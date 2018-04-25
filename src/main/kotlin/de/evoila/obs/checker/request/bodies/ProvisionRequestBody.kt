@@ -5,10 +5,12 @@ import de.evoila.obs.checker.response.Catalog
 import java.io.Serializable
 
 class ProvisionRequestBody(
-    @JsonProperty("service_Id")
-    val serviceId: String,
-    @JsonProperty("plan_Id")
-    val planId: String
+    var service_id: String?,
+    var plan_id: String?,
+    var organization_guid: String? = "A_Random_Guid",
+    var space_guid: String = "A_GUID_from_SPACE!!"
+
+
 ) : Serializable {
 
 
@@ -16,7 +18,6 @@ class ProvisionRequestBody(
       getServiceId(catalog),
       getPlanIdForUsedServiceId(catalog)
   )
-
 
   companion object {
     fun getServiceId(catalog: Catalog): String {

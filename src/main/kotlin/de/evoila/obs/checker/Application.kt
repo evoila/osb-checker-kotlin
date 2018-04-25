@@ -17,7 +17,7 @@ class Application {
 
 
 
-    val provisionRequestBody = ProvisionRequestBody("", "")
+    val provisionRequestBody = ProvisionRequestBody(catalog)
 
     ProvisionTests.runAll(log, token, provisionRequestBody)
 

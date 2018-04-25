@@ -11,10 +11,10 @@ import org.slf4j.Logger
 
 object CatalogTests {
 
-  fun runAll(log: Logger, token: String): HashMap<String, String> {
+  fun runAll(log: Logger, token: String): Catalog {
     withoutHeader(log, token)
 
-    return correctRequest(log, token).getJsonObject<HashMap<String, String>>("") //TODO this is a quick hack solution
+    return correctRequest(log, token)//TODO this is a quick hack solution
   }
 
   private fun withoutHeader(log: Logger, token: String) {
@@ -28,7 +28,7 @@ object CatalogTests {
     }
   }
 
-  private fun correctRequest(log: Logger, token: String): JsonPath {
+  private fun correctRequest(log: Logger, token: String): Catalog {
     return Performance.logTime(log, "should return list of registered service classes as JSON payload") {
       with()
           .header(Header("X-Broker-API-Version", Application.apiVersion))
@@ -39,7 +39,7 @@ object CatalogTests {
           .statusCode(200)
           .contentType(ContentType.JSON)
           .extract()
-          .response().jsonPath()
+          .response().jsonPath().getObject("", Catalog::class.java)
     }
   }
 }

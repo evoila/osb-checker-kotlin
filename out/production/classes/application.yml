@@ -1,8 +1,0 @@
-
-checker:
-  url: https://osb-couchdb-ng-test.cf.dev.eu-de-central.msh.host
-  port: 80
-  apiVersion: 2.13
-  user: admin
-  password: cloudfoundry
-  authentication: basic

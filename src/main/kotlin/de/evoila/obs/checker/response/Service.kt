@@ -1,8 +1,12 @@
 package de.evoila.obs.checker.response
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class Service {
+
+  var plans: List<Plan> = listOf()
 
   var id: String = ""
 

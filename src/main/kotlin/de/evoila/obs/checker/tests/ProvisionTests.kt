@@ -10,11 +10,9 @@ import org.slf4j.Logger
 
 object ProvisionTests {
 
-  fun runAll(log: Logger, token: String) {
+  fun runAll(log: Logger, token: String, provisionRequestBody: ProvisionRequestBody) {
     missingServiceId(log, token)
     missingPlanId(log, token)
-    missingOrgGUId(log, token)
-    missingSpaceGUId(log, token)
     invalidServiceId(log, token)
     invalidPlanId(log, token)
     invalidSchema(log, token)
@@ -23,43 +21,31 @@ object ProvisionTests {
 
   private fun missingServiceId(log: Logger, token: String) {
     Performance.logTime(log, "should reject if missing service_id") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
+      runPutProvisionRequest(token, ProvisionRequestBody("", ""), 400)
     }
   }
 
   private fun missingPlanId(log: Logger, token: String) {
     Performance.logTime(log, "should reject if missing plan_id") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
-    }
-  }
-
-  private fun missingOrgGUId(log: Logger, token: String) {
-    Performance.logTime(log, "should reject if request payload is missing organization_guid") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
-    }
-  }
-
-  private fun missingSpaceGUId(log: Logger, token: String) {
-    Performance.logTime(log, "should reject if request payload is missing space_guid") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
+      runPutProvisionRequest(token, ProvisionRequestBody("", ""), 400)
     }
   }
 
   private fun invalidServiceId(log: Logger, token: String) {
     Performance.logTime(log, "should reject if service_id is invalid") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
+      runPutProvisionRequest(token, ProvisionRequestBody("", ""), 400)
     }
   }
 
   private fun invalidPlanId(log: Logger, token: String) {
     Performance.logTime(log, "should reject if plan_id is invalid") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
+      runPutProvisionRequest(token, ProvisionRequestBody("", ""), 400)
     }
   }
 
   private fun invalidSchema(log: Logger, token: String) {
     Performance.logTime(log, "should reject if parameters are not following schema") {
-      runPutProvisionRequest(token, ProvisionRequestBody(), 400)
+      runPutProvisionRequest(token, ProvisionRequestBody("", ""), 400)
     }
   }
 

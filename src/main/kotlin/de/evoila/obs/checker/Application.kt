@@ -1,12 +1,12 @@
 package de.evoila.obs.checker
 
 
+import de.evoila.obs.checker.request.bodies.ProvisionRequestBody
 import de.evoila.obs.checker.tests.CatalogTests
 import de.evoila.obs.checker.tests.ProvisionTests
 import io.restassured.RestAssured
 import io.restassured.RestAssured.*
 import org.slf4j.LoggerFactory
-import java.util.*
 
 
 class Application {
@@ -16,9 +16,10 @@ class Application {
     val catalog = CatalogTests.runAll(log, token)
 
 
-    catalog[""]
 
-    ProvisionTests.runAll(log, token)
+    val provisionRequestBody = ProvisionRequestBody("", "")
+
+    ProvisionTests.runAll(log, token, provisionRequestBody)
 
   }
 

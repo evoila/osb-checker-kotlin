@@ -1,0 +1,16 @@
+.gradle
+build/
+out/
+.DS_Store
+.settings
+.project
+.classpath
+.factorypathci/credentials.yml
+ci/credentials.yml
+node_modules/
+*.log
+**/mesh.log*
+.idea
+*.iml
+local.properties
+**/target/**

@@ -1,23 +1,29 @@
 package de.evoila.obs.checker.request.bodies
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import de.evoila.obs.checker.response.Catalog
 import java.io.Serializable
 
-class ProvisionRequestBody(
-    var service_id: String?,
-    var plan_id: String?,
-    var organization_guid: String? = "A_Random_Guid",
-    var space_guid: String = "A_GUID_from_SPACE!!"
 
+abstract class ProvisionRequestBody(
 
 ) : Serializable {
 
+  class Valid(
+      var service_id: String?,
+      var plan_id: String?,
+      var organization_guid: String? = "A_Random_Guid",
+      var space_guid: String = "A_GUID_from_SPACE!!"
+  ) : ProvisionRequestBody() {
 
-  constructor(catalog: Catalog) : this(
-      getServiceId(catalog),
-      getPlanIdForUsedServiceId(catalog)
-  )
+    constructor(catalog: Catalog) : this(
+        getServiceId(catalog),
+        getPlanIdForUsedServiceId(catalog)
+    )
+  }
+
+  class Invalid() : ProvisionRequestBody() {
+    val no_a_service_id = "total Nonesense"
+  }
 
   companion object {
     fun getServiceId(catalog: Catalog): String {

@@ -16,10 +16,13 @@ class Application {
     val catalog = CatalogTests.runAll(log, token)
 
 
+    val provisionRequestBody = ProvisionRequestBody.Valid(catalog)
 
-    val provisionRequestBody = ProvisionRequestBody(catalog)
-
-    ProvisionTests.runAll(log, token, provisionRequestBody)
+    ProvisionTests(
+        token = token,
+        scenario = ProvisionTests.Scenario.NEW,
+        provisionRequestBody = provisionRequestBody
+    ).runAll()
 
   }
 

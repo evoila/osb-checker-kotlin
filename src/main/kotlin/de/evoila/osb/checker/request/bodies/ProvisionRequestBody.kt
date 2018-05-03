@@ -1,18 +1,16 @@
-package de.evoila.obs.checker.request.bodies
+package de.evoila.osb.checker.request.bodies
 
-import de.evoila.obs.checker.response.Catalog
+import de.evoila.osb.checker.response.Catalog
 import java.io.Serializable
 
 
-abstract class ProvisionRequestBody(
-
-) : Serializable {
+abstract class ProvisionRequestBody : Serializable {
 
   class Valid(
       var service_id: String?,
       var plan_id: String?,
       var organization_guid: String? = "A_Random_Guid",
-      var space_guid: String = "A_GUID_from_SPACE!!"
+      var space_guid: String? = "A_GUID_from_SPACE!!"
   ) : ProvisionRequestBody() {
 
     constructor(catalog: Catalog) : this(
@@ -21,9 +19,14 @@ abstract class ProvisionRequestBody(
     )
   }
 
-  class Invalid() : ProvisionRequestBody() {
+  class Invalid : ProvisionRequestBody() {
     val no_a_service_id = "total Nonesense"
   }
+
+  class Update(
+      var service_id: String?
+  ) : ProvisionRequestBody()
+
 
   companion object {
     fun getServiceId(catalog: Catalog): String {

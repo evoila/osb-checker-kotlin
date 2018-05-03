@@ -1,9 +1,9 @@
-package de.evoila.obs.checker
+package de.evoila.osb.checker
+/*
 
-
-import de.evoila.obs.checker.request.bodies.ProvisionRequestBody
-import de.evoila.obs.checker.tests.CatalogTests
-import de.evoila.obs.checker.tests.ProvisionTests
+import de.evoila.osb.checker.request.bodies.ProvisionRequestBody
+import de.evoila.osb.checker.tests.CatalogTests
+import de.evoila.osb.checker.tests.ProvisionTests
 import io.restassured.RestAssured
 import io.restassured.RestAssured.*
 import org.slf4j.LoggerFactory
@@ -52,3 +52,4 @@ fun main(args: Array<String>) {
   application.execute()
 }
 
+*/

@@ -1,6 +1,5 @@
-package de.evoila.obs.checker.response
+package de.evoila.osb.checker.response
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)

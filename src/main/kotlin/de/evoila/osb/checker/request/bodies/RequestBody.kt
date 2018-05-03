@@ -4,14 +4,14 @@ import de.evoila.osb.checker.response.Catalog
 import java.io.Serializable
 
 
-abstract class ProvisionRequestBody : Serializable {
+abstract class RequestBody : Serializable {
 
-  class Valid(
+  class ValidProvisioning(
       var service_id: String?,
       var plan_id: String?,
       var organization_guid: String? = "A_Random_Guid",
       var space_guid: String? = "A_GUID_from_SPACE!!"
-  ) : ProvisionRequestBody() {
+  ) : RequestBody() {
 
     constructor(catalog: Catalog) : this(
         getServiceId(catalog),
@@ -19,13 +19,25 @@ abstract class ProvisionRequestBody : Serializable {
     )
   }
 
-  class Invalid : ProvisionRequestBody() {
+  class Invalid : RequestBody() {
     val no_a_service_id = "total Nonesense"
   }
 
+  class ValidBinding(
+      var service_id: String?,
+      var plan_id: String?
+  ) : RequestBody() {
+
+    constructor(catalog: Catalog) : this(
+        getServiceId(catalog),
+        getPlanIdForUsedServiceId(catalog)
+    )
+  }
+
+
   class Update(
       var service_id: String?
-  ) : ProvisionRequestBody()
+  ) : RequestBody()
 
 
   companion object {

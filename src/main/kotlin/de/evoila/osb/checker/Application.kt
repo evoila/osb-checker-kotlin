@@ -1,7 +1,7 @@
 package de.evoila.osb.checker
 /*
 
-import de.evoila.osb.checker.request.bodies.ProvisionRequestBody
+import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.tests.CatalogTests
 import de.evoila.osb.checker.tests.ProvisionTests
 import io.restassured.RestAssured
@@ -16,7 +16,7 @@ class Application {
     val catalog = CatalogTests.runAll(log, token)
 
 
-    val provisionRequestBody = ProvisionRequestBody.Valid(catalog)
+    val provisionRequestBody = RequestBody.ValidProvisioning(catalog)
 
     ProvisionTests(
         token = token,

@@ -12,6 +12,8 @@ object Configuration {
   const val user = "admin"
   const val password = "cloudfoundry"
   // val token = Base64.getEncoder().encode("$user:$password".toByteArray()).toString()
-  val token = "Basic YWRtaW46Y2xvdWRmb3VuZHJ5"
-  val INSTANCE_ID = "TEST_INSTANCE_BY_JS"
+  const val token = "Basic YWRtaW46Y2xvdWRmb3VuZHJ5"
+  const val INSTANCE_ID = "TEST_INSTANCE_BY_JS"
+  const val BINDING_ID = "TEST_BINDING_BY_JS"
+
 }

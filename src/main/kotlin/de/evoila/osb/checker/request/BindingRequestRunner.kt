@@ -14,7 +14,7 @@ object BindingRequestRunner {
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
-        .put("/v2/service_instances/${Configuration.INSTANCE_ID}/service_bindings/")
+        .put("/v2/service_instances/${Configuration.INSTANCE_ID}/service_bindings/${Configuration.BINDING_ID}")
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
@@ -23,7 +23,7 @@ object BindingRequestRunner {
   fun runDeleteBinfingRequest(serviceId : String? , planId : String?, expectedStatusCode: Int) {
 
     var path = "/v2/service_instances/${Configuration.INSTANCE_ID}/service_bindings/${Configuration.BINDING_ID}"
-    path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
+    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     RestAssured.with()

@@ -1,4 +1,4 @@
-package da.evoila.osb.checker.tests
+package de.evoila.osb.checker.tests
 
 
 import com.greghaskins.spectrum.Spectrum

@@ -6,3 +6,5 @@ checker:
   user: admin
   password: cloudfoundry
   authentication: basic
+  provision:
+    plans: //TODO config welche genau gemacht werden müssen

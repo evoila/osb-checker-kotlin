@@ -1,4 +1,4 @@
-package da.evoila.osb.checker.tests
+package de.evoila.osb.checker.tests
 
 import com.greghaskins.spectrum.Spectrum
 import com.greghaskins.spectrum.Spectrum.describe
@@ -9,9 +9,11 @@ import de.evoila.osb.checker.request.BindingRequestRunner.runPutBinfingRequest
 import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner.runDeleteProvisionRequest
 import de.evoila.osb.checker.request.ProvisionRequestRunner.runPutProvisionRequest
+import de.evoila.osb.checker.request.ProvisionRequestRunner.waitForFinish
 import de.evoila.osb.checker.request.bodies.RequestBody.ValidBinding
 import de.evoila.osb.checker.request.bodies.RequestBody.ValidProvisioning
 import io.restassured.RestAssured
+import org.junit.Assert
 import org.junit.runner.RunWith
 
 @RunWith(Spectrum::class)
@@ -32,6 +34,8 @@ class BindingTest {
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {
 
       runPutProvisionRequest(provistion, 202)
+      assert(waitForFinish() == "succeeded")
+
 
       it("should reject if missing service_id") {
         val missingServiceID = ValidBinding(
@@ -62,7 +66,7 @@ class BindingTest {
             runDeleteBinfingRequest(binding.service_id, null, 400)
           }
           it("should accept a valid binding deletion request") {
-            runDeleteBinfingRequest(binding.service_id, binding.plan_id, 202)
+            runDeleteBinfingRequest(binding.service_id, binding.plan_id, 200)
           }
         }
       }

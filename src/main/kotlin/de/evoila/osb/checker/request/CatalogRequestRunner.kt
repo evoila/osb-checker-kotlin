@@ -27,6 +27,8 @@ object CatalogRequestRunner {
         .statusCode(200)
         .contentType(ContentType.JSON)
         .extract()
-        .response().jsonPath().getObject("", Catalog::class.java)
+        .response()
+        .jsonPath()
+        .getObject("", Catalog::class.java)
   }
 }

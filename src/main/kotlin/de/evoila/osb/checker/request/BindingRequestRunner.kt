@@ -8,7 +8,7 @@ import io.restassured.http.Header
 
 object BindingRequestRunner {
 
-  fun runPutBinfingRequest(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int) {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
@@ -20,7 +20,7 @@ object BindingRequestRunner {
         .statusCode(expectedStatusCode)
   }
 
-  fun runDeleteBinfingRequest(serviceId : String? , planId : String?, expectedStatusCode: Int) {
+  fun runDeleteBindingRequest(serviceId : String?, planId : String?, expectedStatusCode: Int) {
 
     var path = "/v2/service_instances/${Configuration.INSTANCE_ID}/service_bindings/${Configuration.BINDING_ID}"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path

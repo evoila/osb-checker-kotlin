@@ -34,11 +34,7 @@ object ProvisionRequestRunner {
         .statusCode(expectedStatusCode)
   }
 
-  fun validLastOperationStatus(requestBody: RequestBody) {
-    runGetLastOperation(requestBody, 200)
-  }
-
-  fun runGetLastOperation(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runGetLastOperation(expectedStatusCode: Int) {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
@@ -49,7 +45,7 @@ object ProvisionRequestRunner {
         .statusCode(expectedStatusCode)
   }
 
-  fun waitForFinish(): String {
+  fun waitForFinish(): String? {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
@@ -57,6 +53,7 @@ object ProvisionRequestRunner {
         .get("/v2/service_instances/${Configuration.INSTANCE_ID}/last_operation")
         .then()
         .assertThat()
+        .statusCode(200)
         .extract()
         .response()
         .jsonPath()
@@ -66,17 +63,19 @@ object ProvisionRequestRunner {
       Thread.sleep(10000)
       return waitForFinish()
     }
+    assert(response.state in listOf("succeeded", "failed"))
+
     return response.state
   }
 
-  fun runDeleteProvisionRequest(serviceId: String?, planId: String?, expectedStatusCode: Int) {
+  fun runDeleteProvisionRequest(serviceId: String?, planId: String?): Int {
 
     var path = "/v2/service_instances/${Configuration.INSTANCE_ID}?accepts_incomplete=true"
 
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
-    val statusCode = RestAssured.with()
+    return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
@@ -85,6 +84,5 @@ object ProvisionRequestRunner {
         .extract()
         .statusCode()
 
-    assert(statusCode == 200 || statusCode == 202)
   }
 }

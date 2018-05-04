@@ -13,13 +13,9 @@ import org.junit.runner.RunWith
 
 
 @RunWith(Spectrum::class)
-class CatalogTests {
+class CatalogTests : TestBase() {
 
   init {
-    baseURI = Configuration.url
-    RestAssured.port = port
-    authentication = basic("admin", "cloudfoundry")
-
 
     Spectrum.describe("Testing the catalog") {
 

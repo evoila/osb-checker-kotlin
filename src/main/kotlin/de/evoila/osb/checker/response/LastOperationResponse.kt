@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 class LastOperationResponse {
 
-  lateinit var state: String
+  var state: String? = null
   var description: String? = null
 }

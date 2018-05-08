@@ -10,7 +10,21 @@ import io.restassured.http.Header
 
 object ProvisionRequestRunner {
 
-  fun runPutProvisionRequest(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPutProvisionRequestSync(requestBody: RequestBody): Int {
+    return RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("Authorization", token))
+        .contentType(ContentType.JSON)
+        .body(requestBody)
+        .put("/v2/service_instances/${Configuration.INSTANCE_ID}")
+        .then()
+        .assertThat()
+        .extract()
+        .statusCode()
+  }
+
+  fun runPutProvisionRequestAsync(requestBody: RequestBody, expectedStatusCode: Int) {
+
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
@@ -68,7 +82,25 @@ object ProvisionRequestRunner {
     return response.state
   }
 
-  fun runDeleteProvisionRequest(serviceId: String?, planId: String?): Int {
+  fun runDeleteProvisionRequestSync(serviceId: String?, planId: String?): Int {
+
+    var path = "/v2/service_instances/${Configuration.INSTANCE_ID}"
+
+    path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
+    path = planId?.let { "$path&plan_id=$planId" } ?: path
+
+    return RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("Authorization", token))
+        .contentType(ContentType.JSON)
+        .delete(path)
+        .then()
+        .extract()
+        .statusCode()
+
+  }
+
+  fun runDeleteProvisionRequestAsync(serviceId: String?, planId: String?): Int {
 
     var path = "/v2/service_instances/${Configuration.INSTANCE_ID}?accepts_incomplete=true"
 

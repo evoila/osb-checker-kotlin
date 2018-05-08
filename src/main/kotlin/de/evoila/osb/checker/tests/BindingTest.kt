@@ -7,7 +7,7 @@ import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner.runDeleteBindingRequest
 import de.evoila.osb.checker.request.BindingRequestRunner.runPutBindingRequest
 import de.evoila.osb.checker.request.CatalogRequestRunner
-import de.evoila.osb.checker.request.ProvisionRequestRunner.runPutProvisionRequest
+import de.evoila.osb.checker.request.ProvisionRequestRunner.runPutProvisionRequestAsync
 import de.evoila.osb.checker.request.ProvisionRequestRunner.waitForFinish
 import de.evoila.osb.checker.request.bodies.ProvisionBody.*
 import de.evoila.osb.checker.request.bodies.RequestBody.ValidBinding
@@ -23,7 +23,7 @@ class BindingTest : TestBase() {
 
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {
 
-      runPutProvisionRequest(provistion, 202)
+      runPutProvisionRequestAsync(provistion, 202)
       assert(waitForFinish() == "succeeded")
 
 

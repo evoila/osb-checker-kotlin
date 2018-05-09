@@ -88,7 +88,7 @@ class ProvisionRequestRunner(
 
     var path = "/v2/service_instances/$instance_Id"
 
-    path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
+    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()

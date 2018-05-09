@@ -8,7 +8,9 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 
-object ProvisionRequestRunner {
+class ProvisionRequestRunner(
+    val instance_Id: String
+) {
 
   fun runPutProvisionRequestSync(requestBody: RequestBody): Int {
     return RestAssured.with()
@@ -16,7 +18,7 @@ object ProvisionRequestRunner {
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
         .body(requestBody)
-        .put("/v2/service_instances/${Configuration.INSTANCE_ID}")
+        .put("/v2/service_instances/$instance_Id")
         .then()
         .assertThat()
         .extract()
@@ -30,7 +32,7 @@ object ProvisionRequestRunner {
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
         .body(requestBody)
-        .put("/v2/service_instances/${Configuration.INSTANCE_ID}?accepts_incomplete=true")
+        .put("/v2/service_instances/$instance_Id?accepts_incomplete=true")
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
@@ -42,7 +44,7 @@ object ProvisionRequestRunner {
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
         .body(requestBody)
-        .put("/v2/service_instances/${Configuration.INSTANCE_ID}?accepts_incomplete=true")
+        .put("/v2/service_instances/$instance_Id?accepts_incomplete=true")
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
@@ -53,7 +55,7 @@ object ProvisionRequestRunner {
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.INSTANCE_ID}/last_operation")
+        .get("/v2/service_instances/$instance_Id/last_operation")
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
@@ -64,7 +66,7 @@ object ProvisionRequestRunner {
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.INSTANCE_ID}/last_operation")
+        .get("/v2/service_instances/$instance_Id/last_operation")
         .then()
         .assertThat()
         .statusCode(200)
@@ -84,7 +86,7 @@ object ProvisionRequestRunner {
 
   fun runDeleteProvisionRequestSync(serviceId: String?, planId: String?): Int {
 
-    var path = "/v2/service_instances/${Configuration.INSTANCE_ID}"
+    var path = "/v2/service_instances/$instance_Id"
 
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
@@ -102,7 +104,7 @@ object ProvisionRequestRunner {
 
   fun runDeleteProvisionRequestAsync(serviceId: String?, planId: String?): Int {
 
-    var path = "/v2/service_instances/${Configuration.INSTANCE_ID}?accepts_incomplete=true"
+    var path = "/v2/service_instances/$instance_Id?accepts_incomplete=true"
 
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path

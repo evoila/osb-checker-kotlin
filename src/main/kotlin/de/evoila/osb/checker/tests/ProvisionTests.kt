@@ -57,9 +57,6 @@ class ProvisionTests : TestBase() {
             val instanceId = "$instanceIdBase$count"
             val provisionRequestRunner = ProvisionRequestRunner(instanceId)
 
-            val service = catalog.services.first()
-            val plan = service.plans.first()
-
             val provisionRequestBody = ValidProvisioning(service, plan)
 
             provisionRequestRunner.runPutProvisionRequestAsync(provisionRequestBody, 202)

@@ -11,7 +11,6 @@ import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody.*
 import de.evoila.osb.checker.request.bodies.RequestBody.Invalid
 import org.junit.runner.RunWith
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -20,6 +19,8 @@ class ProvisionTests : TestBase() {
   init {
 
     val catalog = CatalogRequestRunner.correctRequest(Configuration.token)
+    var count = 1
+
 
     describe("make a provision request and start polling if it's a async service broker. Afterwards the provision should be deleted") {
 
@@ -27,7 +28,7 @@ class ProvisionTests : TestBase() {
 
       it("should handle a sync Put and Delete request correctly") {
 
-        val instanceId = UUID.randomUUID().toString()
+        val instanceId = "$instanceIdBase$count"
         val service = catalog.services.first()
         val plan = service.plans.first()
         val provisionRequestRunner = ProvisionRequestRunner(instanceId)
@@ -41,17 +42,19 @@ class ProvisionTests : TestBase() {
 
         val statusCodeDelete = provisionRequestRunner.runDeleteProvisionRequestSync(provisionRequestBody.service_id, provisionRequestBody.plan_id)
         assertTrue("Delete should return 200, 201, 410, 422 but was $statusCodeDelete") { statusCodeDelete in listOf(200, 201, 410, 422) }
+
+        count++
       }
 
       it("should accept a valid async provision request for each service and plan -id in the catalog." +
           "In case of async Polling should correctly." +
-          "If a second instance with the same ID is being created 409 should be returned" +
+          "If a second instance with the same ID is being created. 409 should be returned" +
           "Afterwards the Instance will be deleted") {
 
         catalog.services.parallelStream().forEach { service ->
-          service.plans.parallelStream().forEach { plan ->
+          service.plans.parallelStream().forEach { plan ->    
 
-            val instanceId = UUID.randomUUID().toString()
+            val instanceId = "$instanceIdBase$count"
             val provisionRequestRunner = ProvisionRequestRunner(instanceId)
             val provisionRequestBody = ValidProvisioning(service, plan)
 
@@ -67,9 +70,9 @@ class ProvisionTests : TestBase() {
                 provisionRequestBody.service_id,
                 provisionRequestBody.plan_id)
 
+            count++
             assertTrue("statusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
           }
-
         }
       }
     }
@@ -78,7 +81,7 @@ class ProvisionTests : TestBase() {
 
     describe("Testing provisioning Syntax") {
 
-      val instanceId = UUID.randomUUID().toString()
+      val instanceId = "$instanceIdBase$count"
       val service = catalog.services.first()
       val plan = service.plans.first()
       val provisionRequestRunner = ProvisionRequestRunner(instanceId)
@@ -177,5 +180,9 @@ class ProvisionTests : TestBase() {
         assertEquals(400, statusCode, "Status Code should haveen been 400 but was $statusCode")
       }
     }
+  }
+
+  companion object {
+    const val instanceIdBase = "exampleSQL+"
   }
 }

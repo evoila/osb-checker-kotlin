@@ -4,7 +4,7 @@ import java.util.*
 
 object Configuration {
 
-  const val url = "http://osb-samba-ng-test.cf.dev.eu-de-central.msh.host"
+  const val url = "https://example-dev.cf.dev.eu-de-central.msh.host"
   const val port = 80
   const val apiVersion = "2.13"
   const val user = "admin"

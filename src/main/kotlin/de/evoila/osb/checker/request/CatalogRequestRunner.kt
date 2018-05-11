@@ -7,9 +7,11 @@ import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
 
-object CatalogRequestRunner {
+class CatalogRequestRunner(
+    private val token: String
+) {
 
-  fun withoutHeader(token: String) {
+  fun withoutHeader() {
     RestAssured.with()
         .header(Header("Authorization", token))
         .get("/v2/catalog")
@@ -18,7 +20,7 @@ object CatalogRequestRunner {
         .statusCode(412)
   }
 
-  fun correctRequestAndValidateResponse(token: String) {
+  fun correctRequestAndValidateResponse() {
 
     val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
@@ -33,8 +35,7 @@ object CatalogRequestRunner {
         .body(catalogSchema)
   }
 
-
-  fun correctRequest(token: String): Catalog {
+  fun correctRequest(): Catalog {
     return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))

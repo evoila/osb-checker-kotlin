@@ -18,13 +18,10 @@ class CatalogTests : TestBase() {
   init {
 
     Spectrum.describe("Testing the catalog") {
-
-      it("should reject requests without X-Broker-API-Version header with 412") {
-        CatalogRequestRunner.withoutHeader(Configuration.token)
-      }
+      val catalogRequestRunner = CatalogRequestRunner(Configuration.token)
 
       it("should return list of registered service classes as JSON payload") {
-        CatalogRequestRunner.correctRequestAndValidateResponse(Configuration.token)
+        catalogRequestRunner.correctRequestAndValidateResponse()
       }
     }
   }

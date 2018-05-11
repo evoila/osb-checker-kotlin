@@ -16,12 +16,14 @@ import java.util.*
 @RunWith(Spectrum::class)
 class BindingTest : TestBase() {
   init {
-    val cat = CatalogRequestRunner.correctRequest(Configuration.token)
+
+    val catalogRequestRunner = CatalogRequestRunner(Configuration.token)
+    val catalog = catalogRequestRunner.correctRequest()
 
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {
       it("should accept a valid binding request for each plan ID and delete the binding and instance afterwards.") {
 
-        cat.services.parallelStream().forEach { service ->
+        catalog.services.parallelStream().forEach { service ->
           service.plans.parallelStream().forEach { plan ->
 
             log.info("Testing Service with ID ${service.id} and Plan with ID ${plan.id}")
@@ -47,7 +49,7 @@ class BindingTest : TestBase() {
 
       describe("Binding syntax") {
 
-        val service = cat.services.first()
+        val service = catalog.services.first()
         val plan = service.plans.first()
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()

@@ -1,6 +1,8 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
+import de.evoila.osb.checker.config.Configuration.apiVersion
+import de.evoila.osb.checker.config.Configuration.token
 import de.evoila.osb.checker.request.bodies.RequestBody
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
@@ -15,8 +17,8 @@ class BindingRequestRunner(
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int) {
 
     val response = RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("X-Broker-API-Version", apiVersion))
+        .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
@@ -48,5 +50,23 @@ class BindingRequestRunner(
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
+  }
+
+  fun putWithoutHeader() {
+    RestAssured.with()
+        .header(Header("Authorization", token))
+        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .then()
+        .assertThat()
+        .statusCode(412)
+  }
+
+  fun deleteWithoutHeader() {
+    RestAssured.with()
+        .header(Header("Authorization", token))
+        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .then()
+        .assertThat()
+        .statusCode(412)
   }
 }

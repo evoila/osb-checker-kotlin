@@ -11,5 +11,6 @@ object Configuration {
   const val password = "cloudfoundry"
   // val token = Base64.getEncoder().encode("$user:$password".toByteArray()).toString()
   const val token = "Basic YWRtaW46Y2xvdWRmb3VuZHJ5"
+  const val NOT_AN_ID = "Delete_me_if_i_get_deployed"
 
 }

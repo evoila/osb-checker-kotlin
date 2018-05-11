@@ -18,7 +18,8 @@ import kotlin.test.assertTrue
 class ProvisionTests : TestBase() {
   init {
 
-    val catalog = CatalogRequestRunner.correctRequest(Configuration.token)
+    val catalogRequestRunner = CatalogRequestRunner(Configuration.token)
+    val catalog = catalogRequestRunner.correctRequest()
     var count = 1
 
 
@@ -67,11 +68,9 @@ class ProvisionTests : TestBase() {
             }
             provisionRequestRunner.runPutProvisionRequestAsync(provisionRequestBody, 409)
 
-
             if (plan.plan_updatable) {
               provisionRequestRunner.runPatchProvisionRequest(provisionRequestBody, 200)
             }
-
 
             val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
                 provisionRequestBody.service_id,

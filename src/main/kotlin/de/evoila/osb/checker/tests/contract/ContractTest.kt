@@ -1,8 +1,8 @@
 package de.evoila.osb.checker.tests.contract
 
 import com.greghaskins.spectrum.Spectrum
-import com.greghaskins.spectrum.Spectrum.*
-import de.evoila.osb.checker.config.Configuration
+import com.greghaskins.spectrum.Spectrum.describe
+import com.greghaskins.spectrum.Spectrum.it
 import de.evoila.osb.checker.config.Configuration.NOT_AN_ID
 import de.evoila.osb.checker.config.Configuration.token
 import de.evoila.osb.checker.request.BindingRequestRunner

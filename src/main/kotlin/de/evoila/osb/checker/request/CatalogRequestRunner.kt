@@ -49,4 +49,14 @@ class CatalogRequestRunner(
         .jsonPath()
         .getObject("", Catalog::class.java)
   }
+
+  fun noAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("Authorization", token))
+        .get("/v2/catalog")
+        .then()
+        .assertThat()
+        .statusCode(401)
+  }
 }

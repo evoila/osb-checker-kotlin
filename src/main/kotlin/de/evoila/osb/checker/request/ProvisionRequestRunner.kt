@@ -8,6 +8,7 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
+import org.apache.http.HttpStatus
 
 class ProvisionRequestRunner(
     private val instanceId: String
@@ -155,4 +156,39 @@ class ProvisionRequestRunner(
         .assertThat()
         .statusCode(412)
   }
+
+  fun putNoAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .contentType(ContentType.JSON)
+        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
+        .then()
+        .assertThat()
+        .statusCode(401)
+        .extract()
+  }
+
+  fun deleteNoAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .contentType(ContentType.JSON)
+        .delete("/v2/service_instances/$instanceId?accepts_incomplete=true")
+        .then()
+        .assertThat()
+        .statusCode(401)
+        .extract()
+  }
+
+  fun lastOpNoAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .contentType(ContentType.JSON)
+        .delete("/v2/service_instances/$instanceId/last_operation")
+        .then()
+        .assertThat()
+        .statusCode(401)
+        .extract()
+  }
+
+
 }

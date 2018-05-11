@@ -69,4 +69,22 @@ class BindingRequestRunner(
         .assertThat()
         .statusCode(412)
   }
+
+  fun putNoAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", apiVersion))
+        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .then()
+        .assertThat()
+        .statusCode(401)
+  }
+
+  fun deleteNoAuth() {
+    RestAssured.with()
+        .header(Header("X-Broker-API-Version", apiVersion))
+        .delete("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .then()
+        .assertThat()
+        .statusCode(401)
+  }
 }

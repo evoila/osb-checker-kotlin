@@ -5,6 +5,8 @@ import de.evoila.osb.checker.response.Catalog
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
+import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
+import org.mockito.internal.hamcrest.HamcrestArgumentMatcher
 
 object CatalogRequestRunner {
 
@@ -18,6 +20,9 @@ object CatalogRequestRunner {
   }
 
   fun correctRequest(token: String): Catalog {
+
+    val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
+
     return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
@@ -26,6 +31,7 @@ object CatalogRequestRunner {
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
+        .body(catalogSchema)
         .extract()
         .response()
         .jsonPath()

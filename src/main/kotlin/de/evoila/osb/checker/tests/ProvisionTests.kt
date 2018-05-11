@@ -52,10 +52,14 @@ class ProvisionTests : TestBase() {
           "Afterwards the Instance will be deleted") {
 
         catalog.services.parallelStream().forEach { service ->
-          service.plans.parallelStream().forEach { plan ->    
+          service.plans.parallelStream().forEach { plan ->
 
             val instanceId = "$instanceIdBase$count"
             val provisionRequestRunner = ProvisionRequestRunner(instanceId)
+
+            val service = catalog.services.first()
+            val plan = service.plans.first()
+
             val provisionRequestBody = ValidProvisioning(service, plan)
 
             provisionRequestRunner.runPutProvisionRequestAsync(provisionRequestBody, 202)
@@ -65,6 +69,12 @@ class ProvisionTests : TestBase() {
               provisionRequestRunner.waitForFinish()
             }
             provisionRequestRunner.runPutProvisionRequestAsync(provisionRequestBody, 409)
+
+
+            if (plan.plan_updatable) {
+              provisionRequestRunner.runPatchProvisionRequest(provisionRequestBody, 200)
+            }
+
 
             val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
                 provisionRequestBody.service_id,
@@ -76,8 +86,6 @@ class ProvisionTests : TestBase() {
         }
       }
     }
-
-//TODO describe("PATCH /v2/service_instance/:instance_id")
 
     describe("Testing provisioning Syntax") {
 

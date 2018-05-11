@@ -6,7 +6,6 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
-import org.mockito.internal.hamcrest.HamcrestArgumentMatcher
 
 object CatalogRequestRunner {
 
@@ -19,11 +18,11 @@ object CatalogRequestRunner {
         .statusCode(412)
   }
 
-  fun correctRequest(token: String): Catalog {
+  fun correctRequestAndValidateResponse(token: String) {
 
     val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
-    return RestAssured.with()
+    RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .get("/v2/catalog")
@@ -32,6 +31,18 @@ object CatalogRequestRunner {
         .statusCode(200)
         .contentType(ContentType.JSON)
         .body(catalogSchema)
+  }
+
+
+  fun correctRequest(token: String): Catalog {
+    return RestAssured.with()
+        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("Authorization", token))
+        .get("/v2/catalog")
+        .then()
+        .assertThat()
+        .statusCode(200)
+        .contentType(ContentType.JSON)
         .extract()
         .response()
         .jsonPath()

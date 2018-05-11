@@ -5,29 +5,40 @@ import de.evoila.osb.checker.request.bodies.RequestBody
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
+import io.restassured.module.jsv.JsonSchemaValidator
 
 class BindingRequestRunner(
-    val Instance_Id: String,
-    val Binding_Id: String
+    private val instanceId: String,
+    private val bindingId: String
 ) {
 
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int) {
-    RestAssured.with()
+
+    val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
-        .put("/v2/service_instances/$Instance_Id/service_bindings/$Binding_Id")
+        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
+        .extract()
+
+    if (response.statusCode() in listOf(200, 201)) {
+      JsonSchemaValidator.matchesJsonSchema("binding-response-schema.json").matches(response.body())
+    }
   }
 
   fun runDeleteBindingRequest(serviceId: String?, planId: String?, expectedStatusCode: Int) {
 
-    var path = "/v2/service_instances/$Instance_Id/service_bindings/$Binding_Id"
+    var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
+
+    path = planId?.let {
+      serviceId.let { "$path&plan_id=$planId" }
+      "$path?plan_id=$planId"
+    } ?: path
 
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))

@@ -7,9 +7,10 @@ import de.evoila.osb.checker.response.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
+import io.restassured.module.jsv.JsonSchemaValidator
 
 class ProvisionRequestRunner(
-    val instance_Id: String
+    private val instance_Id: String
 ) {
 
   fun runPutProvisionRequestSync(requestBody: RequestBody): Int {
@@ -26,8 +27,7 @@ class ProvisionRequestRunner(
   }
 
   fun runPutProvisionRequestAsync(requestBody: RequestBody, expectedStatusCode: Int) {
-
-    RestAssured.with()
+    val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
@@ -36,7 +36,13 @@ class ProvisionRequestRunner(
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
+        .extract()
+
+    if (response.statusCode() in listOf(201, 202, 200)) {
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
+    }
   }
+
 
   fun runPatchProvisionRequest(requestBody: RequestBody, expectedStatusCode: Int) {
     RestAssured.with()
@@ -51,7 +57,7 @@ class ProvisionRequestRunner(
   }
 
   fun runGetLastOperation(expectedStatusCode: Int) {
-    RestAssured.with()
+    val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", token))
         .contentType(ContentType.JSON)
@@ -59,6 +65,11 @@ class ProvisionRequestRunner(
         .then()
         .assertThat()
         .statusCode(expectedStatusCode)
+        .extract()
+
+    if (response.statusCode() == 200) {
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response.body())
+    }
   }
 
   fun waitForFinish(): String? {

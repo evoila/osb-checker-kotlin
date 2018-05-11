@@ -24,7 +24,7 @@ class CatalogTests : TestBase() {
       }
 
       it("should return list of registered service classes as JSON payload") {
-        CatalogRequestRunner.correctRequest(Configuration.token)
+        CatalogRequestRunner.correctRequestAndValidateResponse(Configuration.token)
       }
     }
   }

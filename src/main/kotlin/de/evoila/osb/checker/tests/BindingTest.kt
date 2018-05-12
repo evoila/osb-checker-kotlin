@@ -3,6 +3,7 @@ package de.evoila.osb.checker.tests
 import com.greghaskins.spectrum.Spectrum
 import com.greghaskins.spectrum.Spectrum.describe
 import com.greghaskins.spectrum.Spectrum.it
+import de.evoila.osb.checker.Application
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.CatalogRequestRunner
@@ -11,12 +12,15 @@ import de.evoila.osb.checker.request.bodies.ProvisionBody.*
 import de.evoila.osb.checker.request.bodies.RequestBody.ValidBinding
 import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
 
+@SpringBootTest(classes = [Application::class])
 @RunWith(Spectrum::class)
-class BindingTest : TestBase() {
-  init {
+class BindingTest{
 
+  init {
     val catalogRequestRunner = CatalogRequestRunner(Configuration.token)
     val catalog = catalogRequestRunner.correctRequest()
 

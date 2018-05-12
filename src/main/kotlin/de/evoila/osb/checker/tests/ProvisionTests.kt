@@ -4,6 +4,7 @@ package de.evoila.osb.checker.tests
 import com.greghaskins.spectrum.Spectrum
 import com.greghaskins.spectrum.Spectrum.describe
 import com.greghaskins.spectrum.Spectrum.it
+import de.evoila.osb.checker.Application
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
@@ -11,11 +12,13 @@ import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody.*
 import de.evoila.osb.checker.request.bodies.RequestBody.Invalid
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-
+@SpringBootTest(classes = [Application::class])
 @RunWith(Spectrum::class)
-class ProvisionTests : TestBase() {
+class ProvisionTests  {
   init {
 
     val catalogRequestRunner = CatalogRequestRunner(Configuration.token)

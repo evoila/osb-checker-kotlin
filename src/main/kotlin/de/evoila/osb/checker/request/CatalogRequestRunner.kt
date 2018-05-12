@@ -6,10 +6,14 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
+import org.springframework.beans.factory.annotation.Autowired
 
 class CatalogRequestRunner(
     private val token: String
 ) {
+
+  @Autowired
+  lateinit var configuration: Configuration
 
   fun withoutHeader() {
     RestAssured.with()
@@ -25,7 +29,7 @@ class CatalogRequestRunner(
     val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
     RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", token))
         .get("/v2/catalog")
         .then()
@@ -37,7 +41,7 @@ class CatalogRequestRunner(
 
   fun correctRequest(): Catalog {
     return RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", token))
         .get("/v2/catalog")
         .then()
@@ -52,7 +56,7 @@ class CatalogRequestRunner(
 
   fun noAuth() {
     RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", token))
         .get("/v2/catalog")
         .then()

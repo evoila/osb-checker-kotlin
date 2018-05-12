@@ -1,6 +1,6 @@
 
 checker:
-  url: https://osb-couchdb-ng-test.cf.dev.eu-de-central.msh.host
+  url: https://example-dev.cf.dev.eu-de-central.msh.host
   port: 80
   apiVersion: 2.13
   user: admin

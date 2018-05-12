@@ -1,12 +1,22 @@
 package de.evoila.osb.checker.config
 
-object Configuration {
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.stereotype.Component
 
-  const val url = "https://example-dev.cf.dev.eu-de-central.msh.host"
-  const val apiVersion = "2.13"
-  const val user = "admin"
-  const val password = "cloudfoundry"
+
+@Component
+@ConfigurationProperties(prefix = "checker")
+class Configuration {
+
+  lateinit var url: String
+  var port: Int = 80
+  lateinit var apiVersion: String
+  lateinit var user: String
+  lateinit var password: String
   // val token = Base64.getEncoder().encode("$user:$password".toByteArray()).toString()
-  const val token = "Basic YWRtaW46Y2xvdWRmb3VuZHJ5"
-  const val NOT_AN_ID = "Delete_me_if_i_get_deployed"
+
+  companion object {
+    const val token = "Basic YWRtaW46Y2xvdWRmb3VuZHJ5"
+    const val NOT_AN_ID = "Delete_me_if_i_get_deployed"
+  }
 }

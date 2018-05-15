@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 @SpringBootTest(classes = [Application::class])
 @RunWith(Spectrum::class)
-class ProvisionTests  {
+class ProvisionTests : TestBase() {
   init {
 
     val catalogRequestRunner = CatalogRequestRunner(Configuration.token)

@@ -18,7 +18,7 @@ import java.util.*
 
 @SpringBootTest(classes = [Application::class])
 @RunWith(Spectrum::class)
-class BindingTest{
+class BindingTest : TestBase() {
 
   init {
     val catalogRequestRunner = CatalogRequestRunner(Configuration.token)

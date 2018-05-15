@@ -9,13 +9,13 @@ import de.evoila.osb.checker.config.Configuration.Companion.token
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
+import de.evoila.osb.checker.tests.TestBase
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest(classes = [Application::class])
 @RunWith(Spectrum::class)
-class ContractTest(
-) {
+class ContractTest : TestBase() {
   init {
     describe("Requests should contain header X-Broker-API-Version: 2.13") {
 

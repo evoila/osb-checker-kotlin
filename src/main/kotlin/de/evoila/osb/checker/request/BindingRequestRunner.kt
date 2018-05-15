@@ -6,21 +6,18 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
+@Service
 class BindingRequestRunner(
-    private val instanceId: String,
-    private val bindingId: String
+    val configuration: Configuration
 ) {
 
-  @Autowired
-  lateinit var configuration: Configuration
-
-  fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("Authorization", configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
@@ -34,7 +31,7 @@ class BindingRequestRunner(
     }
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, expectedStatusCode: Int) {
+  fun runDeleteBindingRequest(serviceId: String?, planId: String?, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
@@ -46,7 +43,7 @@ class BindingRequestRunner(
 
     RestAssured.with()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("Authorization", configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
@@ -56,8 +53,8 @@ class BindingRequestRunner(
 
   fun putWithoutHeader() {
     RestAssured.with()
-        .header(Header("Authorization", Configuration.token))
-        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .header(Header("Authorization", configuration.token))
+        .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
         .assertThat()
         .statusCode(412)
@@ -65,8 +62,8 @@ class BindingRequestRunner(
 
   fun deleteWithoutHeader() {
     RestAssured.with()
-        .header(Header("Authorization", Configuration.token))
-        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .header(Header("Authorization", configuration.token))
+        .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
         .assertThat()
         .statusCode(412)
@@ -75,7 +72,7 @@ class BindingRequestRunner(
   fun putNoAuth() {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
         .assertThat()
         .statusCode(401)
@@ -84,7 +81,7 @@ class BindingRequestRunner(
   fun deleteNoAuth() {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .delete("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
         .assertThat()
         .statusCode(401)

@@ -5,5 +5,4 @@ checker:
   apiVersion: 2.13
   user: admin
   password: cloudfoundry
-  token: Basic YWRtaW46Y2xvdWRmb3VuZHJ5
   authentication: basic

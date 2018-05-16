@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestContextManager
+import java.util.*
 
 
 @RunWith(Spectrum::class)
@@ -30,10 +31,11 @@ abstract class TestBase {
     testContextManager.prepareTestInstance(this)
 
 
+    configuration.token = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${configuration.password}".toByteArray())}"
+
+
     RestAssured.baseURI = configuration.url
     RestAssured.port = configuration.port
     RestAssured.authentication = RestAssured.basic("admin", "cloudfoundry")
   }
-
-
 }

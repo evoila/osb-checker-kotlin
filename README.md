@@ -21,9 +21,6 @@ checker:
   apiVersion: 2.13
   user: admin
   password: cloudfoundry
-  token: Basic YWRtaW46Y2xvdWRmb3VuZHJ5
   authentication: basic
  ...
-
-As rest assure didn't support basic auth properly the authentication token needs to be entered maunually in the yml file
 

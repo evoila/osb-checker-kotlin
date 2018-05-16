@@ -3,6 +3,7 @@ package de.evoila.osb.checker.config
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
+import java.util.*
 
 
 @Component
@@ -12,10 +13,10 @@ class Configuration {
   lateinit var url: String
   var port: Int = 80
   lateinit var apiVersion: String
-  lateinit var token: String
   lateinit var user: String
   lateinit var password: String
-  // val token = Base64.getEncoder().encode("$user:$password".toByteArray()).toString()
+  var token: String? = null
+
 
   companion object {
     const val NOT_AN_ID = "Delete_me_if_i_get_deployed"

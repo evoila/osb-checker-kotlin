@@ -33,7 +33,6 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile("org.springframework.boot:spring-boot-starter-data-rest:${springBootVersion}" )
     compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
     compile("com.fasterxml.jackson.core:jackson-databind")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}")

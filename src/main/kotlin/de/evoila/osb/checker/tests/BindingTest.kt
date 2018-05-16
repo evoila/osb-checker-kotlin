@@ -59,7 +59,7 @@ class BindingTest : TestBase() {
 
         wireAndUnwire()
 
-        val catalogRequestRunner = CatalogRequestRunner(configuration)
+        val catalogRequestRunner = CatalogRequestRunner()
         val catalog = catalogRequestRunner.correctRequest()
 
         val service = catalog.services.first()

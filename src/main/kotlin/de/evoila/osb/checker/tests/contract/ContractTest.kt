@@ -27,7 +27,7 @@ class ContractTest : TestBase() {
 
       wireAndUnwire()
 
-      val catalogRequestRunner = CatalogRequestRunner(configuration)
+      val catalogRequestRunner = CatalogRequestRunner()
 
       it("GET - v2/catalog should reject with 412") {
         catalogRequestRunner.withoutHeader()

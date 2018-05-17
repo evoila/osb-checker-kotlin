@@ -1,23 +1,21 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
-import de.evoila.osb.checker.config.Configuration.token
 import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
-import org.apache.http.HttpStatus
+import org.springframework.stereotype.Service
 
-class ProvisionRequestRunner(
-    private val instanceId: String
-) {
+@Service
+class ProvisionRequestRunner {
 
-  fun runPutProvisionRequestSync(requestBody: RequestBody): Int {
+  fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody): Int {
     return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId")
@@ -27,10 +25,10 @@ class ProvisionRequestRunner(
         .statusCode()
   }
 
-  fun runPutProvisionRequestAsync(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, expectedStatusCode: Int) {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
@@ -45,10 +43,10 @@ class ProvisionRequestRunner(
   }
 
 
-  fun runPatchProvisionRequest(requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPatchProvisionRequest(instanceId: String, requestBody: RequestBody, expectedStatusCode: Int) {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
@@ -57,10 +55,10 @@ class ProvisionRequestRunner(
         .statusCode(expectedStatusCode)
   }
 
-  fun runGetLastOperation(expectedStatusCode: Int) {
+  fun runGetLastOperation(instanceId: String, expectedStatusCode: Int) {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId/last_operation")
         .then()
@@ -73,10 +71,10 @@ class ProvisionRequestRunner(
     }
   }
 
-  fun waitForFinish(): String? {
+  fun waitForFinish(instanceId: String): String? {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId/last_operation")
         .then()
@@ -89,14 +87,14 @@ class ProvisionRequestRunner(
 
     if (response.state == "in progress") {
       Thread.sleep(10000)
-      return waitForFinish()
+      return waitForFinish(instanceId)
     }
     assert(response.state in listOf("succeeded", "failed"))
 
     return response.state
   }
 
-  fun runDeleteProvisionRequestSync(serviceId: String?, planId: String?): Int {
+  fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?): Int {
 
     var path = "/v2/service_instances/$instanceId"
 
@@ -105,7 +103,7 @@ class ProvisionRequestRunner(
 
     return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
@@ -113,7 +111,7 @@ class ProvisionRequestRunner(
         .statusCode()
   }
 
-  fun runDeleteProvisionRequestAsync(serviceId: String?, planId: String?): Int {
+  fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?): Int {
 
     var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
 
@@ -122,7 +120,7 @@ class ProvisionRequestRunner(
 
     return RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", token))
+        .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
@@ -132,8 +130,8 @@ class ProvisionRequestRunner(
 
   fun putWithoutHeader() {
     RestAssured.with()
-        .header(Header("Authorization", token))
-        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
+        .header(Header("Authorization", Configuration.token))
+        .put("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
         .assertThat()
         .statusCode(412)
@@ -141,8 +139,8 @@ class ProvisionRequestRunner(
 
   fun deleteWithoutHeader(serviceId: String, planId: String) {
     RestAssured.with()
-        .header(Header("Authorization", token))
-        .delete("/v2/service_instances/$instanceId?accepts_incomplete=true&service_id=$serviceId&plan_id=$planId")
+        .header(Header("Authorization", Configuration.token))
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true&service_id=$serviceId&plan_id=$planId")
         .then()
         .assertThat()
         .statusCode(412)
@@ -150,8 +148,8 @@ class ProvisionRequestRunner(
 
   fun lastOperationWithoutHeader() {
     RestAssured.with()
-        .header(Header("Authorization", token))
-        .get("/v2/service_instances/$instanceId/last_operation")
+        .header(Header("Authorization", Configuration.token))
+        .get("/v2/service_instances/${Configuration.NOT_AN_ID}/last_operation")
         .then()
         .assertThat()
         .statusCode(412)
@@ -161,7 +159,7 @@ class ProvisionRequestRunner(
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
-        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
+        .put("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
         .assertThat()
         .statusCode(401)
@@ -172,7 +170,7 @@ class ProvisionRequestRunner(
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/$instanceId?accepts_incomplete=true")
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
         .assertThat()
         .statusCode(401)
@@ -183,7 +181,7 @@ class ProvisionRequestRunner(
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/$instanceId/last_operation")
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/last_operation")
         .then()
         .assertThat()
         .statusCode(401)

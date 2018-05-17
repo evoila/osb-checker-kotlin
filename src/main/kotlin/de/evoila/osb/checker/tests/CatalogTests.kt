@@ -1,24 +1,20 @@
 package de.evoila.osb.checker.tests
 
-import com.greghaskins.spectrum.Spectrum
-import com.greghaskins.spectrum.Spectrum.it
-import de.evoila.osb.checker.config.Configuration
+import com.greghaskins.spectrum.Spectrum.*
 import de.evoila.osb.checker.request.CatalogRequestRunner
-import de.evoila.osb.checker.response.Catalog
-import io.restassured.RestAssured
-import io.restassured.RestAssured.*
-import io.restassured.http.ContentType
-import io.restassured.http.Header
-import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 
 
-@RunWith(Spectrum::class)
 class CatalogTests : TestBase() {
 
-  init {
+  @Autowired
+  lateinit var catalogRequestRunner: CatalogRequestRunner
 
-    Spectrum.describe("Testing the catalog") {
-      val catalogRequestRunner = CatalogRequestRunner(Configuration.token)
+  init {
+    describe("Testing the catalog") {
+      beforeAll {
+        wireAndUnwire()
+      }
 
       it("should return list of registered service classes as JSON payload") {
         catalogRequestRunner.correctRequestAndValidateResponse()

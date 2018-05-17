@@ -11,10 +11,7 @@ import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.junit.internal.TextListener
 import org.junit.runner.JUnitCore
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
-import org.springframework.test.context.junit4.SpringRunner
 
 
 @SpringBootApplication
@@ -25,71 +22,71 @@ fun main(args: Array<String>) {
   val options = Options()
       .apply {
         addOption(
-            Option.builder("url")
+            Option.builder("U")
                 .required()
-                .longOpt("URL")
+                .longOpt("url")
                 .hasArg()
                 .desc("the URl of the service broker")
                 .build()
         )
         addOption(
-            Option.builder("port")
+            Option.builder("P")
                 .required()
-                .longOpt("Port")
+                .longOpt("port")
                 .hasArg()
                 .desc("the port on which the service broker is reachable.")
                 .build()
         )
         addOption(
-            Option.builder("user")
+            Option.builder("u")
                 .required()
-                .longOpt("User")
+                .longOpt("user")
                 .hasArg()
                 .desc("the User for the Service Broker.")
                 .build()
         )
         addOption(
-            Option.builder("pw")
+            Option.builder("p")
                 .required()
-                .longOpt("Password")
+                .longOpt("password")
                 .hasArg()
                 .desc("The password tp access the service broker.")
                 .build()
         )
         addOption(
-            Option.builder("api")
+            Option.builder("a")
                 .required()
-                .longOpt("Api-Version")
+                .longOpt("api")
                 .hasArg()
                 .desc("Thr api version of the service broker")
                 .build()
         )
         addOption(
             Option.builder("cat")
-                .longOpt("Catalog")
+                .longOpt("catalog")
                 .desc("Indicate if the Catalog Test should run.")
                 .build()
         )
         addOption(
-            Option.builder("pro")
-                .longOpt("Provision")
+            Option.builder("prov")
+                .longOpt("provision")
                 .desc("Indicate if the Provision Test should run.")
                 .build()
         )
         addOption(
-            Option.builder("bin")
-                .longOpt("Binding")
+            Option.builder("bind")
+                .longOpt("binding")
                 .desc("Indicate if the Binding Test should run.")
                 .build()
         )
         addOption(
             Option.builder("auth")
-                .longOpt("Authentication")
+                .longOpt("authentication")
                 .desc("Indicate if the Authentication Test should run.")
                 .build()
         )
         addOption(Option.builder("con")
-            .longOpt("Contract")
+            .longOpt("contract")
             .desc("Indicate if the Contract Test should run.")
             .build()
         )
@@ -104,33 +101,33 @@ fun main(args: Array<String>) {
     port = commandLine.getOptionValue("port").toInt()
     apiVersion = commandLine.getOptionValue("api")
     user = commandLine.getOptionValue("user")
-    password = commandLine.getOptionValue("pw")
+    password = commandLine.getOptionValue("password")
   }
 
   val jUnitCore = JUnitCore()
   jUnitCore.addListener(TextListener(System.out))
 
-  if (commandLine.hasOption("cat")) {
+  if (commandLine.hasOption("catalog")) {
     jUnitCore.run(CatalogTests::class.java)
 
   }
 
-  if (commandLine.hasOption("pro")) {
+  if (commandLine.hasOption("provision")) {
     jUnitCore.run(ProvisionTests::class.java)
 
   }
 
-  if (commandLine.hasOption("bin")) {
+  if (commandLine.hasOption("binding")) {
     jUnitCore.run(BindingTest::class.java)
 
   }
 
-  if (commandLine.hasOption("auth")) {
+  if (commandLine.hasOption("authentication")) {
     jUnitCore.run(AuthenticationTest::class.java)
 
   }
 
-  if (commandLine.hasOption("con")) {
+  if (commandLine.hasOption("contract")) {
     jUnitCore.run(ContractTest::class.java)
   }
   System.exit(0)

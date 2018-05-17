@@ -4,11 +4,11 @@ Example: `java -jar osb-checker-kotlin-1.0-SNAPSHOT.jar -U https://url.to.the.se
 will run the the provision test.
 
 Options:
-User: -u/-user
-Password: -p/-password
-URL: -U/-url
-Port: -P/-port
-API: -a/-api
+* User: -u/-user
+* Password: -p/-password
+* URL: -U/-url
+* Port: -P/-port
+* API: -a/-api
 
 
 There are five different options to run tests. Possibles commands are:

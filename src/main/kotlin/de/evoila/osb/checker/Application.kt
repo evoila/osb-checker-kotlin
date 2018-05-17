@@ -95,7 +95,6 @@ fun main(args: Array<String>) {
   val parser = DefaultParser()
   val commandLine = parser.parse(options, args)
 
-
   Configuration.apply {
     url = commandLine.getOptionValue("url")
     port = commandLine.getOptionValue("port").toInt()
@@ -104,31 +103,33 @@ fun main(args: Array<String>) {
     password = commandLine.getOptionValue("password")
   }
 
+  var failureCount = 0
+
   val jUnitCore = JUnitCore()
   jUnitCore.addListener(TextListener(System.out))
 
   if (commandLine.hasOption("catalog")) {
-    jUnitCore.run(CatalogTests::class.java)
+    failureCount += jUnitCore.run(CatalogTests::class.java).failureCount
 
   }
 
   if (commandLine.hasOption("provision")) {
-    jUnitCore.run(ProvisionTests::class.java)
+    failureCount += jUnitCore.run(ProvisionTests::class.java).failureCount
 
   }
 
   if (commandLine.hasOption("binding")) {
-    jUnitCore.run(BindingTest::class.java)
+    failureCount += jUnitCore.run(BindingTest::class.java).failureCount
 
   }
 
   if (commandLine.hasOption("authentication")) {
-    jUnitCore.run(AuthenticationTest::class.java)
-
+    failureCount += jUnitCore.run(AuthenticationTest::class.java).failureCount
   }
 
   if (commandLine.hasOption("contract")) {
-    jUnitCore.run(ContractTest::class.java)
+    failureCount += jUnitCore.run(ContractTest::class.java).failureCount
   }
-  System.exit(0)
+
+  System.exit(failureCount)
 }

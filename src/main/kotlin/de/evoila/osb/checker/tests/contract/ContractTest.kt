@@ -17,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest
 class ContractTest : TestBase() {
 
   @Autowired
-  lateinit var provisionRequestRunner: ProvisionRequestRunner
-  @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
 
 

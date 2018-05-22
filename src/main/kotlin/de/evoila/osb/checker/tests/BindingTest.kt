@@ -15,8 +15,6 @@ class BindingTest : TestBase() {
   @Autowired
   lateinit var catalogRequestRunner: CatalogRequestRunner
   @Autowired
-  lateinit var provisionRequestRunner: ProvisionRequestRunner
-  @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
 
   init {
@@ -25,6 +23,10 @@ class BindingTest : TestBase() {
 
       beforeAll {
         wireAndUnwire()
+      }
+
+      afterAll{
+
       }
 
       it("should accept a valid binding request for each plan ID and delete the binding and instance afterwards.") {

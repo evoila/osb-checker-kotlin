@@ -25,7 +25,7 @@ class BindingRequestRunner{
         .extract()
 
     if (response.statusCode() in listOf(200, 201)) {
-      JsonSchemaValidator.matchesJsonSchema("binding-response-schema.json").matches(response.body())
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json").matches(response.body())
     }
   }
 
@@ -34,10 +34,7 @@ class BindingRequestRunner{
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
-    path = planId?.let {
-      serviceId.let { "$path&plan_id=$planId" }
-      "$path?plan_id=$planId"
-    } ?: path
+    path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))

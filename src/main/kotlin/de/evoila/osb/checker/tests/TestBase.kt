@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestContextManager
 import java.util.*
 
-
 @RunWith(Spectrum::class)
 @AutoConfigureMockMvc
 @SpringBootTest(classes = [Application::class])
@@ -20,14 +19,11 @@ abstract class TestBase {
   final fun wireAndUnwire() {
 
     val testContextManager = TestContextManager(this.javaClass)
-//    val wire = this.javaClass.getMethod("wireAndUnwire", Boolean::class.java)
 
     testContextManager.beforeTestClass()
     testContextManager.prepareTestInstance(this)
 
-
     Configuration.token = "Basic ${Base64.getEncoder().encodeToString("${Configuration.user}:${Configuration.password}".toByteArray())}"
-
 
     RestAssured.baseURI = Configuration.url
     RestAssured.port = Configuration.port

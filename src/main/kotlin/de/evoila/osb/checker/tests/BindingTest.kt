@@ -19,7 +19,6 @@ class BindingTest : TestBase() {
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
 
-
   init {
 
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {

@@ -4,31 +4,58 @@
   "description": "OSB Binding Response",
   "type": "object",
   "properties": {
-    "credentials":{ "type":"object"},
-    "syslog_drain_url":{"type":"string"},
-    "route_service_url":{"type":"string"},
-    "volume_mounts":{
-      "type":"array",
-      "items":{
-        "type":"object",
-        "required": ["driver", "conatiner_dir", "mode", "device_type", "device"],
+    "credentials": {
+      "type": "object"
+    },
+    "syslog_drain_url": {
+      "type": "string"
+    },
+    "route_service_url": {
+      "type": "string"
+    },
+    "volume_mounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "driver",
+          "conatiner_dir",
+          "mode",
+          "device_type",
+          "device"
+        ],
         "properties": {
-          "driver":{"type":"string"},
-          "container_dir":{"type":"string"},
-          "mode":{
-            "type":"string",
-            "enum":["r", "rw"]
+          "driver": {
+            "type": "string"
           },
-          "device_type":{
-            "type":"string",
-            "enum": ["shared"]
+          "container_dir": {
+            "type": "string"
           },
-          "device":{
-            "type":"object",
-            "required": ["volume_id"],
-            "properties":{
-              "volume_id":{"type":"string"},
-              "mount_config":{"type":"object"}
+          "mode": {
+            "type": "string",
+            "enum": [
+              "r",
+              "rw"
+            ]
+          },
+          "device_type": {
+            "type": "string",
+            "enum": [
+              "shared"
+            ]
+          },
+          "device": {
+            "type": "object",
+            "required": [
+              "volume_id"
+            ],
+            "properties": {
+              "volume_id": {
+                "type": "string"
+              },
+              "mount_config": {
+                "type": "object"
+              }
             },
             "additionalProperties": false
           }

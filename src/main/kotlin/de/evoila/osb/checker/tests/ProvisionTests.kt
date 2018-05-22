@@ -30,12 +30,15 @@ class ProvisionTests : TestBase() {
 
   init {
 
+    beforeAll {
+      wireAndUnwire()
+    }
+
     afterAll {
       cleanUp(usedIds)
     }
 
     describe("make a provision request and start polling if it's a async service broker. Afterwards the provision should be deleted") {
-      wireAndUnwire()
 
       val catalog = catalogRequestRunner.correctRequest()
 
@@ -76,7 +79,7 @@ class ProvisionTests : TestBase() {
           catalog.services
         }
 
-        services.parallelStream().forEach { service ->
+        services.forEach { service ->
           service.plans.parallelStream().forEach { plan ->
 
             testProvision(service, plan, isAsync)
@@ -86,8 +89,6 @@ class ProvisionTests : TestBase() {
     }
 
     describe("Testing provisioning Syntax") {
-
-      wireAndUnwire()
 
       val catalog = catalogRequestRunner.correctRequest()
 

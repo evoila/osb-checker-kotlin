@@ -17,6 +17,8 @@ class BindingTest : TestBase() {
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
 
+  val usedIds: MutableMap<String, Provision> = Collections.synchronizedMap(hashMapOf<String, Provision>())
+
   init {
 
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {
@@ -25,8 +27,8 @@ class BindingTest : TestBase() {
         wireAndUnwire()
       }
 
-      afterAll{
-
+      afterAll {
+        cleanUp(usedIds)
       }
 
       it("should accept a valid binding request for each plan ID and delete the binding and instance afterwards.") {
@@ -44,6 +46,11 @@ class BindingTest : TestBase() {
             val provision = ValidProvisioning(service, plan)
             val binding = ValidBinding(service.id, plan.id)
 
+            usedIds[instanceId] = Provision(
+                serviceID = service.id,
+                planId = plan.id
+            )
+
             provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
 
             assert(provisionRequestRunner.waitForFinish(instanceId) == "succeeded")
@@ -58,8 +65,6 @@ class BindingTest : TestBase() {
 
       describe("Binding syntax") {
 
-        wireAndUnwire()
-
         val catalogRequestRunner = CatalogRequestRunner()
         val catalog = catalogRequestRunner.correctRequest()
 
@@ -70,6 +75,11 @@ class BindingTest : TestBase() {
 
         val provision = ValidProvisioning(service, plan)
         val binding = ValidBinding(service.id, plan.id)
+
+        usedIds[instanceId] = Provision(
+            serviceID = service.id,
+            planId = plan.id
+        )
 
         provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
 

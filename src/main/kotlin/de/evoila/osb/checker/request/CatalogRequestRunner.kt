@@ -54,7 +54,6 @@ class CatalogRequestRunner{
   fun noAuth() {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
         .get("/v2/catalog")
         .then()
         .assertThat()

@@ -26,7 +26,6 @@ class ProvisionTests : TestBase() {
   @Autowired
   lateinit var provisionRequestRunner: ProvisionRequestRunner
 
-
   init {
 
     var count = 1
@@ -34,9 +33,7 @@ class ProvisionTests : TestBase() {
     describe("make a provision request and start polling if it's a async service broker. Afterwards the provision should be deleted") {
       wireAndUnwire()
 
-
       val catalog = catalogRequestRunner.correctRequest()
-
 
       var isAsync = true
 
@@ -67,7 +64,7 @@ class ProvisionTests : TestBase() {
         catalog.services.parallelStream().forEach { service ->
           service.plans.parallelStream().forEach { plan ->
 
-            val instanceId = "$instanceIdBase$count"
+            val instanceId = "$instanceIdBase${plan.id.substring(0, 8)}"
 
             val provisionRequestBody = ValidProvisioning(service, plan)
 
@@ -204,6 +201,6 @@ class ProvisionTests : TestBase() {
   }
 
   companion object {
-    const val instanceIdBase = "exampleSQL+"
+    const val instanceIdBase = "osb-checker-"
   }
 }

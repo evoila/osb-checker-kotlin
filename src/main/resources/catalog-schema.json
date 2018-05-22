@@ -19,8 +19,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "properties": {
-          "name": {
+           "name": {
             "type": "string",
             "pattern": "^[a-z0-9-]+$"
           },

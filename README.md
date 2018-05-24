@@ -19,4 +19,5 @@ There are five different options to run tests. Possibles commands are:
 * authentication: -auth/-authentication
 * contract: -con/-contract
 
+optional:
 

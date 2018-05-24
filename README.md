@@ -1,31 +1,23 @@
 # osb-checker-kotlin
 
-To run a test class specify the it on the command line.
+Example: `java -jar osb-checker-kotlin-1.0-SNAPSHOT.jar -U https://url.to.the.service.broker -P 443 -u admin -p password -a v2.13 -provision`
+will run the the provision test.
+
+Options:
+* User: -u/-user
+* Password: -p/-password
+* URL: -U/-url
+* Port: -P/-port
+* API: -a/-api
 
 
-Arguments are:
+There are five different options to run tests. Possibles commands are:
 
-required
-
--url / -URL :  
--port / -Port 
--user / -User
--pw / -Password : 
--api / -Api-Version 
+* catalog: -cat/-catalog
+* provision: -prov/-provision
+* binding: -bind/-binding
+* authentication: -auth/-authentication
+* contract: -con/-contract
 
 optional:
-
-Add these to run the corresponding test
-
--cat, -Catalog 
--pro, -Provision
--bin,  -Binding
--auth,  -Authentication
--con, -Contract
-
-
-Example Command;
-java -jar osb-checker-kotlin-1.0-SNAPSHOT.jar -url http://example-dev.cf.dev.eu-de-central.msh.host -port 80 -user admin -pw cloudfoundry -api 2.13  -cat -pro
-
-will run a Catalog and ProvisionTest on the http://example-dev.cf.dev.eu-de-central.msh.host Service Broker.
 

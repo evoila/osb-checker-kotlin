@@ -23,7 +23,7 @@ class CatalogRequestRunner{
 
   fun correctRequestAndValidateResponse() {
 
-    val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
+    //val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
@@ -33,7 +33,7 @@ class CatalogRequestRunner{
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
-        .body(catalogSchema)
+      //  .body(catalogSchema)
   }
 
   fun correctRequest(): Catalog {
@@ -54,7 +54,6 @@ class CatalogRequestRunner{
   fun noAuth() {
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
         .get("/v2/catalog")
         .then()
         .assertThat()

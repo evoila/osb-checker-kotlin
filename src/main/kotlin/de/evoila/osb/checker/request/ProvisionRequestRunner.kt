@@ -8,6 +8,7 @@ import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
 import org.springframework.stereotype.Service
+import kotlin.test.assertTrue
 
 @Service
 class ProvisionRequestRunner {
@@ -71,7 +72,7 @@ class ProvisionRequestRunner {
     }
   }
 
-  fun waitForFinish(instanceId: String): String? {
+  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int): String? {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
@@ -79,19 +80,28 @@ class ProvisionRequestRunner {
         .get("/v2/service_instances/$instanceId/last_operation")
         .then()
         .assertThat()
-        .statusCode(200)
         .extract()
         .response()
-        .jsonPath()
-        .getObject("", LastOperationResponse::class.java)
 
-    if (response.state == "in progress") {
-      Thread.sleep(10000)
-      return waitForFinish(instanceId)
+    assertTrue("Expected StatusCode 200 or in case of a deletion 400 but was ${response.statusCode} ")
+    { response.statusCode in listOf(expectedFinalStatusCode, 200) }
+
+    return if (response.statusCode == 200) {
+
+      val responseBody = response.jsonPath()
+          .getObject("", LastOperationResponse::class.java)
+
+      if (responseBody.state == "in progress") {
+        Thread.sleep(10000)
+        return waitForFinish(instanceId, expectedFinalStatusCode)
+      }
+      assertTrue("Expected response body \"succeeded\" or \"failed\" but was ${responseBody.state}")
+      { responseBody.state in listOf("succeeded", "failed") }
+
+      responseBody.state
+    } else {
+      ""
     }
-    assert(response.state in listOf("succeeded", "failed"))
-
-    return response.state
   }
 
   fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?): Int {

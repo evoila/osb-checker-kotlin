@@ -2,6 +2,7 @@ package de.evoila.osb.checker.request.bodies
 
 import de.evoila.osb.checker.response.Catalog
 import java.io.Serializable
+import java.util.*
 
 
 abstract class RequestBody : Serializable {
@@ -12,7 +13,8 @@ abstract class RequestBody : Serializable {
 
   class ValidBinding(
       var service_id: String?,
-      var plan_id: String?
+      var plan_id: String?,
+      val app_guid: String = UUID.randomUUID().toString()
   ) : RequestBody() {
 
     constructor(catalog: Catalog) : this(

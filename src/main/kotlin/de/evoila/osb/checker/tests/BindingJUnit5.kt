@@ -91,7 +91,7 @@ class BindingJUnit5 : TestBase() {
         ))
     )
 
-    val cases = listOf(
+    listOf(
         TestCase(
             requestBody = RequestBody.ValidBinding(
                 service_id = null,
@@ -106,8 +106,7 @@ class BindingJUnit5 : TestBase() {
             ),
             message = "should reject if missing plan_id"
         )
-    )
-    cases.forEach {
+    ).forEach {
       dynamicNodes.add(
           dynamicTest("PUT ${it.message}")
           { bindingRequestRunner.runPutBindingRequest(it.requestBody, 400, instanceId, bindingId) }
@@ -141,9 +140,4 @@ class BindingJUnit5 : TestBase() {
 
     return dynamicNodes
   }
-
-  data class TestCase(
-      val requestBody: RequestBody,
-      val message: String
-  )
 }

@@ -24,7 +24,7 @@ import java.util.logging.Level
 class Application
 
 fun main(args: Array<String>) {
-/*
+
   val options = Options()
       .apply {
         addOption(
@@ -118,8 +118,6 @@ fun main(args: Array<String>) {
       maxServices = commandLine.getOptionValue("I").toInt() - 1
     }
   }
-*/
-
 
   val request = LauncherDiscoveryRequestBuilder.request()
       .selectors(
@@ -137,9 +135,9 @@ fun main(args: Array<String>) {
   launcher.execute(request)
   r.summary.printTo(PrintWriter(System.out))
 
-
-  var failureCount = 0
-
+  System.exit(
+      r.summary.failures.size
+  )
 
   //LauncherDiscoveryRequestBuilder
 

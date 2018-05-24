@@ -28,7 +28,7 @@ class ProvisionTests : TestBase() {
   init {
     describe("make a provision request and start polling if it's a async service broker. Afterwards the provision should be deleted") {
 
-        wire()
+      wire()
 
       afterAll {
         cleanUp(usedIds)
@@ -82,125 +82,6 @@ class ProvisionTests : TestBase() {
       }
     }
 
-    describe("Testing provisioning Syntax") {
-
-      beforeAll {
-        wire()
-      }
-
-      afterAll {
-        cleanUp(usedIds)
-      }
-
-
-      val catalog = catalogRequestRunner.correctRequest()
-
-      val instanceId = UUID.randomUUID().toString()
-
-
-      val service = catalog.services.first()
-      val plan = service.plans.first()
-      val provisionRequestBody = ValidProvisioning(service, plan)
-
-      usedIds[instanceId] = Provision(
-          serviceID = service.id,
-          planId = plan.id
-      )
-
-      it("PUT - should reject if missing service_id") {
-        val missingServiceID = ValidProvisioning(service_id = null, plan_id = provisionRequestBody.plan_id)
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingServiceID, 400)
-      }
-
-      it("PUT - should reject if missing service_id field") {
-        val missingServiceID = NoServiceFieldProvisioning(service)
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingServiceID, 400)
-      }
-
-      it("PUT - should reject if missing plan_id field") {
-        val missingPlanId = ProvisionBody.NoPlanFieldProvisioning(plan)
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingPlanId, 400)
-      }
-
-      it("PUT - should reject if missing plan_id") {
-        val missingPlanId = ValidProvisioning(
-            service_id = provisionRequestBody.service_id,
-            plan_id = null
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingPlanId, 400)
-      }
-
-      it("PUT - should reject if request payload is missing organization_guid field") {
-        val missingOrgGuid = NoOrgFieldProvisioning(
-            service, plan
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingOrgGuid, 400)
-      }
-
-
-      it("PUT - should reject if request payload is missing organization_guid") {
-        val missingOrgGuid = ValidProvisioning(
-            service_id = provisionRequestBody.service_id,
-            plan_id = provisionRequestBody.plan_id,
-            organization_guid = null
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingOrgGuid, 400)
-      }
-
-      it("PUT - should reject if request payload is missing space_guid field") {
-        val missingSpaceGuid = NoSpaceFieldProvisioning(
-            service, plan
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingSpaceGuid, 400)
-      }
-
-      it("PUT - should reject if request payload is missing space_guid") {
-        val missingSpaceGuid = ValidProvisioning(
-            service_id = provisionRequestBody.service_id,
-            plan_id = provisionRequestBody.plan_id,
-            space_guid = null
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, missingSpaceGuid, 400)
-      }
-
-      it("PUT - should reject if service_id is invalid") {
-        val invalidServiceId = ValidProvisioning(
-            service_id = "Invalid",
-            plan_id = provisionRequestBody.plan_id
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, invalidServiceId, 400)
-      }
-
-      it("PUT - should reject if plan_id is invalid") {
-        val invalidPlanId = ValidProvisioning(
-            service_id = provisionRequestBody.service_id,
-            plan_id = "Invalid"
-        )
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, invalidPlanId, 400)
-      }
-
-      it("PUT - should reject if parameters are not following schema") {
-        provisionRequestRunner.runPutProvisionRequestAsync(instanceId, Invalid(), 400)
-      }
-
-      it("DELETE - should reject if missing service_id") {
-
-        val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
-            instanceId,
-            null,
-            provisionRequestBody.plan_id)
-        assertEquals(400, statusCode, "Status Code should haveen been 400 but was $statusCode")
-      }
-
-      it("DELETE - should reject if missing plan_id") {
-
-        val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
-            instanceId,
-            provisionRequestBody.service_id,
-            null)
-        assertEquals(400, statusCode, "Status Code should haveen been 400 but was $statusCode")
-      }
-    }
   }
 
   private fun testProvision(service: Service, plan: Plan, isAsync: Boolean) {

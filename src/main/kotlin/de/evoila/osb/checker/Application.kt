@@ -1,23 +1,30 @@
 package de.evoila.osb.checker
 
 import de.evoila.osb.checker.config.Configuration
-import de.evoila.osb.checker.tests.BindingTest
-import de.evoila.osb.checker.tests.CatalogTests
-import de.evoila.osb.checker.tests.ProvisionTests
+import de.evoila.osb.checker.tests.*
 import de.evoila.osb.checker.tests.contract.AuthenticationTest
 import de.evoila.osb.checker.tests.contract.ContractTest
+import de.evoila.osb.checker.util.ColoredPrintingTestListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.junit.internal.TextListener
+import org.junit.platform.engine.discovery.DiscoverySelectors
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
+import org.junit.platform.launcher.core.LauncherFactory
+import org.junit.platform.launcher.listeners.LoggingListener
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 import org.junit.runner.JUnitCore
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import java.io.FileWriter
+import java.io.PrintWriter
+import java.util.logging.Level
 
 @SpringBootApplication
 class Application
 
 fun main(args: Array<String>) {
-
+/*
   val options = Options()
       .apply {
         addOption(
@@ -111,12 +118,33 @@ fun main(args: Array<String>) {
       maxServices = commandLine.getOptionValue("I").toInt() - 1
     }
   }
+*/
+
+
+  val request = LauncherDiscoveryRequestBuilder.request()
+      .selectors(
+          DiscoverySelectors.selectPackage("tests")
+          , DiscoverySelectors.selectClass(BindingJUnit5::class.java)
+      )
+      .build()
+
+  val l = ColoredPrintingTestListener()
+  val r = SummaryGeneratingListener()
+  val launcher = LauncherFactory.create()
+
+  launcher.registerTestExecutionListeners(l, r)
+
+  launcher.execute(request)
+  r.summary.printTo(PrintWriter(System.out))
+
 
   var failureCount = 0
 
-  val jUnitCore = JUnitCore()
-  jUnitCore.addListener(TextListener(System.out))
 
+  //LauncherDiscoveryRequestBuilder
+
+
+  /*
   if (commandLine.hasOption("catalog")) {
     failureCount += jUnitCore.run(CatalogTests::class.java).failureCount
 
@@ -129,7 +157,6 @@ fun main(args: Array<String>) {
 
   if (commandLine.hasOption("binding")) {
     failureCount += jUnitCore.run(BindingTest::class.java).failureCount
-
   }
 
   if (commandLine.hasOption("authentication")) {
@@ -140,5 +167,5 @@ fun main(args: Array<String>) {
     failureCount += jUnitCore.run(ContractTest::class.java).failureCount
   }
 
-  System.exit(failureCount)
+  System.exit(failureCount)*/
 }

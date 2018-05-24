@@ -6,7 +6,6 @@ import com.greghaskins.spectrum.Spectrum.it
 import de.evoila.osb.checker.Application
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.CatalogRequestRunner
-import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.tests.TestBase
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +20,7 @@ class AuthenticationTest : TestBase() {
 
   init {
     describe("Service Broker should reject unauthorized access.") {
-      wireAndUnwire()
+      wire()
 
       val catalogRequestRunner = CatalogRequestRunner()
 

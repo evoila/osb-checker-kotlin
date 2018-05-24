@@ -6,7 +6,6 @@ import com.greghaskins.spectrum.Spectrum.it
 import de.evoila.osb.checker.Application
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.CatalogRequestRunner
-import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.tests.TestBase
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +22,7 @@ class ContractTest : TestBase() {
   init {
     describe("Requests should contain header X-Broker-API-Version: 2.13") {
 
-      wireAndUnwire()
+      wire()
 
       val catalogRequestRunner = CatalogRequestRunner()
 

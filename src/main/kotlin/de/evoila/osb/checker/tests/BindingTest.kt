@@ -3,7 +3,6 @@ package de.evoila.osb.checker.tests
 import com.greghaskins.spectrum.Spectrum.*
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.CatalogRequestRunner
-import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.ProvisionBody.ValidProvisioning
 import de.evoila.osb.checker.request.bodies.RequestBody.ValidBinding
 import org.slf4j.LoggerFactory
@@ -12,21 +11,16 @@ import java.util.*
 
 class BindingTest : TestBase() {
 
-  @Autowired
-  lateinit var catalogRequestRunner: CatalogRequestRunner
+
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
 
   val usedIds: MutableMap<String, Provision> = Collections.synchronizedMap(hashMapOf<String, Provision>())
 
   init {
+    wire()
 
     describe("PUT /v2/service_instance/:instance_id/service_bindings/:binding_id") {
-
-      beforeAll {
-        wireAndUnwire()
-      }
-
       afterAll {
         cleanUp(usedIds)
       }
@@ -35,8 +29,8 @@ class BindingTest : TestBase() {
 
         val catalog = catalogRequestRunner.correctRequest()
 
-        catalog.services.parallelStream().forEach { service ->
-          service.plans.parallelStream().forEach { plan ->
+        catalog.services.forEach { service ->
+          service.plans.forEach { plan ->
 
             log.info("Testing Service with ID ${service.id} and Plan with ID ${plan.id}")
 
@@ -53,19 +47,25 @@ class BindingTest : TestBase() {
 
             provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
 
-            assert(provisionRequestRunner.waitForFinish(instanceId) == "succeeded")
 
             bindingRequestRunner.runPutBindingRequest(binding, 201, instanceId, bindingId)
             bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, 200, instanceId, bindingId)
 
             provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
+
+
           }
         }
       }
 
+
       describe("Binding syntax") {
 
-        val catalogRequestRunner = CatalogRequestRunner()
+
+        afterAll {
+          cleanUp(usedIds)
+        }
+
         val catalog = catalogRequestRunner.correctRequest()
 
         val service = catalog.services.first()
@@ -83,7 +83,6 @@ class BindingTest : TestBase() {
 
         provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
 
-        assert(provisionRequestRunner.waitForFinish(instanceId) == "succeeded")
 
         it("PUT - should reject if missing service_id") {
           val missingServiceID = ValidBinding(
@@ -105,7 +104,6 @@ class BindingTest : TestBase() {
         it("DELETE - should reject if missing plan_id") {
           bindingRequestRunner.runDeleteBindingRequest(binding.service_id, null, 400, instanceId, bindingId)
         }
-
         provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
       }
     }

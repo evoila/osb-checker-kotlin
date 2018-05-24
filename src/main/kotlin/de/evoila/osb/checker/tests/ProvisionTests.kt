@@ -23,22 +23,16 @@ import kotlin.test.assertTrue
 @RunWith(Spectrum::class)
 class ProvisionTests : TestBase() {
 
-  @Autowired
-  lateinit var catalogRequestRunner: CatalogRequestRunner
-
   val usedIds: MutableMap<String, Provision> = Collections.synchronizedMap(hashMapOf<String, Provision>())
 
   init {
-
-    beforeAll {
-      wireAndUnwire()
-    }
-
-    afterAll {
-      cleanUp(usedIds)
-    }
-
     describe("make a provision request and start polling if it's a async service broker. Afterwards the provision should be deleted") {
+
+        wire()
+
+      afterAll {
+        cleanUp(usedIds)
+      }
 
       val catalog = catalogRequestRunner.correctRequest()
 
@@ -89,6 +83,15 @@ class ProvisionTests : TestBase() {
     }
 
     describe("Testing provisioning Syntax") {
+
+      beforeAll {
+        wire()
+      }
+
+      afterAll {
+        cleanUp(usedIds)
+      }
+
 
       val catalog = catalogRequestRunner.correctRequest()
 
@@ -215,7 +218,6 @@ class ProvisionTests : TestBase() {
 
     if (isAsync) {
       provisionRequestRunner.runGetLastOperation(instanceId, 200)
-      provisionRequestRunner.waitForFinish(instanceId)
     }
     provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provisionRequestBody, 409)
 

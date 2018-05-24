@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class CatalogTests : TestBase() {
 
-  @Autowired
-  lateinit var catalogRequestRunner: CatalogRequestRunner
 
   init {
     describe("Testing the catalog") {
       beforeAll {
-        wireAndUnwire()
+        wire()
       }
 
       it("should return list of registered service classes as JSON payload") {

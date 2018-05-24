@@ -2,26 +2,23 @@ package de.evoila.osb.checker
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.tests.*
-import de.evoila.osb.checker.tests.contract.AuthenticationTest
-import de.evoila.osb.checker.tests.contract.ContractTest
-import de.evoila.osb.checker.util.ColoredPrintingTestListener
+import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
+import de.evoila.osb.checker.tests.contract.ContractJUnit5
+import util.ColoredPrintingTestListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
-import org.junit.internal.TextListener
+import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
-import org.junit.platform.launcher.listeners.LoggingListener
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
-import org.junit.runner.JUnitCore
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import java.io.FileWriter
 import java.io.PrintWriter
-import java.util.logging.Level
 
 @SpringBootApplication
-class Application
+class Application(
+)
 
 fun main(args: Array<String>) {
 
@@ -119,12 +116,27 @@ fun main(args: Array<String>) {
     }
   }
 
-  val request = LauncherDiscoveryRequestBuilder.request()
-      .selectors(
-          DiscoverySelectors.selectPackage("tests")
-          , DiscoverySelectors.selectClass(BindingJUnit5::class.java)
-      )
-      .build()
+  val selectors = mutableListOf<DiscoverySelector>()
+
+  if (commandLine.hasOption("catalog")) {
+    selectors.add(DiscoverySelectors.selectClass(CatalogJUnit5::class.java))
+  }
+
+  if (commandLine.hasOption("provision")) {
+    selectors.add(DiscoverySelectors.selectClass(ProvisionJUnit5::class.java))
+  }
+
+  if (commandLine.hasOption("binding")) {
+    selectors.add(DiscoverySelectors.selectClass(BindingJUnit5::class.java))
+  }
+
+  if (commandLine.hasOption("authentication")) {
+    selectors.add(DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java))
+  }
+
+  if (commandLine.hasOption("contract")) {
+    selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
+  }
 
   val l = ColoredPrintingTestListener()
   val r = SummaryGeneratingListener()
@@ -132,38 +144,16 @@ fun main(args: Array<String>) {
 
   launcher.registerTestExecutionListeners(l, r)
 
+  val request = LauncherDiscoveryRequestBuilder.request()
+      .selectors(
+          selectors
+      )
+      .build()
+
   launcher.execute(request)
   r.summary.printTo(PrintWriter(System.out))
 
   System.exit(
       r.summary.failures.size
   )
-
-  //LauncherDiscoveryRequestBuilder
-
-
-  /*
-  if (commandLine.hasOption("catalog")) {
-    failureCount += jUnitCore.run(CatalogTests::class.java).failureCount
-
-  }
-
-  if (commandLine.hasOption("provision")) {
-    failureCount += jUnitCore.run(ProvisionTests::class.java).failureCount
-
-  }
-
-  if (commandLine.hasOption("binding")) {
-    failureCount += jUnitCore.run(BindingTest::class.java).failureCount
-  }
-
-  if (commandLine.hasOption("authentication")) {
-    failureCount += jUnitCore.run(AuthenticationTest::class.java).failureCount
-  }
-
-  if (commandLine.hasOption("contract")) {
-    failureCount += jUnitCore.run(ContractTest::class.java).failureCount
-  }
-
-  System.exit(failureCount)*/
 }

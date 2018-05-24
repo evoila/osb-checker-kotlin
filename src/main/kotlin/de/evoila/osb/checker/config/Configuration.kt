@@ -2,8 +2,8 @@ package de.evoila.osb.checker.config
 
 object Configuration {
 
-  var url: String = "https://osb-samba-test.cf.dev.eu-de-central.msh.host"
-  var port: Int = 443
+  var url: String = "http://localhost"
+  var port: Int = 8080
   var apiVersion: String = "2.13"
   var user: String = "admin"
   var password: String = "cloudfoundry"

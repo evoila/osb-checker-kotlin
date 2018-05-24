@@ -1,13 +1,15 @@
-package de.evoila.osb.checker.util;
+package util;
 
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
+import org.springframework.stereotype.Service;
 
-import static de.evoila.osb.checker.util.ColoredPrintingTestListener.Color.*;
+import static util.ColoredPrintingTestListener.Color.*;
 
+@Service
 public class ColoredPrintingTestListener implements TestExecutionListener {
 
 

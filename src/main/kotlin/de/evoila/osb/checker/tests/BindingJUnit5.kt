@@ -61,9 +61,9 @@ class BindingJUnit5 : TestBase() {
                         dynamicTest("deleting Provision") {
                           val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
                           assertTrue("statusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
-                        },
-                        dynamicTest("polling Provision") {
-                          provisionRequestRunner.waitForFinish(instanceId, 410)
+                          if (statusCode == 202) {
+                            provisionRequestRunner.waitForFinish(instanceId, 410)
+                          }
                         }
                     ))
             ))
@@ -137,9 +137,9 @@ class BindingJUnit5 : TestBase() {
                 dynamicTest("deleting Provision") {
                   val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
                   assertTrue("statusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
-                },
-                dynamicTest("polling Provision") {
-                  provisionRequestRunner.waitForFinish(instanceId, 410)
+                  if (statusCode == 202) {
+                    provisionRequestRunner.waitForFinish(instanceId, 410)
+                  }
                 }
             ))
     )

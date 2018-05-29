@@ -24,6 +24,8 @@ class BindingJUnit5 : TestBase() {
 
     val dynamicNodes = mutableListOf<DynamicNode>()
 
+
+    //Todo implement custom limitation
     catalog.services.forEach { service ->
       service.plans.forEach { plan ->
 
@@ -34,14 +36,16 @@ class BindingJUnit5 : TestBase() {
         val binding = RequestBody.ValidBinding(service.id, plan.id)
 
         dynamicNodes.add(
-            dynamicContainer("Running Valid Provision with InstanceId $instanceId and Valid Binding with BindingId $bindingId", listOf(
+            dynamicContainer("Running a valid provision with instanceId $instanceId and valid binding with bindingId $bindingId", listOf(
 
-                dynamicContainer("Provision and Polling for later Binding", listOf(
+                dynamicContainer("Provision and in case of a Async SB polling, for later binding", listOf(
                     dynamicTest("Running Valid Provision with InstanceId $instanceId") {
-                      provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
-                    },
-                    dynamicTest("RunningPolling") {
-                      assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
+                      val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
+                      assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
+
+                      if (statusCode in listOf(200, 201)) {
+                        assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
+                      }
                     }
                 )),
                 dynamicContainer("Running PUT Binding and DELETE Binding afterwards", listOf(
@@ -83,10 +87,12 @@ class BindingJUnit5 : TestBase() {
     dynamicNodes.add(
         dynamicContainer("Provision and Polling for later Binding", listOf(
             dynamicTest("Running Valid Provision with InstanceId $instanceId") {
-              provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 202)
-            },
-            dynamicTest("RunningPolling") {
-              assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
+              val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
+              assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
+
+              if (statusCode in listOf(200, 201)) {
+                assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
+              }
             }
         ))
     )

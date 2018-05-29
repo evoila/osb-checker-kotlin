@@ -26,7 +26,7 @@ class ProvisionRequestRunner {
         .statusCode()
   }
 
-  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, expectedStatusCode: Int) {
+  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody): Int {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
@@ -35,12 +35,13 @@ class ProvisionRequestRunner {
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
         .then()
         .assertThat()
-        .statusCode(expectedStatusCode)
         .extract()
 
     if (response.statusCode() in listOf(201, 202, 200)) {
       JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
     }
+
+    return response.statusCode()
   }
 
 

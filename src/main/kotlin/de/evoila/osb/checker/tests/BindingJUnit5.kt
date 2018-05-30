@@ -24,10 +24,8 @@ class BindingJUnit5 : TestBase() {
   fun runValidBindings(): Stream<DynamicNode> {
     wire()
     val catalog = catalogRequestRunner.correctRequest()
-
     val dynamicNodes = mutableListOf<DynamicNode>()
 
-    //Todo implement custom limitation
     catalog.services.forEach { service ->
       service.plans.forEach { plan ->
 
@@ -71,16 +69,7 @@ class BindingJUnit5 : TestBase() {
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     dynamicNodes.add(
-        dynamicContainer("Provision and Polling for later Binding", listOf(
-            dynamicTest("Running Valid Provision with InstanceId $instanceId") {
-              val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
-              assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
-
-              if (statusCode == 202) {
-                assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
-              }
-            }
-        ))
+        validProvisionContainer(instanceId, provision)
     )
 
     listOf(
@@ -118,16 +107,7 @@ class BindingJUnit5 : TestBase() {
       )
     }
     dynamicNodes.add(
-        dynamicContainer("Deleting Provision and Polling afterwards",
-            listOf(
-                dynamicTest("deleting Provision") {
-                  val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
-                  assertTrue("statusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
-                  if (statusCode == 202) {
-                    provisionRequestRunner.waitForFinish(instanceId, 410)
-                  }
-                }
-            ))
+        validDeleteProvisionContainer(instanceId, service, plan)
     )
 
     return dynamicNodes

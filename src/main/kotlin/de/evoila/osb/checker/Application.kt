@@ -63,6 +63,10 @@ fun main(args: Array<String>) {
                 .desc("Thr api version of the service broker")
                 .build()
         )
+        Option.builder("s")
+            .longOpt("service-key")
+            .build()
+
         addOption(
             Option.builder("cat")
                 .longOpt("catalog")
@@ -103,6 +107,7 @@ fun main(args: Array<String>) {
     apiVersion = commandLine.getOptionValue("api")
     user = commandLine.getOptionValue("user")
     password = commandLine.getOptionValue("password")
+    serviceKeysFlag = commandLine.hasOption("s")
   }
 
   val selectors = mutableListOf<DiscoverySelector>()

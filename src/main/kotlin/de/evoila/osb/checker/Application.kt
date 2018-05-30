@@ -17,8 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.PrintWriter
 
 @SpringBootApplication
-class Application(
-)
+class Application
 
 fun main(args: Array<String>) {
 
@@ -64,12 +63,6 @@ fun main(args: Array<String>) {
                 .desc("Thr api version of the service broker")
                 .build()
         )
-        addOption(Option.builder("I")
-            .longOpt("instances")
-            .hasArg()
-            .desc("The number of Services to test in the Provision Test. Default is 3")
-            .build()
-        )
         addOption(
             Option.builder("cat")
                 .longOpt("catalog")
@@ -110,10 +103,6 @@ fun main(args: Array<String>) {
     apiVersion = commandLine.getOptionValue("api")
     user = commandLine.getOptionValue("user")
     password = commandLine.getOptionValue("password")
-
-    if (commandLine.hasOption("I")) {
-      maxServices = commandLine.getOptionValue("I").toInt() - 1
-    }
   }
 
   val selectors = mutableListOf<DiscoverySelector>()

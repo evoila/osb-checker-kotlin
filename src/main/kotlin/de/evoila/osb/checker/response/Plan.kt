@@ -11,4 +11,5 @@ class Plan {
   var vmType: String? = null
   var persistentDiskType: String? = null
   var plan_updatable = false
+  var bindable: Boolean = true
 }

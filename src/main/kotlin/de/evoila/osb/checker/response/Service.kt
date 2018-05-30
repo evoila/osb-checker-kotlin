@@ -10,7 +10,7 @@ class Service {
 
   var id: String = ""
 
-  var bindable: Boolean = false
+  var bindable: Boolean = true
 
   var description: String = ""
 

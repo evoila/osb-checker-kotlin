@@ -38,7 +38,9 @@ class BindingJUnit5 : TestBase() {
 
         val testContainers = mutableListOf(validProvisionContainer(instanceId, provision))
 
-        if (plan.bindable) {
+        val bindable = plan.bindable ?: service.bindable
+
+        if (bindable) {
           testContainers.add(validBindingContainer(binding, instanceId, bindingId))
         }
 
@@ -58,7 +60,9 @@ class BindingJUnit5 : TestBase() {
     val service = catalog.services.first()
     val plan = service.plans.first()
 
-    if (!plan.bindable) {
+    val bindable = plan.bindable ?: service.bindable
+
+    if (bindable) {
       return emptyList()
     }
 

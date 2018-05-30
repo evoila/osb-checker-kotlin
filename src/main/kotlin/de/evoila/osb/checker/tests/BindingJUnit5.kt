@@ -76,7 +76,7 @@ class BindingJUnit5 : TestBase() {
               val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
               assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
 
-              if (statusCode in listOf(200, 201)) {
+              if (statusCode == 202) {
                 assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
               }
             }
@@ -163,7 +163,7 @@ class BindingJUnit5 : TestBase() {
           val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
           assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
 
-          if (statusCode in listOf(200, 201)) {
+          if (statusCode == 202) {
             assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
           }
         }

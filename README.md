@@ -3,12 +3,17 @@
 Example: `java -jar osb-checker-kotlin-1.0-SNAPSHOT.jar -U https://url.to.the.service.broker -P 443 -u admin -p password -a v2.13 -provision`
 will run the the provision test.
 
-Options:
+required:
 * User: -u/-user
 * Password: -p/-password
 * URL: -U/-url
 * Port: -P/-port
 * API: -a/-api
+
+optional:
+* Service Key flag: -s/-service-key
+
+Signals to the checker that a app_guid should be used for binding instances.
 
 
 There are five different options to run tests. Possibles commands are:

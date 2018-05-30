@@ -3,7 +3,7 @@ package de.evoila.osb.checker.request.bodies
 import de.evoila.osb.checker.response.Plan
 import de.evoila.osb.checker.response.Service
 
-abstract class ProvisionBody : RequestBody() {
+abstract class ProvisionBody : RequestBody {
 
   class ValidProvisioning(
       var service_id: String?,

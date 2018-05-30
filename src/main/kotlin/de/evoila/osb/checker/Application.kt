@@ -65,6 +65,7 @@ fun main(args: Array<String>) {
         )
         Option.builder("s")
             .longOpt("service-key")
+            .desc("By setting this flag no app_guid will be used during binding")
             .build()
 
         addOption(
@@ -107,7 +108,7 @@ fun main(args: Array<String>) {
     apiVersion = commandLine.getOptionValue("api")
     user = commandLine.getOptionValue("user")
     password = commandLine.getOptionValue("password")
-    serviceKeysFlag = commandLine.hasOption("s")
+    serviceKeysFlag = !commandLine.hasOption("s")
   }
 
   val selectors = mutableListOf<DiscoverySelector>()

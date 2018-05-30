@@ -13,7 +13,7 @@ required:
 optional:
 * Service Key flag: -s/-service-key
 
-Signals to the checker that a app_guid should be used for binding instances.
+Signals to the checker that NO app_guid should be used for binding instances.
 
 
 There are five different options to run tests. Possibles commands are:

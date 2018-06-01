@@ -13,9 +13,11 @@ class CatalogRequestRunner {
 
   fun withoutHeader() {
     RestAssured.with()
+        .log().all()
         .header(Header("Authorization", Configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(412)
   }
@@ -25,10 +27,12 @@ class CatalogRequestRunner {
     val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
     RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
@@ -37,10 +41,12 @@ class CatalogRequestRunner {
 
   fun correctRequest(): Catalog {
     return RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
@@ -52,9 +58,11 @@ class CatalogRequestRunner {
 
   fun noAuth() {
     RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .get("/v2/catalog")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(401)
   }

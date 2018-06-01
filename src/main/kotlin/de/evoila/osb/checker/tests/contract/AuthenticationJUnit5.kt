@@ -24,6 +24,8 @@ class AuthenticationJUnit5 : TestBase() {
                 { catalogRequestRunner.noAuth() },
                 DynamicTest.dynamicTest("PUT - v2/service_instance/instance_id should reject with 412")
                 { provisionRequestRunner.putNoAuth() },
+                DynamicTest.dynamicTest("DELETE - v2/service_instance/instance_id should reject with 412")
+                { provisionRequestRunner.deleteNoAuth() },
                 DynamicTest.dynamicTest("GET - v2/service_instance/instance_id/last_operation should reject with 412")
                 { provisionRequestRunner.lastOpNoAuth() },
                 DynamicTest.dynamicTest("PUT - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412)")

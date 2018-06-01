@@ -24,6 +24,8 @@ class ContractJUnit5 : TestBase() {
                 { catalogRequestRunner.withoutHeader() },
                 dynamicTest("PUT - v2/service_instance/instance_id should reject with 412")
                 { provisionRequestRunner.putWithoutHeader() },
+                dynamicTest("DELETE - v2/service_instance/instance_id should reject with 412")
+                { provisionRequestRunner.deleteWithoutHeader() },
                 dynamicTest("GET - v2/service_instance/instance_id/last_operation should reject with 412")
                 { provisionRequestRunner.lastOperationWithoutHeader() },
                 dynamicTest("DELETE - v2/service_instance/instance_id?service_id=Invalid&plan_id=Invalid  should reject with 412)")

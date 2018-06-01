@@ -9,7 +9,7 @@ import io.restassured.module.jsv.JsonSchemaValidator
 import org.springframework.stereotype.Service
 
 @Service
-class BindingRequestRunner{
+class BindingRequestRunner {
 
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 

@@ -14,11 +14,11 @@ class AuthenticationJUnit5 : TestBase() {
   lateinit var bindingRequestRunner: BindingRequestRunner
 
   @TestFactory
-  fun testHeaderForAPIVersion(): List<DynamicNode> {
+  fun testAuthentication(): List<DynamicNode> {
     wire()
 
     return listOf(
-        DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version:",
+        DynamicContainer.dynamicContainer("Requests been rejected without authentication:",
             listOf(
                 DynamicTest.dynamicTest("GET - v2/catalog should reject with 412")
                 { catalogRequestRunner.noAuth() },
@@ -28,6 +28,10 @@ class AuthenticationJUnit5 : TestBase() {
                 { provisionRequestRunner.lastOpNoAuth() },
                 DynamicTest.dynamicTest("PUT - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412)")
                 { provisionRequestRunner.putNoAuth() },
+                DynamicTest.dynamicTest("DELETE - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412)")
+                { provisionRequestRunner.deleteNoAuth() },
+                DynamicTest.dynamicTest("PUT - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412")
+                { bindingRequestRunner.putNoAuth() },
                 DynamicTest.dynamicTest("DELETE - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412")
                 { bindingRequestRunner.deleteNoAuth() }
             )

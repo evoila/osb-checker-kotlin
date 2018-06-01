@@ -148,10 +148,10 @@ class ProvisionRequestRunner {
         .statusCode(412)
   }
 
-  fun deleteWithoutHeader(serviceId: String, planId: String) {
+  fun deleteWithoutHeader() {
     RestAssured.with()
         .header(Header("Authorization", Configuration.token))
-        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true&service_id=$serviceId&plan_id=$planId")
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true&service_id=Invalid&plan_id=Invalid")
         .then()
         .assertThat()
         .statusCode(412)

@@ -28,7 +28,7 @@ class ProvisionJUnit5 : TestBase() {
 
             },
             dynamicTest("Sync DELETE request") {
-              val statusCodePut = provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
+              val statusCodePut = provisionRequestRunner.runDeleteProvisionRequestSync(instanceId, provisionRequestBody.service_id, provisionRequestBody.plan_id)
               assertTrue("Should return  201 in case of a sync Service Broker or 422 if it's async but it was $statusCodePut.")
               { statusCodePut in listOf(201, 422) }
             }

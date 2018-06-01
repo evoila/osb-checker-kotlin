@@ -26,9 +26,11 @@ class ContractJUnit5 : TestBase() {
                 { provisionRequestRunner.putWithoutHeader() },
                 dynamicTest("GET - v2/service_instance/instance_id/last_operation should reject with 412")
                 { provisionRequestRunner.lastOperationWithoutHeader() },
+                dynamicTest("DELETE - v2/service_instance/instance_id?service_id=Invalid&plan_id=Invalid  should reject with 412)")
+                { provisionRequestRunner.deleteWithoutHeader() },
                 dynamicTest("PUT - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412)")
-                { provisionRequestRunner.deleteWithoutHeader("Invalid", "Invalid") },
-                dynamicTest("DELETE - v2/service_instance/instance_id/service_binding/binding_id  should reject with 412")
+                { bindingRequestRunner.putWithoutHeader() },
+                dynamicTest("DELETE - v2/service_instance/instance_id/service_binding/binding_id?service_id=Invalid&plan_id=Invalid should reject with 412")
                 { bindingRequestRunner.deleteWithoutHeader() }
             )
         )

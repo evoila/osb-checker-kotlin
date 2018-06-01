@@ -9,8 +9,7 @@ import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspat
 import org.springframework.stereotype.Service
 
 @Service
-class CatalogRequestRunner{
-
+class CatalogRequestRunner {
 
   fun withoutHeader() {
     RestAssured.with()
@@ -23,7 +22,7 @@ class CatalogRequestRunner{
 
   fun correctRequestAndValidateResponse() {
 
-    //val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
+    val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
     RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
@@ -33,7 +32,7 @@ class CatalogRequestRunner{
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
-      //  .body(catalogSchema)
+        .body(catalogSchema)
   }
 
   fun correctRequest(): Catalog {

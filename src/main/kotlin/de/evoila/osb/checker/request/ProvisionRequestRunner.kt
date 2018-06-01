@@ -44,35 +44,6 @@ class ProvisionRequestRunner {
     return response.statusCode()
   }
 
-
-  fun runPatchProvisionRequest(instanceId: String, requestBody: RequestBody, expectedStatusCode: Int) {
-    RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
-        .contentType(ContentType.JSON)
-        .body(requestBody)
-        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
-        .then()
-        .assertThat()
-        .statusCode(expectedStatusCode)
-  }
-
-  fun runGetLastOperation(instanceId: String, expectedStatusCode: Int) {
-    val response = RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/$instanceId/last_operation")
-        .then()
-        .assertThat()
-        .statusCode(expectedStatusCode)
-        .extract()
-
-    if (response.statusCode() == 200) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response.body())
-    }
-  }
-
   fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int): String? {
     val response = RestAssured.with()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))

@@ -15,12 +15,14 @@ class ProvisionRequestRunner {
 
   fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody): Int {
     return RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId")
         .then()
+        .log().all()
         .assertThat()
         .extract()
         .statusCode()
@@ -28,12 +30,14 @@ class ProvisionRequestRunner {
 
   fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody): Int {
     val response = RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
         .then()
+        .log().all()
         .assertThat()
         .extract()
 
@@ -46,11 +50,13 @@ class ProvisionRequestRunner {
 
   fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int): String? {
     val response = RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId/last_operation")
         .then()
+        .log().all()
         .assertThat()
         .extract()
         .response()
@@ -62,7 +68,6 @@ class ProvisionRequestRunner {
 
       val responseBody = response.jsonPath()
           .getObject("", LastOperationResponse::class.java)
-
 
       JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
 
@@ -87,11 +92,13 @@ class ProvisionRequestRunner {
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
+        .log().all()
         .extract()
         .statusCode()
   }
@@ -104,48 +111,58 @@ class ProvisionRequestRunner {
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
+        .log().all()
         .extract()
         .statusCode()
   }
 
   fun putWithoutHeader() {
     RestAssured.with()
+        .log().all()
         .header(Header("Authorization", Configuration.token))
         .put("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(412)
   }
 
   fun deleteWithoutHeader() {
     RestAssured.with()
+        .log().all()
         .header(Header("Authorization", Configuration.token))
         .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true&service_id=Invalid&plan_id=Invalid")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(412)
   }
 
   fun lastOperationWithoutHeader() {
     RestAssured.with()
+        .log().all()
         .header(Header("Authorization", Configuration.token))
         .get("/v2/service_instances/${Configuration.NOT_AN_ID}/last_operation")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(412)
   }
 
   fun putNoAuth() {
     RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
         .put("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(401)
         .extract()
@@ -153,10 +170,12 @@ class ProvisionRequestRunner {
 
   fun deleteNoAuth() {
     RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
         .delete("/v2/service_instances/${Configuration.NOT_AN_ID}?accepts_incomplete=true")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(401)
         .extract()
@@ -164,10 +183,12 @@ class ProvisionRequestRunner {
 
   fun lastOpNoAuth() {
     RestAssured.with()
+        .log().all()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .contentType(ContentType.JSON)
         .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/last_operation")
         .then()
+        .log().all()
         .assertThat()
         .statusCode(401)
         .extract()

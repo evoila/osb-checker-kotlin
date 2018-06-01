@@ -1,5 +1,6 @@
 package de.evoila.osb.checker.config
 
+import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
@@ -12,13 +13,14 @@ class Configuration {
   companion object {
 
     var url: String = "http://localhost"
-    var port: Int = 8080
+    var port: Int = 80
     var apiVersion: String = "2.13"
     var user: String = "admin"
     var password: String = "cloudfoundry"
     var token: String? = null
-    var serviceKeysFlag = false
+    var serviceKeysFlag = true
 
-    const val NOT_AN_ID = "Delete_me_if_i_get_deployed"
+    val NOT_AN_ID = UUID.randomUUID().toString()
+
   }
 }

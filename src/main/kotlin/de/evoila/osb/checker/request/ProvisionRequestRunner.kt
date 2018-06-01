@@ -92,6 +92,9 @@ class ProvisionRequestRunner {
       val responseBody = response.jsonPath()
           .getObject("", LastOperationResponse::class.java)
 
+
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
+
       if (responseBody.state == "in progress") {
         Thread.sleep(10000)
         return waitForFinish(instanceId, expectedFinalStatusCode)

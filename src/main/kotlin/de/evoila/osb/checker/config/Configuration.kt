@@ -4,6 +4,7 @@ object Configuration {
 
   var url: String = "http://localhost"
   var port: Int = 8080
+  var port: Int = 80
   var apiVersion: String = "2.13"
   var user: String = "admin"
   var password: String = "cloudfoundry"

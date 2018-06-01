@@ -34,7 +34,7 @@ class BindingJUnit5 : TestBase() {
         val bindingId = UUID.randomUUID().toString()
 
         val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val binding = if (!Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
         val testContainers = mutableListOf(validProvisionContainer(instanceId, provision))
 

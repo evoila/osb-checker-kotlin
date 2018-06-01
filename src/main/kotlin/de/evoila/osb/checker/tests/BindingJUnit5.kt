@@ -39,7 +39,7 @@ class BindingJUnit5 : TestBase() {
         val provision = ProvisionBody.ValidProvisioning(service, plan)
         val binding = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
-        configuration.customParameters?.let {
+        configuration.parameters.let {
           if (it.containsKey(plan.id)) {
             provision.parameters = it[plan.id]
           }

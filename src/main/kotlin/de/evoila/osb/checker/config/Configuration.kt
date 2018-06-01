@@ -3,16 +3,17 @@ package de.evoila.osb.checker.config
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
+import kotlin.collections.HashMap
 
 @Component
-@ConfigurationProperties("stuff")
+@ConfigurationProperties(prefix = "config")
 class Configuration {
 
-  var customParameters: Map<String, Map<String, Any>>? = null
+  val parameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
 
   companion object {
 
-    var url: String = "http://localhost"
+    var url: String = "http://osb-autoscaler.cf.dev.eu-de-central.msh.host"
     var port: Int = 80
     var apiVersion: String = "2.13"
     var user: String = "admin"

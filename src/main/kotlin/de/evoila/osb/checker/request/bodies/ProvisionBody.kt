@@ -11,7 +11,7 @@ abstract class ProvisionBody : RequestBody {
       var plan_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString(),
-      var parameters: Map<String, String>? = null
+      var parameters: Map<String, Any>? = null
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(

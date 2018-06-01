@@ -8,8 +8,7 @@ class Plan {
   var id: String = ""
   var name: String = ""
   var description: String? = null
-  var vmType: String? = null
-  var persistentDiskType: String? = null
   var plan_updatable = false
   var bindable: Boolean? = null
+  var metadata = PlanMetadata()
 }

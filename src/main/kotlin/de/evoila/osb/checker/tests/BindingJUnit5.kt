@@ -32,9 +32,10 @@ class BindingJUnit5 : TestBase() {
 
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
+        val needsAppGuid = !plan.metadata.customParameters.usesServicesKeys
 
         val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
         val testContainers = mutableListOf(validProvisionContainer(instanceId, provision))
 
@@ -59,8 +60,9 @@ class BindingJUnit5 : TestBase() {
     val catalog = setupCatalog()
     val service = catalog.services.first()
     val plan = service.plans.first()
-
     val bindable = plan.bindable ?: service.bindable
+    val needsAppGuid = !plan.metadata.customParameters.usesServicesKeys
+
 
     if (bindable) {
       return emptyList()
@@ -78,12 +80,11 @@ class BindingJUnit5 : TestBase() {
 
     listOf(
         TestCase(
-            requestBody =
-            if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
+            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
             message = "should reject if missing service_id"
         ),
         TestCase(
-            requestBody = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
+            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
             message = "should reject if missing plan_id"
         )
     ).forEach {

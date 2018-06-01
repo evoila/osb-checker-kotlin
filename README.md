@@ -10,12 +10,6 @@ required:
 * Port: -P/-port
 * API: -a/-api
 
-optional:
-* Service Key flag: -s/-service-key
-
-Signals to the checker that NO app_guid should be used for binding instances.
-
-
 There are five different options to run tests. Possibles commands are:
 
 * catalog: -cat/-catalog

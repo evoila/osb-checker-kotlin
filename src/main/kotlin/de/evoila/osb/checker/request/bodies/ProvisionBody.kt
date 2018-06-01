@@ -9,7 +9,8 @@ abstract class ProvisionBody : RequestBody {
       var service_id: String?,
       var plan_id: String?,
       var organization_guid: String? = "A_Random_Guid",
-      var space_guid: String? = "A_GUID_from_SPACE!!"
+      var space_guid: String? = "A_GUID_from_SPACE!!",
+      var parameters: Map<String, String>? = null
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(

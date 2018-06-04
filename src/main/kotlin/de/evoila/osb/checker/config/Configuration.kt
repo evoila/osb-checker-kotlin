@@ -9,19 +9,16 @@ import kotlin.collections.HashMap
 @ConfigurationProperties(prefix = "config")
 class Configuration {
 
+  lateinit var url: String
+  var port: Int = 80
+  lateinit var apiVersion: String
+  lateinit var user: String
+  lateinit var password: String
+  lateinit var token: String
+  var usingAppGuid: Boolean = true
   val parameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
 
   companion object {
-
-    var url: String = "http://osb-autoscaler.cf.dev.eu-de-central.msh.host"
-    var port: Int = 80
-    var apiVersion: String = "2.13"
-    var user: String = "admin"
-    var password: String = "cloudfoundry"
-    var token: String? = null
-    var serviceKeysFlag = true
-
     val NOT_AN_ID = UUID.randomUUID().toString()
-
   }
 }

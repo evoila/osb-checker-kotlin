@@ -15,7 +15,6 @@ class AuthenticationJUnit5 : TestBase() {
 
   @TestFactory
   fun testAuthentication(): List<DynamicNode> {
-    wire()
 
     return listOf(
         DynamicContainer.dynamicContainer("Requests been rejected without authentication:",

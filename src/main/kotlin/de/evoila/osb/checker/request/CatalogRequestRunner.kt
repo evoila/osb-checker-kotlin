@@ -9,12 +9,14 @@ import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspat
 import org.springframework.stereotype.Service
 
 @Service
-class CatalogRequestRunner {
+class CatalogRequestRunner(
+    val configuration: Configuration
+) {
 
   fun withoutHeader() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -28,8 +30,8 @@ class CatalogRequestRunner {
 
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -42,8 +44,8 @@ class CatalogRequestRunner {
   fun correctRequest(): Catalog {
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -59,7 +61,7 @@ class CatalogRequestRunner {
   fun noAuth() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()

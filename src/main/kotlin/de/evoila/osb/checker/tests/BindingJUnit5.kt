@@ -1,6 +1,5 @@
 package de.evoila.osb.checker.tests
 
-import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
@@ -20,13 +19,10 @@ class BindingJUnit5 : TestBase() {
 
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
-  @Autowired
-  lateinit var configuration: Configuration
 
 
   @TestFactory
   fun runValidBindings(): Stream<DynamicNode> {
-    wire()
     val catalog = catalogRequestRunner.correctRequest()
     val dynamicNodes = mutableListOf<DynamicNode>()
 
@@ -37,7 +33,7 @@ class BindingJUnit5 : TestBase() {
         val bindingId = UUID.randomUUID().toString()
 
         val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val binding = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
         configuration.parameters.let {
           if (it.containsKey(plan.id)) {
@@ -71,7 +67,7 @@ class BindingJUnit5 : TestBase() {
 
     val bindable = plan.bindable ?: service.bindable
 
-    if (bindable) {
+    if (!bindable) {
       return emptyList()
     }
 
@@ -88,11 +84,11 @@ class BindingJUnit5 : TestBase() {
     listOf(
         TestCase(
             requestBody =
-            if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
+            if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
             message = "should reject if missing service_id"
         ),
         TestCase(
-            requestBody = if (Configuration.serviceKeysFlag) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
+            requestBody = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
             message = "should reject if missing plan_id"
         )
     ).forEach {
@@ -103,7 +99,7 @@ class BindingJUnit5 : TestBase() {
       dynamicNodes.add(
           dynamicTest("DELETE ${it.message}")
           {
-            val bindingRequestBody = it.requestBody as BindingBody.ValidBinding
+            val bindingRequestBody = it.requestBody
 
             bindingRequestRunner.runDeleteBindingRequest(
                 serviceId = bindingRequestBody.service_id,

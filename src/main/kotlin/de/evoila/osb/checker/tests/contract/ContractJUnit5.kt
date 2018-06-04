@@ -15,8 +15,6 @@ class ContractJUnit5 : TestBase() {
 
   @TestFactory
   fun testHeaderForAPIVersion(): List<DynamicNode> {
-    wire()
-
     return listOf(
         DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version:",
             listOf(

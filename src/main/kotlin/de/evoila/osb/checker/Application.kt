@@ -1,10 +1,10 @@
 package de.evoila.osb.checker
 
-import de.evoila.osb.checker.config.Configuration
-import de.evoila.osb.checker.tests.*
+import de.evoila.osb.checker.tests.BindingJUnit5
+import de.evoila.osb.checker.tests.CatalogJUnit5
+import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
-import util.ColoredPrintingTestListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -14,6 +14,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import util.ColoredPrintingTestListener
 import java.io.PrintWriter
 
 @SpringBootApplication
@@ -23,51 +24,6 @@ fun main(args: Array<String>) {
 
   val options = Options()
       .apply {
-        addOption(
-            Option.builder("U")
-                .required()
-                .longOpt("url")
-                .hasArg()
-                .desc("the URl of the service broker")
-                .build()
-        )
-        addOption(
-            Option.builder("P")
-                .required()
-                .longOpt("port")
-                .hasArg()
-                .desc("the port on which the service broker is reachable.")
-                .build()
-        )
-        addOption(
-            Option.builder("u")
-                .required()
-                .longOpt("user")
-                .hasArg()
-                .desc("the User for the Service Broker.")
-                .build()
-        )
-        addOption(
-            Option.builder("p")
-                .required()
-                .longOpt("password")
-                .hasArg()
-                .desc("The password tp access the service broker.")
-                .build()
-        )
-        addOption(
-            Option.builder("a")
-                .required()
-                .longOpt("api")
-                .hasArg()
-                .desc("Thr api version of the service broker")
-                .build()
-        )
-        Option.builder("s")
-            .longOpt("service-key")
-            .desc("By setting this flag no app_guid will be used during binding")
-            .build()
-
         addOption(
             Option.builder("cat")
                 .longOpt("catalog")
@@ -101,15 +57,6 @@ fun main(args: Array<String>) {
 
   val parser = DefaultParser()
   val commandLine = parser.parse(options, args)
-
-  Configuration.apply {
-    url = commandLine.getOptionValue("url")
-    port = commandLine.getOptionValue("port").toInt()
-    apiVersion = commandLine.getOptionValue("api")
-    user = commandLine.getOptionValue("user")
-    password = commandLine.getOptionValue("password")
-    serviceKeysFlag = !commandLine.hasOption("s")
-  }
 
   val selectors = mutableListOf<DiscoverySelector>()
 

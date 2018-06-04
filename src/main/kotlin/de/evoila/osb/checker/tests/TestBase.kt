@@ -6,14 +6,14 @@ import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.Catalog
-import io.restassured.RestAssured
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.TestContextManager
-import java.util.*
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @AutoConfigureMockMvc
+@ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [Application::class])
 abstract class TestBase {
 
@@ -21,43 +21,15 @@ abstract class TestBase {
   lateinit var catalogRequestRunner: CatalogRequestRunner
   @Autowired
   lateinit var provisionRequestRunner: ProvisionRequestRunner
-
-
-  final fun cleanUp(usedIds: MutableMap<String, Provision>) {
-    usedIds.forEach {
-      provisionRequestRunner.runDeleteProvisionRequestAsync(
-          it.key, it.value.serviceID, it.value.planId
-      )
-    }
-  }
+  @Autowired
+  lateinit var configuration: Configuration
 
   final fun setupCatalog(): Catalog {
-    wire()
     return catalogRequestRunner.correctRequest()
   }
-
-  final fun wire() {
-
-    val testContextManager = TestContextManager(this.javaClass)
-
-    testContextManager.beforeTestClass()
-    testContextManager.prepareTestInstance(this)
-
-    Configuration.token = "Basic ${Base64.getEncoder().encodeToString("${Configuration.user}:${Configuration.password}".toByteArray())}"
-
-    RestAssured.baseURI = Configuration.url
-    RestAssured.port = Configuration.port
-    RestAssured.authentication = RestAssured.basic("admin", "cloudfoundry")
-  }
-
 }
 
-data class TestCase(
-    val requestBody: RequestBody,
+data class TestCase<out T : RequestBody>(
+    val requestBody: T,
     val message: String
-)
-
-class Provision(
-    val serviceID: String,
-    val planId: String
 )

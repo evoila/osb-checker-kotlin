@@ -7,7 +7,6 @@ class CatalogJUnit5 : TestBase() {
 
   @Test
   fun validateCatalog() {
-    wire()
     catalogRequestRunner.correctRequestAndValidateResponse()
   }
 }

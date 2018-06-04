@@ -14,14 +14,14 @@ class BindingRequestRunner {
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     val response = RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(expectedStatusCode)
         .extract()
@@ -45,51 +45,57 @@ class BindingRequestRunner {
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .header(Header("Authorization", Configuration.token))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(expectedStatusCode)
   }
 
   fun putWithoutHeader() {
     RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("Authorization", Configuration.token))
         .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(412)
   }
 
   fun deleteWithoutHeader() {
     RestAssured.with()
+        .log().ifValidationFails()
         .header(Header("Authorization", Configuration.token))
         .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(412)
   }
 
   fun putNoAuth() {
     RestAssured.with()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .put("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(401)
   }
 
   fun deleteNoAuth() {
     RestAssured.with()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", Configuration.apiVersion))
         .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(401)
   }

@@ -1,4 +1,4 @@
-# osb-checker-kotlin
+## osb-checker-kotlin
 
 This application is a general tests for service brokers. It runs rest calls against the defined service broker and checks if it
 behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
@@ -21,14 +21,25 @@ config:
       plan-id-2-here:
         parameter1 : 2
         parameter2 : bar
+        
+     services:
+       -
+         id: service-id-here
+         plans:
+           -
+             id: plan-id-here
+   
+         bindable: true     
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
-usingAppGuid and parameters are optional.
+usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
-To set parameters for the provision define them in parameters (Default is null).
+#Parameters
+
+To set parameters for the provision, define them in parameters (Default is null).
 
 specify the plan id as key for the parameters
 
@@ -40,7 +51,9 @@ parameters:
         DB-Name: db-name
 ```
 
-would run a provision like  `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+would run a provisions like this:
+
+  `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id-here",
@@ -53,6 +66,78 @@ would run a provision like  `curl http://username:password@broker-url/v2/service
 }
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+#Services
+
+To define a specific set of services and plans for testing define them under services like this:
+
+```yaml
+     services:
+       -
+         id: service-id-here
+         plans:
+           -
+             id: plan-id-here
+           -
+             id: plan-id2-here
+             bindable: false
+         bindable: true     
+       -
+        id: service-id2-here
+        plans:
+          -
+            id: plan-id3-here
+        bindable: false   
+```
+
+this config would run the following PUT calls when running the binding test:
+
+`curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+```json
+{
+  "service_id": "service-id-here",
+  "plan_id": "plan-id-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here"
+}
+```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+`curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?accepts_incomplete=true -d `
+```json
+{
+  "service_id": "service-id-here",
+  "plan_id": "plan-id-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here"
+}
+```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+`curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+```json
+{
+  "service_id": "service-id2-here",
+  "plan_id": "plan-id-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here"
+}
+```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+
+`curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+```json
+{
+  "service_id": "service-id2-here",
+  "plan_id": "plan-id3-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here"
+}
+```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+#Declaring Test Runs
 
 Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
 will run the the provision test.

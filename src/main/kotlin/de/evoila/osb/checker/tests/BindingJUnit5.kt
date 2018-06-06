@@ -1,5 +1,6 @@
 package de.evoila.osb.checker.tests
 
+import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
@@ -23,7 +24,8 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runValidBindings(): Stream<DynamicNode> {
-    val catalog = catalogRequestRunner.correctRequest()
+
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     catalog.services.forEach { service ->
@@ -31,9 +33,10 @@ class BindingJUnit5 : TestBase() {
 
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
+        val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
 
         val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
         configuration.parameters.let {
           if (it.containsKey(plan.id)) {
@@ -61,11 +64,12 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runInvalidBindingAttempts(): List<DynamicNode> {
-    val catalog = setupCatalog()
+
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
-
     val bindable = plan.bindable ?: service.bindable
+    val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
 
     if (!bindable) {
       return emptyList()
@@ -84,11 +88,11 @@ class BindingJUnit5 : TestBase() {
     listOf(
         TestCase(
             requestBody =
-            if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
+            if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
             message = "should reject if missing service_id"
         ),
         TestCase(
-            requestBody = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
+            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
             message = "should reject if missing plan_id"
         )
     ).forEach {

@@ -1,6 +1,5 @@
 package de.evoila.osb.checker.response
 
-class Provider {
-
-  var name = ""
-}
+data class Provider(
+    val name: String
+)

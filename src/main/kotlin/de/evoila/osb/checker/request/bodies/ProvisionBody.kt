@@ -6,7 +6,7 @@ import java.util.*
 
 abstract class ProvisionBody : RequestBody {
 
-  class ValidProvisioning(
+  data class ValidProvisioning(
       var service_id: String?,
       var plan_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
@@ -20,7 +20,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  class NoServiceFieldProvisioning(
+  data class NoServiceFieldProvisioning(
       var service_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString()
@@ -31,7 +31,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  class NoPlanFieldProvisioning(
+  data class NoPlanFieldProvisioning(
       var plan_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString()
@@ -42,7 +42,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  class NoOrgFieldProvisioning(
+  data class NoOrgFieldProvisioning(
       var service_id: String?,
       var plan_id: String?,
       var space_guid: String? = UUID.randomUUID().toString()
@@ -54,7 +54,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  class NoSpaceFieldProvisioning(
+  data class NoSpaceFieldProvisioning(
       var service_id: String?,
       var plan_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString()

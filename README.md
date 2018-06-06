@@ -1,4 +1,4 @@
-## osb-checker-kotlin
+# osb-checker-kotlin
 
 This application is a general tests for service brokers. It runs rest calls against the defined service broker and checks if it
 behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
@@ -37,7 +37,7 @@ usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
-#Parameters
+##Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).
 
@@ -67,7 +67,7 @@ would run a provisions like this:
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
-#Services
+##Declaring Services
 
 To define a specific set of services and plans for testing define them under services like this:
 
@@ -139,7 +139,7 @@ this config would run the following PUT calls when running the binding test:
 
 If no catalog is set the checker will use the catalog the service broker provides by itself.
 
-#Declaring Test Runs
+##Declaring Test Runs
 
 Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
 will run the the provision test.

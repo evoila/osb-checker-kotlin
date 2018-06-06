@@ -13,8 +13,8 @@ data class Service(
     val bindable: Boolean,
     val metadata: ServiceMetadata?,
     @JsonProperty("dashboard_client")
-    val dashbordClient: DashboardClient?,
-    @JsonProperty("plan_updateable")
-    val planUpdateable: Boolean?,
+    val dashboardClient: DashboardClient?,
+    @JsonProperty("plan_updatable")
+    val planUpdatable: Boolean?,
     val plans: List<Plan>
 )

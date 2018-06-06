@@ -1,5 +1,6 @@
 package de.evoila.osb.checker.tests
 
+import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
@@ -23,7 +24,8 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runValidBindings(): Stream<DynamicNode> {
-    val catalog = catalogRequestRunner.correctRequest()
+
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     catalog.services.forEach { service ->
@@ -62,7 +64,8 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runInvalidBindingAttempts(): List<DynamicNode> {
-    val catalog = setupCatalog()
+
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
     val bindable = plan.bindable ?: service.bindable

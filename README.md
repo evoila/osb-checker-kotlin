@@ -5,6 +5,7 @@ behaves as expected to the service broker API specification: https://github.com/
 
 To run the application put a file with the name application.yml into the same folder as the jar file with the following schema
 
+```yaml
 config:
   url: http://localhost
   port : 80
@@ -14,12 +15,13 @@ config:
   usingAppGuid: true
 
   parameters:
-      plan-id-1-here:
+     plan-id-1-here:
         parameter1 : 1
         parameter2 : foo
       plan-id-2-here:
         parameter1 : 2
         parameter2 : bar
+```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
 usingAppGuid and parameters are optional.
@@ -33,19 +35,25 @@ specify the plan id as key for the parameters
 
 example: a configuration with 
 
+```yaml
 parameters:
     plan-id-here:
         DB-Name: db-name
+```
         
 would run a provision like  v2/service_instance/service-instance-guid?accepts_incomplete=true 
+
+```json
 {
   "service_id": "service-id-here",
   "plan_id": "plan-id-here",
   "organization_guid": "org-guid-here",
   "space_guid": "space-guid-here",
   "parameters": {
-    "DB-name": db-name,
+    "DB-name": "db-name"
+    }
 }
+```
 
 Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
 will run the the provision test.

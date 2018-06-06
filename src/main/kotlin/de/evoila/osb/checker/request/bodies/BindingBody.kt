@@ -3,8 +3,8 @@ package de.evoila.osb.checker.request.bodies
 import java.util.*
 
 abstract class BindingBody(
-    var service_id: String?,
-    var plan_id: String?
+    val service_id: String?,
+    val plan_id: String?
 ) : RequestBody {
 
   class ValidBinding(

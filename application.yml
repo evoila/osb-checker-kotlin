@@ -14,3 +14,12 @@ config:
       plan-id-2-here:
         parameter1 : 2
         parameter2 : bar
+
+  services:
+    -
+      id: service-id-here
+      plans:
+        -
+          id: plan-id-here
+          bindable: true
+      bindable: true

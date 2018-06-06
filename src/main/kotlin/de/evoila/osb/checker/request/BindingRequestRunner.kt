@@ -13,7 +13,6 @@ class BindingRequestRunner(
     val configuration: Configuration
 ) {
 
-
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     val response = RestAssured.with()

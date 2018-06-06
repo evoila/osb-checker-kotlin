@@ -26,7 +26,6 @@ config:
 url, port, apiVersion, user and password are mandatory and MUST be set.
 usingAppGuid and parameters are optional.
 
-
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
 To set parameters for the provision define them in parameters (Default is null).
@@ -40,9 +39,8 @@ parameters:
     plan-id-here:
         DB-Name: db-name
 ```
-        
-would run a provision like  v2/service_instance/service-instance-guid?accepts_incomplete=true 
 
+would run a provision like  `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id-here",
@@ -54,6 +52,7 @@ would run a provision like  v2/service_instance/service-instance-guid?accepts_in
     }
 }
 ```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
 Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
 will run the the provision test.

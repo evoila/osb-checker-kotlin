@@ -1,14 +1,55 @@
 # osb-checker-kotlin
 
-Example: `java -jar osb-checker-kotlin-1.0-SNAPSHOT.jar -U https://url.to.the.service.broker -P 443 -u admin -p password -a v2.13 -provision`
+This application is a general tests for service brokers. It runs rest calls against the defined service broker and checks if it
+behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
+
+To run the application put a file with the name application.yml into the same folder as the jar file with the following schema
+
+config:
+  url: http://localhost
+  port : 80
+  apiVersion: 2.13
+  user: admin
+  password: cloudfoundry
+  usingAppGuid: true
+
+  parameters:
+      plan-id-1-here:
+        parameter1 : 1
+        parameter2 : foo
+      plan-id-2-here:
+        parameter1 : 2
+        parameter2 : bar
+
+url, port, apiVersion, user and password are mandatory and MUST be set.
+usingAppGuid and parameters are optional.
+
+
+usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
+
+To set parameters for the provision define them in parameters (Default is null).
+
+specify the plan id as key for the parameters
+
+example: a configuration with 
+
+parameters:
+    plan-id-here:
+        DB-Name: db-name
+        
+would run a provision like  v2/service_instance/service-instance-guid?accepts_incomplete=true 
+{
+  "service_id": "service-id-here",
+  "plan_id": "plan-id-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here",
+  "parameters": {
+    "DB-name": db-name,
+}
+
+Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
 will run the the provision test.
 
-required:
-* User: -u/-user
-* Password: -p/-password
-* URL: -U/-url
-* Port: -P/-port
-* API: -a/-api
 
 There are five different options to run tests. Possibles commands are:
 
@@ -19,7 +60,7 @@ There are five different options to run tests. Possibles commands are:
 * contract: -con/-contract
 
 Catalog
-- will call v2/catalog and check if it returns 200.
+- will call v2/catalog and check if it returns 200 and validate if the catalog follows schema.
 
 Provision
 - Provision will run all v2/instance/instanceId...
@@ -35,4 +76,4 @@ authentication
 -runs a all requests without a valid password and checks if the fails with HttpStatus unauthorized.
 
 contract: 
--runs all requests and checks if they fail with 412 if the X-Broker-API-Version header is missing.
+-runs all requests and checks if they fail with 412 if the X-Broker-API-Version header is missing or does not match the given one.

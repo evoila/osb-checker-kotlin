@@ -1,12 +1,24 @@
 package de.evoila.osb.checker.config
 
-object Configuration {
+import java.util.*
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.stereotype.Component
+import kotlin.collections.HashMap
 
-  var url: String = "http://osb-samba-test.cf.dev.eu-de-central.msh.host"
+@Component
+@ConfigurationProperties(prefix = "config")
+class Configuration {
+
+  lateinit var url: String
   var port: Int = 80
-  var apiVersion: String = "2.13"
-  var user: String = "admin"
-  var password: String = "cloudfoundry"
-  var token: String? = null
-  const val NOT_AN_ID = "Delete_me_if_i_get_deployed"
+  lateinit var apiVersion: String
+  lateinit var user: String
+  lateinit var password: String
+  lateinit var token: String
+  var usingAppGuid: Boolean = true
+  val parameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+
+  companion object {
+    val NOT_AN_ID = UUID.randomUUID().toString()
+  }
 }

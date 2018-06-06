@@ -9,13 +9,17 @@ import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspat
 import org.springframework.stereotype.Service
 
 @Service
-class CatalogRequestRunner {
+class CatalogRequestRunner(
+    val configuration: Configuration
+) {
 
   fun withoutHeader() {
     RestAssured.with()
-        .header(Header("Authorization", Configuration.token))
+        .log().ifValidationFails()
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(412)
   }
@@ -25,10 +29,12 @@ class CatalogRequestRunner {
     val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
 
     RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
@@ -37,10 +43,12 @@ class CatalogRequestRunner {
 
   fun correctRequest(): Catalog {
     return RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
-        .header(Header("Authorization", Configuration.token))
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.token))
         .get("/v2/catalog")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(200)
         .contentType(ContentType.JSON)
@@ -52,9 +60,11 @@ class CatalogRequestRunner {
 
   fun noAuth() {
     RestAssured.with()
-        .header(Header("X-Broker-API-Version", Configuration.apiVersion))
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .get("/v2/catalog")
         .then()
+        .log().ifValidationFails()
         .assertThat()
         .statusCode(401)
   }

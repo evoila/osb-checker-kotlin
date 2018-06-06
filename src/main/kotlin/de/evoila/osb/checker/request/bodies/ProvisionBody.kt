@@ -2,15 +2,16 @@ package de.evoila.osb.checker.request.bodies
 
 import de.evoila.osb.checker.response.Plan
 import de.evoila.osb.checker.response.Service
+import java.util.*
 
 abstract class ProvisionBody : RequestBody {
 
   class ValidProvisioning(
       var service_id: String?,
       var plan_id: String?,
-      var organization_guid: String? = "A_Random_Guid",
-      var space_guid: String? = "A_GUID_from_SPACE!!",
-      var parameters: Map<String, String>? = null
+      var organization_guid: String? = UUID.randomUUID().toString(),
+      var space_guid: String? = UUID.randomUUID().toString(),
+      var parameters: Map<String, Any>? = null
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(
@@ -21,8 +22,8 @@ abstract class ProvisionBody : RequestBody {
 
   class NoServiceFieldProvisioning(
       var service_id: String?,
-      var organization_guid: String? = "A_Random_Guid",
-      var space_guid: String? = "A_GUID_from_SPACE!!"
+      var organization_guid: String? = UUID.randomUUID().toString(),
+      var space_guid: String? = UUID.randomUUID().toString()
   ) : ProvisionBody() {
 
     constructor(service: Service) : this(
@@ -32,8 +33,8 @@ abstract class ProvisionBody : RequestBody {
 
   class NoPlanFieldProvisioning(
       var plan_id: String?,
-      var organization_guid: String? = "A_Random_Guid",
-      var space_guid: String? = "A_GUID_from_SPACE!!"
+      var organization_guid: String? = UUID.randomUUID().toString(),
+      var space_guid: String? = UUID.randomUUID().toString()
   ) : ProvisionBody() {
 
     constructor(plan: Plan) : this(
@@ -44,7 +45,7 @@ abstract class ProvisionBody : RequestBody {
   class NoOrgFieldProvisioning(
       var service_id: String?,
       var plan_id: String?,
-      var space_guid: String? = "A_GUID_from_SPACE!!"
+      var space_guid: String? = UUID.randomUUID().toString()
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(
@@ -56,7 +57,7 @@ abstract class ProvisionBody : RequestBody {
   class NoSpaceFieldProvisioning(
       var service_id: String?,
       var plan_id: String?,
-      var organization_guid: String? = "A_Random_Guid"
+      var organization_guid: String? = UUID.randomUUID().toString()
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(

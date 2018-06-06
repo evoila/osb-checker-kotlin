@@ -1,9 +1,11 @@
 package de.evoila.osb.checker.tests
 
 import de.evoila.osb.checker.request.bodies.ProvisionBody
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
+import org.junit.jupiter.api.DynamicNode
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestFactory
 import java.util.*
 import kotlin.test.assertTrue
 
@@ -140,7 +142,7 @@ class ProvisionJUnit5 : TestBase() {
     ).forEach {
       dynamicNodes.add(dynamicTest("DELETE ${it.message}")
       {
-        val provisionBody = it.requestBody as ProvisionBody.ValidProvisioning
+        val provisionBody = it.requestBody
 
         val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
             serviceId = provisionBody.service_id,

@@ -137,6 +137,8 @@ this config would run the following PUT calls when running the binding test:
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
+If no catalog is set the checker will use the catalog the service broker provides by itself.
+
 #Declaring Test Runs
 
 Example: `java -jar osb-checker-kotlin-1.0.jar -provision`

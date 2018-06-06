@@ -31,10 +31,10 @@ class BindingJUnit5 : TestBase() {
 
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
-        val needsAppGuid = !plan.metadata.customParameters.usesServicesKeys
+        val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
 
         val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
         configuration.parameters.let {
           if (it.containsKey(plan.id)) {
@@ -66,7 +66,7 @@ class BindingJUnit5 : TestBase() {
     val service = catalog.services.first()
     val plan = service.plans.first()
     val bindable = plan.bindable ?: service.bindable
-    val needsAppGuid = !plan.metadata.customParameters.usesServicesKeys
+    val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
 
     if (!bindable) {
       return emptyList()
@@ -85,11 +85,11 @@ class BindingJUnit5 : TestBase() {
     listOf(
         TestCase(
             requestBody =
-            if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
+            if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
             message = "should reject if missing service_id"
         ),
         TestCase(
-            requestBody = if (configuration.usingAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
+            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
             message = "should reject if missing plan_id"
         )
     ).forEach {

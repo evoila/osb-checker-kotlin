@@ -5,7 +5,7 @@ import de.evoila.osb.checker.tests.CatalogJUnit5
 import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
-import de.evoila.osb.checker.util.MyTreePrintingListeiner
+import de.evoila.osb.checker.util.MyTreePrintingListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -13,25 +13,15 @@ import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
-import org.junit.platform.launcher.listeners.LoggingListener
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
-import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import util.ColoredPrintingTestListener
 import java.io.PrintWriter
-import java.util.logging.Level
 
 @SpringBootApplication
-class Application {
-
-  companion object {
-    val log = LoggerFactory.getLogger(Application::class.java)
-  }
-}
+class Application
 
 fun main(args: Array<String>) {
 
-/*
   val options = Options()
       .apply {
         addOption(
@@ -65,7 +55,6 @@ fun main(args: Array<String>) {
         )
       }
 
-
   val parser = DefaultParser()
   val commandLine = parser.parse(options, args)
 
@@ -90,23 +79,15 @@ fun main(args: Array<String>) {
   if (commandLine.hasOption("contract")) {
     selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
   }
-  */
 
-  val selectors = mutableListOf<DiscoverySelector>()
-  selectors.add(DiscoverySelectors.selectClass(BindingJUnit5::class.java))
-
-
-  val l = ColoredPrintingTestListener()
   val r = SummaryGeneratingListener()
   val launcher = LauncherFactory.create()
-  val tree = MyTreePrintingListeiner()
+  val tree = MyTreePrintingListener()
 
   launcher.registerTestExecutionListeners(tree, r)
 
   val request = LauncherDiscoveryRequestBuilder.request()
-      .selectors(
-          selectors
-      )
+      .selectors(selectors)
       .build()
 
   launcher.execute(request)

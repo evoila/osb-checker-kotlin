@@ -53,10 +53,12 @@ class MyTreePrinter(
     out.print(prefix)
     out.print(" ")
     out.print(caption)
+
     if (node.duration > 10000 && node.children.isEmpty()) {
       out.print(" ")
       out.print(duration)
     }
+
     out.print(" ")
     out.print(icon)
     node.result?.let { result -> printThrowable(tabbed, result) }

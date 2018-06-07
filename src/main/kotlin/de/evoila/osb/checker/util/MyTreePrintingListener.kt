@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.util
 
 import com.google.common.collect.Queues
+
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.launcher.TestExecutionListener
@@ -8,7 +9,7 @@ import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.io.PrintWriter
 
-class MyTreePrintingListeiner : TestExecutionListener {
+class MyTreePrintingListener : TestExecutionListener {
 
   private val stack = Queues.newArrayDeque<TreeNode>()
 
@@ -17,26 +18,15 @@ class MyTreePrintingListeiner : TestExecutionListener {
       theme = Theme.UNICODE
   )
 
-  override fun executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
-
-    if (stack.isNotEmpty()) {
-      stack.pop().setResult(testExecutionResult)
-    }
-  }
-
-  override fun reportingEntryPublished(testIdentifier: TestIdentifier, entry: ReportEntry) {
-    stack.peek().addReportEntry(entry)
+  override fun testPlanExecutionStarted(testPlan: TestPlan) {
+    stack.push(TreeNode(testPlan.toString()))
   }
 
   override fun testPlanExecutionFinished(testPlan: TestPlan) {
-
+    println()
     if (stack.isNotEmpty()) {
       treePrinter.print(stack.pop())
     }
-  }
-
-  override fun executionSkipped(testIdentifier: TestIdentifier, reason: String) {
-    stack.peek().addChild(TreeNode(testIdentifier, reason))
   }
 
   override fun executionStarted(testIdentifier: TestIdentifier) {
@@ -45,16 +35,23 @@ class MyTreePrintingListeiner : TestExecutionListener {
     stack.push(treeNode)
   }
 
-  override fun testPlanExecutionStarted(testPlan: TestPlan) {
+  override fun executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
+    print(".")
+
     if (stack.isNotEmpty()) {
-      treePrinter.print(stack.pop())
+      stack.pop().setResult(testExecutionResult)
     }
   }
 
+  override fun executionSkipped(testIdentifier: TestIdentifier, reason: String) {
+    stack.peek().addChild(TreeNode(testIdentifier, reason))
+  }
+
+  override fun reportingEntryPublished(testIdentifier: TestIdentifier, entry: ReportEntry) {
+    stack.peek().addReportEntry(entry)
+  }
+
   override fun dynamicTestRegistered(testIdentifier: TestIdentifier) {
-    val treeNode = TreeNode(testIdentifier)
-    stack.peek()?.addChild(treeNode)
-    stack.push(treeNode)
 
   }
 }

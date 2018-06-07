@@ -6,15 +6,20 @@ import org.junit.platform.launcher.TestIdentifier
 import java.util.*
 
 class TreeNode(val caption: String,
-                         val creation: Long = System.currentTimeMillis(),
-                        var duration: Long = 0,
-                         val reason: String? = null,
-                         val identifier: TestIdentifier? = null,
-                         var result: TestExecutionResult? = null,
-                        var reports: MutableList<ReportEntry> = mutableListOf(),
-                        var children: MutableList<TreeNode> = mutableListOf(),
-                        var visible: Boolean
+               val creation: Long = System.currentTimeMillis(),
+               var duration: Long = 0,
+               val reason: String? = null,
+               val identifier: TestIdentifier? = null,
+               var result: TestExecutionResult? = null,
+               var reports: MutableList<ReportEntry> = mutableListOf(),
+               var children: MutableList<TreeNode> = mutableListOf(),
+               var visible: Boolean
 ) {
+
+  constructor(caption: String) : this(
+      caption = caption,
+      visible = false
+  )
 
 
   constructor(testIdentifier: TestIdentifier) : this(
@@ -34,14 +39,12 @@ class TreeNode(val caption: String,
     if (children === Collections.EMPTY_LIST) {
       children = ArrayList()
     }
+
     children.add(node)
     return this
   }
 
   fun addReportEntry(reportEntry: ReportEntry): TreeNode {
-    if (reports === Collections.EMPTY_LIST) {
-      reports = ArrayList()
-    }
     reports.add(reportEntry)
     return this
   }

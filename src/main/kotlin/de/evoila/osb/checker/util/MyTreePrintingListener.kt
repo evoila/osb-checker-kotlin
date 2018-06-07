@@ -23,7 +23,6 @@ class MyTreePrintingListener : TestExecutionListener {
   }
 
   override fun testPlanExecutionFinished(testPlan: TestPlan) {
-    println("]")
     if (stack.isNotEmpty()) {
       treePrinter.print(stack.pop())
     }
@@ -36,12 +35,6 @@ class MyTreePrintingListener : TestExecutionListener {
   }
 
   override fun executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
-    if (first) {
-      print("Progress: [=")
-      first = false
-    } else {
-      print("=")
-    }
 
     if (stack.isNotEmpty()) {
       stack.pop().setResult(testExecutionResult)
@@ -59,9 +52,5 @@ class MyTreePrintingListener : TestExecutionListener {
 
   override fun dynamicTestRegistered(testIdentifier: TestIdentifier) {
 
-  }
-
-  companion object {
-    var first = true
   }
 }

@@ -178,7 +178,6 @@ A Binding Test Out put with one depolyed service service. each "=" in the progre
 
 
 ```cmd
-Progress: [===================]
 ╷
 └─ JUnit Jupiter ✔
    └─ BindingJUnit5 ✔

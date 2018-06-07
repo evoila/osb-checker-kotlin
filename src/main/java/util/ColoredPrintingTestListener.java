@@ -6,23 +6,32 @@ import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
+import java.io.PrintWriter;
+import java.util.Map;
+
+import static java.text.MessageFormat.format;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static util.ColoredPrintingTestListener.Color.*;
 
 public class ColoredPrintingTestListener implements TestExecutionListener {
 
+
+    private final PrintWriter out = new PrintWriter(System.out);
 
     public ColoredPrintingTestListener() {
     }
 
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        System.out.printf("Test execution started. Number of static tests: %d%n",
+        out.printf("Test execution started. Number of static tests: %d%n",
                 testPlan.countTestIdentifiers(TestIdentifier::isTest));
+        out.flush();
     }
 
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
-        System.out.println("Test execution finished.");
+        out.println("Test execution finished.");
+        out.flush();
     }
 
     @Override
@@ -51,8 +60,18 @@ public class ColoredPrintingTestListener implements TestExecutionListener {
     @Override
     public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
         printlnTestDescriptor(PURPLE, "Reported:", testIdentifier);
-        // entry.appendDescription(stringBuilder, "");
-        printlnMessage(PURPLE, "Reported values", "");
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+
+        stringBuilder.append(format("Report Entry{0} (creation timestamp: {1})\n", "",
+                ISO_LOCAL_DATE_TIME.format(entry.getTimestamp())));
+        for (Map.Entry<String, String> mapEntry : entry.getKeyValuePairs().entrySet()) {
+            stringBuilder.append(format("\t- {0}: {1}\n", mapEntry.getKey(), mapEntry.getValue()));
+        }
+
+
+        printlnMessage(PURPLE, "Reported values", stringBuilder.toString());
     }
 
     private Color determineColor(TestExecutionResult.Status status) {
@@ -87,7 +106,8 @@ public class ColoredPrintingTestListener implements TestExecutionListener {
     private void println(Color color, String message) {
 
         // Use string concatenation to avoid ANSI disruption on console
-        System.out.println(color + message + NONE);
+        out.println(color + message + NONE);
+        out.flush();
     }
 
     enum Color {

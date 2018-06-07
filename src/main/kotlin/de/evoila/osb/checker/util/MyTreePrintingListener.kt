@@ -37,7 +37,7 @@ class MyTreePrintingListener : TestExecutionListener {
 
   override fun executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
     if (first) {
-      print("[")
+      print("Progress: [=")
       first = false
     } else {
       print("=")

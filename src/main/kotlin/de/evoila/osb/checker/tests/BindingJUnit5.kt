@@ -1,6 +1,6 @@
 package de.evoila.osb.checker.tests
 
-import de.evoila.osb.checker.config.Configuration
+
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
-import java.util.stream.Stream
 import kotlin.test.assertTrue
 
 class BindingJUnit5 : TestBase() {
@@ -23,7 +22,7 @@ class BindingJUnit5 : TestBase() {
 
 
   @TestFactory
-  fun runValidBindings(): Stream<DynamicNode> {
+  fun runValidBindings(): List<DynamicNode> {
 
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val dynamicNodes = mutableListOf<DynamicNode>()
@@ -59,7 +58,7 @@ class BindingJUnit5 : TestBase() {
         )
       }
     }
-    return dynamicNodes.parallelStream()
+    return dynamicNodes
   }
 
   @TestFactory

@@ -5,6 +5,7 @@ import de.evoila.osb.checker.tests.CatalogJUnit5
 import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
+import de.evoila.osb.checker.util.MyTreePrintingListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -14,7 +15,6 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import util.ColoredPrintingTestListener
 import java.io.PrintWriter
 
 @SpringBootApplication
@@ -80,16 +80,14 @@ fun main(args: Array<String>) {
     selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
   }
 
-  val l = ColoredPrintingTestListener()
   val r = SummaryGeneratingListener()
   val launcher = LauncherFactory.create()
+  val tree = MyTreePrintingListener()
 
-  launcher.registerTestExecutionListeners(l, r)
+  launcher.registerTestExecutionListeners(tree, r)
 
   val request = LauncherDiscoveryRequestBuilder.request()
-      .selectors(
-          selectors
-      )
+      .selectors(selectors)
       .build()
 
   launcher.execute(request)

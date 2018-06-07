@@ -171,3 +171,47 @@ authentication
 
 contract: 
 -runs all requests and checks if they fail with 412 if the X-Broker-API-Version header is missing or does not match the given one.
+
+##Example output
+
+A Binding Test Out put with one depolyed service service. each "=" in the progressbar stands for one test.
+
+
+```cmd
+Progress: [===================]
+╷
+└─ JUnit Jupiter ✔
+   └─ BindingJUnit5 ✔
+      ├─ runInvalidBindingAttempts() ✔
+      │  ├─ Provision and in case of a Async SB polling, for later binding ✔
+      │  │  └─ Running Valid Provision with InstanceId d78baaef-d602-4222-b9f5-c0dd74198560 ✔
+      │  ├─ PUT should reject if missing service_id ✔
+      │  ├─ DELETE should reject if missing service_id ✔
+      │  ├─ PUT should reject if missing plan_id ✔
+      │  ├─ DELETE should reject if missing plan_id ✔
+      │  └─ Deleting Provision and Polling afterwards ✔
+      │     └─ deleting Provision ✔
+      └─ runValidBindings() ✔
+         └─ Running a valid provision with instanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 and if it is bindable a valid binding with bindingId 77fc6c32-b23a-4577-b24e-8f3347eb21c7 ✔
+            ├─ Provision and in case of a Async SB polling, for later binding ✔
+            │  └─ Running Valid Provision with InstanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 ✔
+            ├─ Running PUT Binding and DELETE Binding afterwards ✔
+            │  ├─ PUT Binding ✔
+            │  └─ DELETE Binding ✔
+            └─ Deleting Provision and Polling afterwards ✔
+               └─ deleting Provision ✔
+
+Test run finished after 12060 ms
+[        10 containers found      ]
+[         0 containers skipped    ]
+[        10 containers started    ]
+[         0 containers aborted    ]
+[        10 containers successful ]
+[         0 containers failed     ]
+[        10 tests found           ]
+[         0 tests skipped         ]
+[        10 tests started         ]
+[         0 tests aborted         ]
+[        10 tests successful      ]
+[         0 tests failed          ]
+```

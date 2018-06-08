@@ -174,8 +174,6 @@ contract:
 
 ##Example output
 
-A Binding Test Out put with one depolyed service service. each "=" in the progressbar stands for one test.
-
 ```sh
 ╷
 └─ JUnit Jupiter ✔

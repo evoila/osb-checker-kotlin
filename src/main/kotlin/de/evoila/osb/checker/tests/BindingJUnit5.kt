@@ -153,7 +153,7 @@ class BindingJUnit5 : TestBase() {
 
   private fun validProvisionContainer(instanceId: String, provision: ProvisionBody.ValidProvisioning): DynamicContainer {
     return dynamicContainer("Provision and in case of a async service broker polling, for later binding", listOf(
-        dynamicTest("Running Valid PUT provision with instanceId $instanceId") {
+        dynamicTest("Running valid PUT provision with instanceId $instanceId") {
           val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
           assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
 

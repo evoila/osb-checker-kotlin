@@ -19,7 +19,7 @@ class ContractJUnit5 : TestBase() {
   @TestFactory
   fun testHeaderForAPIVersion(): List<DynamicNode> {
     return listOf(
-        DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version:",
+        DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version",
             listOf(
                 dynamicTest("GET - v2/catalog should reject with 412")
                 { catalogRequestRunner.withoutHeader() },

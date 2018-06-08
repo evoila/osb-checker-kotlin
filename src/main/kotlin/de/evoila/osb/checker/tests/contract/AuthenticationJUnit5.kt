@@ -20,7 +20,7 @@ class AuthenticationJUnit5 : TestBase() {
   fun testAuthentication(): List<DynamicNode> {
 
     return listOf(
-        DynamicContainer.dynamicContainer("Requests been rejected without authentication:",
+        DynamicContainer.dynamicContainer("Requests without authentication should be rejected",
             listOf(
                 DynamicTest.dynamicTest("GET - v2/catalog should reject with 412")
                 { catalogRequestRunner.noAuth() },

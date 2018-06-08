@@ -128,7 +128,7 @@ class BindingJUnit5 : TestBase() {
   }
 
   private fun validDeleteProvisionContainer(instanceId: String, service: Service, plan: Plan): DynamicContainer {
-    return dynamicContainer("Deleting Provision",
+    return dynamicContainer("Deleting provision",
         listOf(
             dynamicTest("DELETE provision and if the service broker is async polling afterwards") {
               val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
@@ -141,8 +141,8 @@ class BindingJUnit5 : TestBase() {
   }
 
   private fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicContainer {
-    return dynamicContainer("Running PUT Binding and DELETE Binding afterwards", listOf(
-        dynamicTest("Running a valid binding with BindingId $bindingId") {
+    return dynamicContainer("Running PUT binding and DELETE binding afterwards", listOf(
+        dynamicTest("Running a valid binding with bindingId $bindingId") {
           bindingRequestRunner.runPutBindingRequest(binding, 201, instanceId, bindingId)
         },
         dynamicTest("Deleting binding with bindingId $bindingId") {

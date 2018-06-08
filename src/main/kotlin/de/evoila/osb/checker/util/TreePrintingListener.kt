@@ -9,7 +9,7 @@ import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
 import java.io.PrintWriter
 
-class MyTreePrintingListener : TestExecutionListener {
+class TreePrintingListener : TestExecutionListener {
 
   private val stack = Queues.newArrayDeque<TreeNode>()
 
@@ -46,7 +46,6 @@ class MyTreePrintingListener : TestExecutionListener {
   }
 
   override fun reportingEntryPublished(testIdentifier: TestIdentifier, entry: ReportEntry) {
-    print(".")
     stack.peek().addReportEntry(entry)
   }
 

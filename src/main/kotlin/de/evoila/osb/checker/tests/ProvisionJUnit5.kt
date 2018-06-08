@@ -1,20 +1,25 @@
 package de.evoila.osb.checker.tests
 
+import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 import kotlin.test.assertTrue
 
 class ProvisionJUnit5 : TestBase() {
 
+  @Autowired
+  lateinit var provisionRequestRunner: ProvisionRequestRunner
+
   @TestFactory
   fun runSyncTest(): List<DynamicNode> {
 
-    val catalog = configuration.initCustomCatalog() ?: setupCatalog()
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val instanceId = UUID.randomUUID().toString()
     val service = catalog.services.first()
     val plan = service.plans.first()
@@ -42,7 +47,7 @@ class ProvisionJUnit5 : TestBase() {
   @TestFactory
   fun runInvalidAsyncPutTest(): List<DynamicNode> {
 
-    val catalog = configuration.initCustomCatalog() ?: setupCatalog()
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
     val instanceId = UUID.randomUUID().toString()
@@ -102,7 +107,7 @@ class ProvisionJUnit5 : TestBase() {
         )
     ).forEach {
       dynamicNodes.add(
-          DynamicTest.dynamicTest("PUT + ${it.message}") {
+          DynamicTest.dynamicTest("PUT ${it.message}") {
             val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
             assertTrue("Expected status code is 400 but was $statusCode") {
               400 == statusCode
@@ -117,7 +122,7 @@ class ProvisionJUnit5 : TestBase() {
   @TestFactory
   fun runInvalidAsyncDeleteTest(): List<DynamicNode> {
 
-    val catalog = configuration.initCustomCatalog() ?: setupCatalog()
+    val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
     val instanceId = UUID.randomUUID().toString()
@@ -149,7 +154,7 @@ class ProvisionJUnit5 : TestBase() {
             planId = provisionBody.plan_id,
             instanceId = instanceId
         )
-        assertTrue("Should decline a Invalid DELETE Request with 400 but was $statusCode") { statusCode == 400 }
+        assertTrue("Should decline a invalid DELETE request with 400 but was $statusCode") { statusCode == 400 }
       }
       )
     }

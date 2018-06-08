@@ -1,7 +1,7 @@
 # osb-checker-kotlin
 
 This application is a general tests for service brokers. It runs rest calls against the defined service broker and checks if it
-behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
+behaves as expected to the service broker API specification: [link](https://github.com/openservicebrokerapi/servicebroker)
 
 To run the application put a file with the name application.yml into the same folder as the jar file with the following schema
 
@@ -176,36 +176,36 @@ contract:
 
 A Binding Test Out put with one depolyed service service. each "=" in the progressbar stands for one test.
 
-
-```cmd
+```sh
 ╷
 └─ JUnit Jupiter ✔
    └─ BindingJUnit5 ✔
       ├─ runInvalidBindingAttempts() ✔
-      │  ├─ Provision and in case of a Async SB polling, for later binding ✔
-      │  │  └─ Running Valid Provision with InstanceId d78baaef-d602-4222-b9f5-c0dd74198560 ✔
-      │  ├─ PUT should reject if missing service_id ✔
-      │  ├─ DELETE should reject if missing service_id ✔
-      │  ├─ PUT should reject if missing plan_id ✔
-      │  ├─ DELETE should reject if missing plan_id ✔
-      │  └─ Deleting Provision and Polling afterwards ✔
-      │     └─ deleting Provision ✔
+      │  ├─ Provision and in case of a async service broker polling, for later binding ✔
+      │  │  └─ Running Valid PUT provision with instanceId feaf198a-ec45-4c5b-a35b-77bd4b9c6f95 ✔
+      │  ├─ Running invalid bindings ✔
+      │  │  ├─ PUT should reject if missing service_id ✔
+      │  │  ├─ DELETE should reject if missing service_id ✔
+      │  │  ├─ PUT should reject if missing plan_id ✔
+      │  │  └─ DELETE should reject if missing plan_id ✔
+      │  └─ Deleting Provision ✔
+      │     └─ DELETE provision and if the service broker is async polling afterwards ✔
       └─ runValidBindings() ✔
-         └─ Running a valid provision with instanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 and if it is bindable a valid binding with bindingId 77fc6c32-b23a-4577-b24e-8f3347eb21c7 ✔
-            ├─ Provision and in case of a Async SB polling, for later binding ✔
-            │  └─ Running Valid Provision with InstanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 ✔
+         └─ Running a valid provision if the service is bindable a valid binding. Deleting both afterwards. ✔
+            ├─ Provision and in case of a async service broker polling, for later binding ✔
+            │  └─ Running Valid PUT provision with instanceId b4206514-2915-4fea-b140-63d942aeb25e ✔
             ├─ Running PUT Binding and DELETE Binding afterwards ✔
-            │  ├─ PUT Binding ✔
-            │  └─ DELETE Binding ✔
-            └─ Deleting Provision and Polling afterwards ✔
-               └─ deleting Provision ✔
+            │  ├─ Running a valid binding with BindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60778 ms ✔
+            │  └─ Deleting binding with bindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60197 ms ✔
+            └─ Deleting Provision ✔
+               └─ DELETE provision and if the service broker is async polling afterwards ✔
 
-Test run finished after 12060 ms
-[        10 containers found      ]
+Test run finished after 129414 ms
+[        11 containers found      ]
 [         0 containers skipped    ]
-[        10 containers started    ]
+[        11 containers started    ]
 [         0 containers aborted    ]
-[        10 containers successful ]
+[        11 containers successful ]
 [         0 containers failed     ]
 [        10 tests found           ]
 [         0 tests skipped         ]
@@ -213,4 +213,5 @@ Test run finished after 12060 ms
 [         0 tests aborted         ]
 [        10 tests successful      ]
 [         0 tests failed          ]
+
 ```

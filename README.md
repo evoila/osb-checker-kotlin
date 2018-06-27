@@ -16,15 +16,15 @@
     - [Example output](#Example output)
 
 
-##Description
+###Description
 
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
-behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
+behaves as expected to the [service broker API specification](link=https://github.com/openservicebrokerapi/servicebroker)  
 Tests are created dynamically based upon the service broker catalog or custom input by the operator.
 
-##Usage
+###Usage
 
-###Configuration
+####Configuration
 
 To run the application put a file with the name .yml file into the same location as the osb-checker-kotlin-1.0.jar file with the following schema
 
@@ -63,8 +63,7 @@ usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
-<a name="parameters"></a>
-###Parameters
+####Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).
 specify the plan id as key for the parameters
@@ -101,8 +100,7 @@ would run a provisions like this:
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
-<a name="declaringservices"></a>
-###Declaring Services
+####Declaring Services
 
 To define a specific set of services and plans for testing define them under services like this:
 
@@ -122,7 +120,7 @@ To define a specific set of services and plans for testing define them under ser
 
 this config would run the following provisions and bindings when running the binding test:
 
-1. `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id-here",
@@ -133,7 +131,7 @@ this config would run the following provisions and bindings when running the bin
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
-2. `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?accepts_incomplete=true -d `
+- `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id-here",
@@ -144,7 +142,7 @@ this config would run the following provisions and bindings when running the bin
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
-3. `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id2-here",
@@ -156,7 +154,7 @@ this config would run the following provisions and bindings when running the bin
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
 
-4. `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
   "service_id": "service-id2-here",
@@ -169,7 +167,7 @@ this config would run the following provisions and bindings when running the bin
 
 If no catalog is set the checker will use the catalog the service broker provides by itself.
 
-###Declaring Test Runs
+####Declaring Test Runs
 
 There are five different options to run tests. Possibles commands are:
 
@@ -188,19 +186,18 @@ Some Tests need certain endpoints to work as defined in the osb specification.
 For example: The binding test can only run if the provisioning and catalog endpoint work.
 It is recommended to use the checker accordingly the ease up debugging of the service broker.
 
-<a name="catalog"></a>
 ####Catalog
 
 when starting the application with the parameter -cat/-catalog, it will:
-1. call `curl http://username:password@broker-url/v2/catalog -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-2. check if the service broker returns 200 and validate if the catalog from the response follows schema.
+- call `curl http://username:password@broker-url/v2/catalog -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+- check if the service broker returns 200 and validate if the catalog from the response follows schema.
 
-See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management for more information about service broker catalogs.
+Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management), for more information about service broker catalogs.
 
 ####Provision
 
-1. Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
-2. For each plan_id defined in the catalog the application will call:
+- Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
+- For each plan_id defined in the catalog the application will call:
   `curl http://username:password@broker-url/v2/service_instances/:instance_id -d `
 ```json
 {
@@ -211,19 +208,20 @@ See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#cat
 }
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-3. validate that the service broker returns 201 in case of a sync service broker or 422 in case of a async service broker.
-4. Now it calls `curl http://username:password@broker-url/v2/service_instances/:instance_id?service_id=service-id-here&plan_id=plan-id-here -d  DELETE -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"` 
+- validate that the service broker returns 201 in case of a sync service broker or 422 in case of a async service broker.
+- Now it calls `curl http://username:password@broker-url/v2/service_instances/:instance_id?service_id=service-id-here&plan_id=plan-id-here -d  DELETE -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"` 
  and validate if the service broker returns 200 in case of a sync service broker or 422 in case of a async service broker.
-5. validates the broker returns 400 when being given faulty provision requests.
+- validates the broker returns 400 when being given faulty provision requests.
 
 - Note: This test can only run successfully if the Service Broker returns a valid catalog or a correct custom catalog has been set im the .yml file.
 
-See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#provisioning and https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#deprovisioning  for more information.
+Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#provisioning) (provisioning)
+and [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#deprovisioning) (deprovisioning) for more information.
 
 ####Binding
 
-1. Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
-2. For each plan_id defined in the catalog the application will call:
+- Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
+- For each plan_id defined in the catalog the application will call:
   `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
 ```json
 {
@@ -233,28 +231,35 @@ See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#pro
   "space_guid": "space-guid-here"
 }
 ```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-and validate if it returns 200 or 202 and that the response body matches the specification.
-3. in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"` and validate if it returns 200 or 202 and that the response body matches the specification.
+
+- in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
 unit the service broker returns 200 and that the response body matches the specification. Note: Depending on the service broker this may take a while.
-4. If a provision has finished and the service is bindable the test continues the following 2 calls:
-5. `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '`
-```json
-{
+
+- If a provision has finished and the service is bindable the test continues with the 2 following calls:
+
+    - `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '`
+    ```json
+    {
   "service_id": "service-id-here",
   "plan_id": "plan-id-here",
   "bind_resource": {
     "app_guid": "app-guid-here"
-  }
-}
-```
-`' -X PUT -H "X-Broker-API-Version: api-version-here"` and validate if it returns 201 and that the response body matches the specification. 
-6. `curl 'http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
-and validate if the service broker returns 200.
-7. The provisioned service will now be deleted by calling `curl 'http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true&service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+     }
+    }
+    ```
+    `' -X PUT -H "X-Broker-API-Version: api-version-here"` and validate if it returns 201 and that the response body matches the specification. 
+    - `curl 'http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+    and validate if the service broker returns 200.
+
+- The provisioned service will now be deleted by calling `curl 'http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true&service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
 The test checks if the response is 200 or 202.
-3. in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+
+- in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
 unit the service broker returns 410. Note: Depending on the service broker this may take a while.
+
+Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#binding) for more information about binding and unbinding.
+
 
 ####Authentication
 
@@ -262,12 +267,10 @@ unit the service broker returns 410. Note: Depending on the service broker this 
 
 ####Contract
 
--runs all standard requests and checks if they fail with 412 Precondition Failed, if the X-Broker-API-Version header is missing or does not match the given one.
+- runs all standard requests and checks if they fail with 412 Precondition Failed, if the X-Broker-API-Version header is missing or does not match the given one.
 
-###Example output
+####Example output
 A Binding Test output with one deployed service.
-
-
 ```
 ╷
 └─ JUnit Jupiter ✔

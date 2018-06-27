@@ -1,22 +1,43 @@
 # osb-checker-kotlin
 
+# Table of Contents
+- [Description](#Description)
+- [Usage](#Usage)
+    - [Configuration](#Configuration)
+    - [Parameters](#Parameters)
+    - [Declaring Services](#Declaring Services)
+    - [Declaring Test Runs](#Declaring Test Runs)
+- [Test](#Test)
+    - [Catalog](#Catalog)
+    - [Provision](#Provision)
+    - [Binding](#Binding)
+    - [Authentication](#Authentication)
+    - [Contract](#Contract)
+    - [Example output](#Example output)
+
+
 ##Description
 
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
-behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker based upon the service brokers 
-catalog or customized input by the operator.
+behaves as expected to the service broker API specification: https://github.com/openservicebrokerapi/servicebroker
+Tests are created dynamically based upon the service broker catalog or custom input by the operator.
 
 ##Usage
 
-To run the application put a file with the name application.yml into the same folder as the jar file with the following schema
+###Configuration
+
+To run the application put a file with the name .yml file into the same location as the osb-checker-kotlin-1.0.jar file with the following schema
 
 ```yaml
+
+##Define the service broker connection here
 config:
   url: http://localhost
   port : 80
   apiVersion: 2.13
-  user: admin
-  password: cloudfoundry
+  user: user
+  password: password
+##Optional
   usingAppGuid: true
 
   parameters:
@@ -34,7 +55,7 @@ config:
            -
              id: plan-id-here
    
-         bindable: true     
+         bindable: true
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
@@ -42,18 +63,21 @@ usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
+<a name="parameters"></a>
 ###Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).
-
 specify the plan id as key for the parameters
-
-example: a configuration with 
+example: a configuration with ...
 
 ```yaml
 parameters:
     plan-id-here:
-        DB-Name: db-name
+      DB-name: "db-name
+      parameter1 : 1
+      parameter2 : foo
+      key : value:
+      schemaName: a_name
 ```
 
 would run a provisions like this:
@@ -66,33 +90,34 @@ would run a provisions like this:
   "organization_guid": "org-guid-here",
   "space_guid": "space-guid-here",
   "parameters": {
-    "DB-name": "db-name"
+    "DB-name": "db-name",
+    "parameter1" : 1,
+    "parameter2" : "foo",
+    "key" : "value",
+    "schemaName": "a_name"
+    
     }
 }
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
+<a name="declaringservices"></a>
 ###Declaring Services
 
 To define a specific set of services and plans for testing define them under services like this:
 
 ```yaml
      services:
-       -
-         id: service-id-here
+       - id: service-id-here
          plans:
-           -
-             id: plan-id-here
-           -
-             id: plan-id2-here
+           - id: plan-id-here
+           - id: plan-id2-here
              bindable: false
          bindable: true     
-       -
-        id: service-id2-here
-        plans:
-          -
-            id: plan-id3-here
-        bindable: false   
+       - id: service-id2-here
+         plans:
+          - id: plan-id3-here
+         bindable: false   
 ```
 
 this config would run the following provisions and bindings when running the binding test:
@@ -146,10 +171,6 @@ If no catalog is set the checker will use the catalog the service broker provide
 
 ###Declaring Test Runs
 
-Example: `java -jar osb-checker-kotlin-1.0.jar -provision`
-will run the the provision test.
-
-
 There are five different options to run tests. Possibles commands are:
 
 * catalog: -cat/-catalog
@@ -158,15 +179,25 @@ There are five different options to run tests. Possibles commands are:
 * authentication: -auth/-authentication
 * contract: -con/-contract
 
-#####Catalog
+In case you want to run all tests call for example `java -jar osb-checker-kotlin-1.0.jar -cat -provision -bind -auth -con`
+
+###Test
+
+All Tests make a series of rest calls on the defined service and validate their behaviour afterwards.
+Some Tests need certain endpoints to work as defined in the osb specification.
+For example: The binding test can only run if the provisioning and catalog endpoint work.
+It is recommended to use the checker accordingly the ease up debugging of the service broker.
+
+<a name="catalog"></a>
+####Catalog
 
 when starting the application with the parameter -cat/-catalog, it will:
 1. call `curl http://username:password@broker-url/v2/catalog -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-2. check if the service broker returns 200 and validate if the catalog from the reponse follows schema.
+2. check if the service broker returns 200 and validate if the catalog from the response follows schema.
 
 See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management for more information about service broker catalogs.
 
-#####Provision
+####Provision
 
 1. Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
 2. For each plan_id defined in the catalog the application will call:
@@ -189,19 +220,49 @@ See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#cat
 
 See https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#provisioning and https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#deprovisioning  for more information.
 
-#####Binding
+####Binding
 
-- runs a full scenario of  creating calling the catalog and creates a instance for each plan_id and performs a bind on it.
-- afterwards it deletes the binding and the provision
-- validates that the broker returns 400 when making invalid binding requests
+1. Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
+2. For each plan_id defined in the catalog the application will call:
+  `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
+```json
+{
+  "service_id": "service-id-here",
+  "plan_id": "plan-id-here",
+  "organization_guid": "org-guid-here",
+  "space_guid": "space-guid-here"
+}
+```
+` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+and validate if it returns 200 or 202 and that the response body matches the specification.
+3. in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+unit the service broker returns 200 and that the response body matches the specification. Note: Depending on the service broker this may take a while.
+4. If a provision has finished and the service is bindable the test continues the following 2 calls:
+5. `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '`
+```json
+{
+  "service_id": "service-id-here",
+  "plan_id": "plan-id-here",
+  "bind_resource": {
+    "app_guid": "app-guid-here"
+  }
+}
+```
+`' -X PUT -H "X-Broker-API-Version: api-version-here"` and validate if it returns 201 and that the response body matches the specification. 
+6. `curl 'http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+and validate if the service broker returns 200.
+7. The provisioned service will now be deleted by calling `curl 'http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true&service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+The test checks if the response is 200 or 202.
+3. in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+unit the service broker returns 410. Note: Depending on the service broker this may take a while.
 
-#####Authentication
+####Authentication
 
-- runs a all requests without a valid password and checks if the fails with HttpStatus unauthorized.
+- runs a all requests without a valid password and checks if the fails with HttpStatus 401 unauthorized.
 
-#####Contract
+####Contract
 
--runs all standard requests and checks if they fail with 412 if the X-Broker-API-Version header is missing or does not match the given one.
+-runs all standard requests and checks if they fail with 412 Precondition Failed, if the X-Broker-API-Version header is missing or does not match the given one.
 
 ###Example output
 A Binding Test output with one deployed service.

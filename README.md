@@ -220,46 +220,50 @@ and [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec
 
 ####Binding
 
-- Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
-- For each plan_id defined in the catalog the application will call:
-  `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
-```json
-{
-  "service_id": "service-id-here",
-  "plan_id": "plan-id-here",
-  "organization_guid": "org-guid-here",
-  "space_guid": "space-guid-here"
-}
-```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"` and validate if it returns 200 or 202 and that the response body matches the specification.
-
-- in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
-unit the service broker returns 200 and that the response body matches the specification. Note: Depending on the service broker this may take a while.
-
-- If a provision has finished and the service is bindable the test continues with the 2 following calls:
-
-    - `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '`
+* Valid binding attempts 
+    - Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
+    - For each plan_id defined in the catalog the application will call:
+      `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
     ```json
     {
-  "service_id": "service-id-here",
-  "plan_id": "plan-id-here",
-  "bind_resource": {
-    "app_guid": "app-guid-here"
-     }
+     "service_id": "service-id-here",
+    "plan_id": "plan-id-here",
+    "organization_guid": "org-guid-here",
+    "space_guid": "space-guid-here"
     }
     ```
-    `' -X PUT -H "X-Broker-API-Version: api-version-here"` and validate if it returns 201 and that the response body matches the specification. 
-    - `curl 'http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
-    and validate if the service broker returns 200.
+    ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"` and validate if it returns 200 or 202 and that the response body matches the specification.
 
-- The provisioned service will now be deleted by calling `curl 'http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true&service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
-The test checks if the response is 200 or 202.
+    - in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+    unit the service broker returns 200 and that the response body matches the specification. Note: Depending on the service broker this may take a while.
 
-- in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
-unit the service broker returns 410. Note: Depending on the service broker this may take a while.
-
+    - If a provision has finished and the service is bindable the test continues with the 2 following calls:    
+        - `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '`
+        ```json
+        {
+      "service_id": "service-id-here",
+      "plan_id": "plan-id-here",
+      "bind_resource": {
+        "app_guid": "app-guid-here"
+           }
+        }
+        ```
+        `' -X PUT -H "X-Broker-API-Version: api-version-here"` and validate if it returns 201 and that the response body matches the specification. 
+        - `curl 'http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+        and validate if the service broker returns 200.
+    
+    - The provisioned service will now be deleted by calling `curl 'http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true&service_id=service-id-here&plan_id=plan-id-here' -X DELETE -H "X-Broker-API-Version: api-version-here"`
+    The test checks if the response is 200 or 202.
+    
+    - in case of 202 the test continues polling by calling  `curl http://username:password@broker-url/v2/service_instances/:instance_id/last_operation" ` 
+    unit the service broker returns 410. Note: Depending on the service broker this may take a while.
+    
+* Invalid binding attempts
+    - This tests will only run if the service is bindable.
+    - calls the catalog and makes a runs a single provision
+    - runs invalid binding and unbinding attempts and validates of the service broker returns 400.
+    
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#binding) for more information about binding and unbinding.
-
 
 ####Authentication
 

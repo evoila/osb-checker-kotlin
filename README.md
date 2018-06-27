@@ -72,7 +72,7 @@ example: a configuration with ...
 ```yaml
 parameters:
     plan-id-here:
-      DB-name: "db-name
+      DB-name: db-name
       parameter1 : 1
       parameter2 : foo
       key : value:

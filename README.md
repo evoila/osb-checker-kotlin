@@ -14,8 +14,7 @@
     - [Authentication](#Authentication)
     - [Contract](#Contract)
     - [Example output](#Example-output)
-
-
+    
 ##Description
 
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
@@ -23,7 +22,6 @@ behaves as expected to the [service broker API specification](link=https://githu
 Tests are created dynamically based upon the service broker catalog or custom input by the operator.
 
 ##Usage
-
 ###Configuration
 
 To run the application put a file with the name .yml file into the same location as the osb-checker-kotlin-1.0.jar file with the following schema

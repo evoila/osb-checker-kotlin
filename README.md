@@ -1,19 +1,19 @@
 # osb-checker-kotlin
 
 ## Table of Contents
-- [Description](#Description)
-- [Usage](#Usage)
-    - [Configuration](#Configuration)
-    - [Parameters](#Parameters)
-    - [Declaring Services](#Declaring-Services)
-    - [Declaring Test Runs](#Declaring-Test-Runs)
-- [Test](#Test)
-    - [Catalog](#Catalog)
-    - [Provision](#Provision)
-    - [Binding](#Binding)
-    - [Authentication](#Authentication)
-    - [Contract](#Contract)
-    - [Example output](#Example-output)
+- [Description](#description)
+- [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Parameters](#parameters)
+    - [Declaring Services](#declaring-services)
+    - [Declaring Test Runs](#declaring-test-runs)
+- [Test](#test)
+    - [Catalog](#catalog)
+    - [Provision](#provision)
+    - [Binding](#binding)
+    - [Authentication](#authentication)
+    - [Contract](#contract)
+    - [Example output](#example-output)
 
 ##Description
 

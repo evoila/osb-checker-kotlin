@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.tests.contract
 
 import de.evoila.osb.checker.request.BindingRequestRunner
+import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.tests.TestBase
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -12,11 +13,13 @@ class ContractJUnit5 : TestBase() {
 
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
+  @Autowired
+  lateinit var provisionRequestRunner: ProvisionRequestRunner
 
   @TestFactory
   fun testHeaderForAPIVersion(): List<DynamicNode> {
     return listOf(
-        DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version:",
+        DynamicContainer.dynamicContainer("Requests should contain header X-Broker-API-Version",
             listOf(
                 dynamicTest("GET - v2/catalog should reject with 412")
                 { catalogRequestRunner.withoutHeader() },

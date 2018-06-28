@@ -5,7 +5,7 @@ import de.evoila.osb.checker.tests.CatalogJUnit5
 import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
-import de.evoila.osb.checker.util.MyTreePrintingListener
+import de.evoila.osb.checker.util.TreePrintingListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -13,9 +13,11 @@ import org.junit.platform.engine.DiscoverySelector
 import org.junit.platform.engine.discovery.DiscoverySelectors
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
+import org.junit.platform.launcher.listeners.LoggingListener
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.PrintWriter
+import java.util.logging.Level
 
 @SpringBootApplication
 class Application
@@ -80,20 +82,24 @@ fun main(args: Array<String>) {
     selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
   }
 
-  val r = SummaryGeneratingListener()
+  val summaryGenerator = SummaryGeneratingListener()
   val launcher = LauncherFactory.create()
-  val tree = MyTreePrintingListener()
+  val treeLogger = TreePrintingListener()
 
-  launcher.registerTestExecutionListeners(tree, r)
+  launcher.registerTestExecutionListeners(
+      LoggingListener.forJavaUtilLogging(Level.INFO),
+      treeLogger,
+      summaryGenerator
+  )
 
   val request = LauncherDiscoveryRequestBuilder.request()
       .selectors(selectors)
       .build()
 
   launcher.execute(request)
-  r.summary.printTo(PrintWriter(System.out))
+  summaryGenerator.summary.printTo(PrintWriter(System.out))
 
   System.exit(
-      r.summary.failures.size
+      summaryGenerator.summary.failures.size
   )
 }

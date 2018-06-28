@@ -1,30 +1,29 @@
 # osb-checker-kotlin
 
-# Table of Contents
-- [Description](#Description)
-- [Usage](#Usage)
-    - [Configuration](#Configuration)
-    - [Parameters](#Parameters)
-    - [Declaring Services](#Declaring Services)
-    - [Declaring Test Runs](#Declaring Test Runs)
-- [Test](#Test)
-    - [Catalog](#Catalog)
-    - [Provision](#Provision)
-    - [Binding](#Binding)
-    - [Authentication](#Authentication)
-    - [Contract](#Contract)
-    - [Example output](#Example output)
-
-
-###Description
+## Table of Contents
+- [Description](#description)
+- [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Parameters](#parameters)
+    - [Declaring Services](#declaring-services)
+    - [Declaring Test Runs](#declaring-test-runs)
+- [Test](#test)
+    - [Catalog](#catalog)
+    - [Provision](#provision)
+    - [Binding](#binding)
+    - [Authentication](#authentication)
+    - [Contract](#contract)
+    - [Example output](#example-output)
+   
+## Description
 
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
 behaves as expected to the [service broker API specification](link=https://github.com/openservicebrokerapi/servicebroker)  
 Tests are created dynamically based upon the service broker catalog or custom input by the operator.
 
-###Usage
+## Usage
 
-####Configuration
+### Configuration
 
 To run the application put a file with the name .yml file into the same location as the osb-checker-kotlin-1.0.jar file with the following schema
 
@@ -63,7 +62,7 @@ usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
-####Parameters
+### Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).
 specify the plan id as key for the parameters
@@ -100,7 +99,7 @@ would run a provisions like this:
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 
-####Declaring Services
+### Declaring Services
 
 To define a specific set of services and plans for testing define them under services like this:
 
@@ -167,7 +166,7 @@ this config would run the following provisions and bindings when running the bin
 
 If no catalog is set the checker will use the catalog the service broker provides by itself.
 
-####Declaring Test Runs
+### Declaring Test Runs
 
 There are five different options to run tests. Possibles commands are:
 
@@ -179,14 +178,14 @@ There are five different options to run tests. Possibles commands are:
 
 In case you want to run all tests call for example `java -jar osb-checker-kotlin-1.0.jar -cat -provision -bind -auth -con`
 
-###Test
+## Test
 
 All Tests make a series of rest calls on the defined service and validate their behaviour afterwards.
 Some Tests need certain endpoints to work as defined in the osb specification.
 For example: The binding test can only run if the provisioning and catalog endpoint work.
 It is recommended to use the checker accordingly the ease up debugging of the service broker.
 
-####Catalog
+### Catalog
 
 when starting the application with the parameter -cat/-catalog, it will:
 - call `curl http://username:password@broker-url/v2/catalog -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
@@ -194,7 +193,7 @@ when starting the application with the parameter -cat/-catalog, it will:
 
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management), for more information about service broker catalogs.
 
-####Provision
+### Provision
 
 - Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
 - For each plan_id defined in the catalog the application will call:
@@ -218,7 +217,7 @@ Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spe
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#provisioning) (provisioning)
 and [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#deprovisioning) (deprovisioning) for more information.
 
-####Binding
+### Binding
 
 * Valid binding attempts 
     - Calls the catalog to set up a valid provision requests or uses a custom catalog, from the yml provided by the operator.
@@ -265,45 +264,46 @@ and [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec
     
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#binding) for more information about binding and unbinding.
 
-####Authentication
+### Authentication
 
 - runs a all requests without a valid password and checks if the fails with HttpStatus 401 unauthorized.
 
-####Contract
+### Contract
 
 - runs all standard requests and checks if they fail with 412 Precondition Failed, if the X-Broker-API-Version header is missing or does not match the given one.
 
-####Example output
+### Example output
 A Binding Test output with one deployed service.
 ```
 ╷
 └─ JUnit Jupiter ✔
    └─ BindingJUnit5 ✔
       ├─ runInvalidBindingAttempts() ✔
-      │  ├─ Provision and in case of a Async SB polling, for later binding ✔
-      │  │  └─ Running Valid Provision with InstanceId d78baaef-d602-4222-b9f5-c0dd74198560 ✔
-      │  ├─ PUT should reject if missing service_id ✔
-      │  ├─ DELETE should reject if missing service_id ✔
-      │  ├─ PUT should reject if missing plan_id ✔
-      │  ├─ DELETE should reject if missing plan_id ✔
-      │  └─ Deleting Provision and Polling afterwards ✔
-      │     └─ deleting Provision ✔
+      │  ├─ Provision and in case of a async service broker polling, for later binding ✔
+      │  │  └─ Running Valid PUT provision with instanceId feaf198a-ec45-4c5b-a35b-77bd4b9c6f95 ✔
+      │  ├─ Running invalid bindings ✔
+      │  │  ├─ PUT should reject if missing service_id ✔
+      │  │  ├─ DELETE should reject if missing service_id ✔
+      │  │  ├─ PUT should reject if missing plan_id ✔
+      │  │  └─ DELETE should reject if missing plan_id ✔
+      │  └─ Deleting Provision ✔
+      │     └─ DELETE provision and if the service broker is async polling afterwards ✔
       └─ runValidBindings() ✔
-         └─ Running a valid provision with instanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 and if it is bindable a valid binding with bindingId 77fc6c32-b23a-4577-b24e-8f3347eb21c7 ✔
-            ├─ Provision and in case of a Async SB polling, for later binding ✔
-            │  └─ Running Valid Provision with InstanceId 6430daf0-5231-49e6-a9d9-58f6625d3813 ✔
+         └─ Running a valid provision if the service is bindable a valid binding. Deleting both afterwards. ✔
+            ├─ Provision and in case of a async service broker polling, for later binding ✔
+            │  └─ Running Valid PUT provision with instanceId b4206514-2915-4fea-b140-63d942aeb25e ✔
             ├─ Running PUT Binding and DELETE Binding afterwards ✔
-            │  ├─ PUT Binding ✔
-            │  └─ DELETE Binding ✔
-            └─ Deleting Provision and Polling afterwards ✔
-               └─ deleting Provision ✔
+            │  ├─ Running a valid binding with BindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60778 ms ✔
+            │  └─ Deleting binding with bindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60197 ms ✔
+            └─ Deleting Provision ✔
+               └─ DELETE provision and if the service broker is async polling afterwards ✔
 
-Test run finished after 12060 ms
-[        10 containers found      ]
+Test run finished after 129414 ms
+[        11 containers found      ]
 [         0 containers skipped    ]
-[        10 containers started    ]
+[        11 containers started    ]
 [         0 containers aborted    ]
-[        10 containers successful ]
+[        11 containers successful ]
 [         0 containers failed     ]
 [        10 tests found           ]
 [         0 tests skipped         ]
@@ -311,4 +311,5 @@ Test run finished after 12060 ms
 [         0 tests aborted         ]
 [        10 tests successful      ]
 [         0 tests failed          ]
+
 ```

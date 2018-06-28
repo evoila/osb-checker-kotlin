@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.tests.contract
 
 import de.evoila.osb.checker.request.BindingRequestRunner
+import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.tests.TestBase
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -12,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired
 class AuthenticationJUnit5 : TestBase() {
   @Autowired
   lateinit var bindingRequestRunner: BindingRequestRunner
+  @Autowired
+  lateinit var provisionRequestRunner: ProvisionRequestRunner
 
   @TestFactory
   fun testAuthentication(): List<DynamicNode> {
 
     return listOf(
-        DynamicContainer.dynamicContainer("Requests been rejected without authentication:",
+        DynamicContainer.dynamicContainer("Requests without authentication should be rejected",
             listOf(
                 DynamicTest.dynamicTest("GET - v2/catalog should reject with 412")
                 { catalogRequestRunner.noAuth() },

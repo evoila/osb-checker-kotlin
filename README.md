@@ -21,6 +21,11 @@ This application is a generalized test program for service brokers. It runs rest
 behaves as expected to the [service broker API specification](link=https://github.com/openservicebrokerapi/servicebroker)  
 Tests are created dynamically based upon the service broker catalog or custom input by the operator.
 
+## Build Application
+
+to build the application run `{path}/osb-checker-kotlin/gradlew build` on linux and MacOS or `{path}/osb-checker-kotlin/gradlew.bat build` on windows.
+Afterwards you can find `osb-checker-kotlin-1.0.jar` in `osb-checker-kotlin/build/libs`.
+
 ## Usage
 
 ### Configuration

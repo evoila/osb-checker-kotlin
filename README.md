@@ -30,8 +30,9 @@ Afterwards you can find `osb-checker-kotlin-1.0.jar` in `osb-checker-kotlin/buil
 
 ### Configuration
 
-To run the application put a file with the name .yml file into the same location as the osb-checker-kotlin-1.0.jar file with the following schema
-
+To run the application put a file with the name application.yml into the same location as the osb-checker-kotlin-1.0.jar file. For more information on how to configurate a spring boot application see [here](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html). 
+ The .yml file needs the following schema.
+ 
 ```yaml
 
 ##Define the service broker connection here

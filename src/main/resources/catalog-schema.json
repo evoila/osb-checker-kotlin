@@ -109,6 +109,7 @@
                 },
                 "schemas": {
                   "type": "object",
+                  "nullable": true,
                   "properties": {
                     "service_instance": {
                       "type": "object",

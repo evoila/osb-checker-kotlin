@@ -4,7 +4,8 @@ import java.util.*
 
 abstract class BindingBody(
     val service_id: String?,
-    val plan_id: String?
+    val plan_id: String?,
+    var parameters: Map<String, Any>? = null
 ) : RequestBody {
 
   class ValidBinding(

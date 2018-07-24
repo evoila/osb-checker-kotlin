@@ -16,14 +16,14 @@ class BindingRequestRunner(
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     val response = RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.token))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
-        .log().ifValidationFails()
+        .log().all()
         .assertThat()
         .statusCode(expectedStatusCode)
         .extract()

@@ -75,12 +75,12 @@ specify the plan id as key for the parameters
 example: a configuration with ...
 
 ```yaml
-parameters:
+provisionParameters:
     plan-id-here:
       DB-name: db-name
       parameter1 : 1
       parameter2 : foo
-      key : value:
+      key : value
       schemaName: a_name
 ```
 
@@ -104,6 +104,15 @@ would run a provisions like this:
 }
 ```
 ` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+
+to declare parameters for a binding set them like this:
+
+```yaml
+bindingParameters:
+    plan-id-here:
+      key : value
+      schemaName: a_name
+```
 
 ### Declaring Services
 

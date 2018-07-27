@@ -16,7 +16,7 @@ class CatalogRequestRunner(
   fun withoutHeader() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("Authorization", configuration.token))
+        .header(Header("Authorization", configuration.correctToken))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -31,7 +31,7 @@ class CatalogRequestRunner(
     RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .header(Header("Authorization", configuration.token))
+        .header(Header("Authorization", configuration.correctToken))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -45,7 +45,7 @@ class CatalogRequestRunner(
     return RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
-        .header(Header("Authorization", configuration.token))
+        .header(Header("Authorization", configuration.correctToken))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -62,6 +62,30 @@ class CatalogRequestRunner(
     RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .get("/v2/catalog")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(401)
+  }
+
+  fun wrongUser() {
+    RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.wrongUserToken))
+        .get("/v2/catalog")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(401)
+  }
+
+  fun wrongPassword() {
+    RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.wrongPasswordToken))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()

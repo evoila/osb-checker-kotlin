@@ -144,5 +144,4 @@ class BindingRequestRunner(
         .assertThat()
         .statusCode(401)
   }
-
 }

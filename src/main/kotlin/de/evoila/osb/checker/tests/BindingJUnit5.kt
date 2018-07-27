@@ -10,7 +10,6 @@ import de.evoila.osb.checker.response.Service
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,9 +39,16 @@ class BindingJUnit5 : TestBase() {
         val provision = ProvisionBody.ValidProvisioning(service, plan)
         val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
-        configuration.parameters.let {
+
+        configuration.provisionParameters.let {
           if (it.containsKey(plan.id)) {
             provision.parameters = it[plan.id]
+          }
+        }
+
+        configuration.bindingParameters.let {
+          if (it.containsKey(plan.id)) {
+            binding.parameters = it[plan.id]
           }
         }
 

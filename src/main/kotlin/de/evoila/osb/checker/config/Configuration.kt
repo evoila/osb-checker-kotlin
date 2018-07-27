@@ -20,7 +20,9 @@ class Configuration {
   lateinit var password: String
   lateinit var correctToken: String
   var usingAppGuid: Boolean = true
-  val parameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+  val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+  val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+
   final var services = mutableListOf<CustomServices>()
   lateinit var wrongUserToken: String
   lateinit var wrongPasswordToken: String

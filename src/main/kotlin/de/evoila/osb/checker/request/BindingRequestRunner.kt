@@ -95,4 +95,28 @@ class BindingRequestRunner(
         .assertThat()
         .statusCode(401)
   }
+
+  fun deleteWrongUser() {
+    RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("Authorization", configuration.wrongUserToken))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(401)
+  }
+
+  fun deleteWrongPassword() {
+    RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("Authorization", configuration.wrongPasswordToken))
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .delete("/v2/service_instances/${Configuration.NOT_AN_ID}/service_bindings/${Configuration.NOT_AN_ID}")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(401)
+  }
 }

@@ -9,7 +9,9 @@ class RestAssureConfig(
     configuration: Configuration
 ) {
   init {
-    configuration.token = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${configuration.password}".toByteArray())}"
+    configuration.correctToken = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${configuration.password}".toByteArray())}"
+    configuration.wrongUserToken = "Basic ${Base64.getEncoder().encodeToString("${UUID.randomUUID()}:${configuration.password}".toByteArray())}"
+    configuration.wrongPasswordToken = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${UUID.randomUUID()}".toByteArray())}"
 
     RestAssured.baseURI = configuration.url
     RestAssured.port = configuration.port

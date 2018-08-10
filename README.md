@@ -281,7 +281,7 @@ Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spe
 
 ### Authentication
 
-- runs a all requests without a valid password and checks if the fails with HttpStatus 401 unauthorized.
+- runs a all requests without a user and password, a wrong username and a wrong password. It checks if service broker replies with HttpStatus 401 unauthorized.
 
 ### Contract
 

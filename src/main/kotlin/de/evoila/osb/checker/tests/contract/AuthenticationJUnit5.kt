@@ -66,5 +66,4 @@ class AuthenticationJUnit5 : TestBase() {
     const val WRONG_USER = "With wrong Username"
     const val WRONG_PW = "With wrong Password"
   }
-
 }

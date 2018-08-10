@@ -36,8 +36,8 @@ class AuthenticationJUnit5 : TestBase() {
               DynamicContainer.dynamicContainer("DELETE - v2/service_instance/instance_id should reject with 401",
                   listOf(
                       DynamicTest.dynamicTest(NO_AUTH) { provisionRequestRunner.deleteNoAuth() },
-                      DynamicTest.dynamicTest(WRONG_USER) { provisionRequestRunner.putWrongUser() },
-                      DynamicTest.dynamicTest(WRONG_PW) { provisionRequestRunner.putWrongPassword() }
+                      DynamicTest.dynamicTest(WRONG_USER) { provisionRequestRunner.deleteWrongUser() },
+                      DynamicTest.dynamicTest(WRONG_PW) { provisionRequestRunner.deleteWrongPassword() }
                   )),
               DynamicContainer.dynamicContainer("GET - v2/service_instance/instance_id/last_operation should reject with 401",
                   listOf(

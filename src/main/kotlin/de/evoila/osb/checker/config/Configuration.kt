@@ -19,13 +19,15 @@ class Configuration {
   lateinit var user: String
   lateinit var password: String
   lateinit var correctToken: String
+  lateinit var wrongUserToken: String
+  lateinit var wrongPasswordToken: String
+
+
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
 
   final var services = mutableListOf<CustomServices>()
-  lateinit var wrongUserToken: String
-  lateinit var wrongPasswordToken: String
 
 
   fun initCustomCatalog(): Catalog? {

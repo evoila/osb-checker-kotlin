@@ -17,3 +17,4 @@ local.properties
 .gradle
 build
 gradle
+src/main/resources/application\.yml

@@ -53,14 +53,14 @@ config:
         parameter1 : 2
         parameter2 : bar
         
-     services:
-       -
-         id: service-id-here
-         plans:
-           -
-             id: plan-id-here
+  services:
+    -
+    id: service-id-here
+    plans:
+    -
+      id: plan-id-here
    
-         bindable: true
+    bindable: true
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.

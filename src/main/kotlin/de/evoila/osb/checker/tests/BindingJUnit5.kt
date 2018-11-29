@@ -52,7 +52,7 @@ class BindingJUnit5 : TestBase() {
           }
         }
 
-        val testContainers = mutableListOf(validProvisionContainer(instanceId, provision))
+        val testContainers = mutableListOf(validProvisionContainer(instanceId, plan.name, provision))
 
         val bindable = plan.bindable ?: service.bindable
 
@@ -90,7 +90,7 @@ class BindingJUnit5 : TestBase() {
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     dynamicNodes.add(
-        validProvisionContainer(instanceId, provision)
+        validProvisionContainer(instanceId, plan.name, provision)
     )
 
     val invalidBindings = mutableListOf<DynamicNode>()
@@ -157,9 +157,9 @@ class BindingJUnit5 : TestBase() {
     ))
   }
 
-  private fun validProvisionContainer(instanceId: String, provision: ProvisionBody.ValidProvisioning): DynamicContainer {
+  private fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning): DynamicContainer {
     return dynamicContainer("Provision and in case of a async service broker polling, for later binding", listOf(
-        dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan ${provision.plan_id}") {
+        dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
           val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
           assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
 

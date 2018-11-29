@@ -63,7 +63,7 @@ class ProvisionRequestRunner(
         .extract()
         .response()
 
-    assertTrue("Expected StatusCode 200 or in case of a deletion 400 but was ${response.statusCode} ")
+    assertTrue("Expected StatusCode is $expectedFinalStatusCode but was ${response.statusCode} ")
     { response.statusCode in listOf(expectedFinalStatusCode, 200) }
 
     return if (response.statusCode == 200) {

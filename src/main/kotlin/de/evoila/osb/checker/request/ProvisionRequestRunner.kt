@@ -3,6 +3,7 @@ package de.evoila.osb.checker.request
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.LastOperationResponse
+import de.evoila.osb.checker.response.ServiceInstance
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -14,6 +15,31 @@ import kotlin.test.assertTrue
 class ProvisionRequestRunner(
     val configuration: Configuration
 ) {
+
+  fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance? {
+    val response = RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.correctToken))
+        .contentType(ContentType.JSON)
+        .get("/v2/service_instances/$instanceId")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .extract()
+        .response()
+
+    return if (retrievable) {
+      assertTrue("Expected StatusCode is 200 but was ${response.statusCode}") { response.statusCode == 200 }
+
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response.body)
+
+      return response.jsonPath().getObject("", ServiceInstance::class.java)
+    } else {
+
+      null
+    }
+  }
 
   fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody): Int {
     return RestAssured.with()

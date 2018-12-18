@@ -16,5 +16,10 @@ data class Service(
     val dashboardClient: DashboardClient?,
     @JsonProperty("plan_updatable")
     val planUpdatable: Boolean?,
+    @JsonProperty("instances_retrievable")
+    val instancesRetrievable: Boolean?,
+    @JsonProperty("bindings_retrievable")
+    val bindingsRetrievable: Boolean?,
+
     val plans: List<Plan>
 )

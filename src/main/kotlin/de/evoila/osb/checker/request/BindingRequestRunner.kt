@@ -13,6 +13,23 @@ class BindingRequestRunner(
     val configuration: Configuration
 ) {
 
+  fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
+
+    val response = RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.correctToken))
+        .contentType(ContentType.JSON)
+        .get("/v2/service_instances/$instanceId/service_bindings/$bindingId")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(expectedStatusCode)
+        .extract()
+
+    JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json").matches(response.body())
+  }
+
   fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
 
     val response = RestAssured.with()

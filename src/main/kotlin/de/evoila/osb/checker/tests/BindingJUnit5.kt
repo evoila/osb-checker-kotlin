@@ -67,7 +67,7 @@ class BindingJUnit5 : TestBase() {
         testContainers.add(validDeleteProvisionContainer(instanceId, service, plan))
 
         dynamicNodes.add(
-            dynamicContainer("Running a valid provision if the service is bindable a valid binding. Deleting both afterwards.", testContainers)
+            dynamicContainer("Running a valid provision if the service is bindable a valid binding. Deleting both afterwards. In case of a async service broker poll afterwards.", testContainers)
         )
       }
     }
@@ -113,7 +113,7 @@ class BindingJUnit5 : TestBase() {
     ).forEach {
       invalidBindings.add(
           dynamicTest("PUT ${it.message}")
-          { bindingRequestRunner.runPutBindingRequest(it.requestBody, 400, instanceId, bindingId) }
+          { assertTrue { 400 == bindingRequestRunner.runPutBindingRequest(it.requestBody, instanceId, bindingId) } }
       )
       invalidBindings.add(
           dynamicTest("DELETE ${it.message}")
@@ -123,7 +123,6 @@ class BindingJUnit5 : TestBase() {
             bindingRequestRunner.runDeleteBindingRequest(
                 serviceId = bindingRequestBody.service_id,
                 planId = bindingRequestBody.plan_id,
-                expectedStatusCode = 400,
                 instanceId = instanceId,
                 bindingId = bindingId)
           }
@@ -142,7 +141,7 @@ class BindingJUnit5 : TestBase() {
         listOf(
             dynamicTest("DELETE provision and if the service broker is async polling afterwards") {
               val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
-              assertTrue("statusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
+              assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
               if (statusCode == 202) {
                 provisionRequestRunner.waitForFinish(instanceId, 410)
               }
@@ -154,7 +153,13 @@ class BindingJUnit5 : TestBase() {
 
     val bindingTests = listOf(
         dynamicTest("Running a valid binding with bindingId $bindingId") {
-          bindingRequestRunner.runPutBindingRequest(binding, 201, instanceId, bindingId)
+          val statusCode = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId)
+          assertTrue { statusCode in listOf(201, 202) }
+
+          if (statusCode == 202) {
+            bindingRequestRunner.waitForFinish(instanceId, bindingId, 200)
+          }
+
         }
     )
 
@@ -166,7 +171,13 @@ class BindingJUnit5 : TestBase() {
   }
 
   private fun validDeleteContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicTest = dynamicTest("Deleting binding with bindingId $bindingId") {
-    bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, 200, instanceId, bindingId)
+    val statusCode = bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, instanceId, bindingId)
+
+    assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
+
+    if (statusCode == 202) {
+      bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
+    }
   }
 
   private fun validRetrievableBindingContainer(instanceId: String, bindingId: String): DynamicTest {

@@ -60,7 +60,8 @@ class BindingJUnit5 : TestBase() {
         val bindable = plan.bindable ?: service.bindable
 
         if (bindable) {
-          testContainers.add(validBindingContainer(binding, instanceId, bindingId))
+          testContainers.add(validBindingContainer(binding, instanceId, bindingId, service.bindingsRetrievable
+              ?: false))
         }
 
         testContainers.add(validDeleteProvisionContainer(instanceId, service, plan))
@@ -149,18 +150,33 @@ class BindingJUnit5 : TestBase() {
         ))
   }
 
-  private fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicContainer {
-    return dynamicContainer("Running PUT binding and DELETE binding afterwards", listOf(
+  private fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String, isRetrievable: Boolean): DynamicContainer {
+
+    val bindingTests = listOf(
         dynamicTest("Running a valid binding with bindingId $bindingId") {
           bindingRequestRunner.runPutBindingRequest(binding, 201, instanceId, bindingId)
-        },
-        dynamicTest("Deleting binding with bindingId $bindingId") {
-          bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, 200, instanceId, bindingId)
         }
-    ))
+    )
+
+    return dynamicContainer("Running PUT binding and DELETE binding afterwards", if (isRetrievable) {
+      bindingTests.plus(listOf(validRetrievableBindingContainer(instanceId, bindingId), validDeleteContainer(binding, instanceId, bindingId)))
+    } else {
+      bindingTests.plus(validDeleteContainer(binding, instanceId, bindingId))
+    })
   }
 
-  private fun validRetrivableContainer(instanceId: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicTest {
+  private fun validDeleteContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicTest = dynamicTest("Deleting binding with bindingId $bindingId") {
+    bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, 200, instanceId, bindingId)
+  }
+
+  private fun validRetrievableBindingContainer(instanceId: String, bindingId: String): DynamicTest {
+
+    return dynamicTest("Running valid GET for retrievable service binding") {
+      bindingRequestRunner.runGetBindingRequest(200, instanceId, bindingId)
+    }
+  }
+
+  private fun validRetrievableInstanceContainer(instanceId: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicTest {
 
     return dynamicTest("Running valid GET for retrievable service instance") {
 
@@ -177,7 +193,8 @@ class BindingJUnit5 : TestBase() {
   }
 
   private fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicContainer {
-    return dynamicContainer("Provision and in case of a async service broker polling, for later binding", listOf(
+
+    val provisionTests = listOf(
         dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
 
           val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
@@ -187,11 +204,12 @@ class BindingJUnit5 : TestBase() {
           if (statusCode == 202) {
             assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
           }
-        },
-        if (isRetrievable) {
-          validRetrivableContainer(instanceId, provision, isRetrievable)
-        } else {
-          null
-        }))
+        })
+
+    return dynamicContainer("Provision and in case of a async service broker polling, for later binding", if (isRetrievable) {
+      provisionTests.plus(validRetrievableInstanceContainer(instanceId, provision, isRetrievable))
+    } else {
+      provisionTests
+    })
   }
 }

@@ -47,7 +47,7 @@ class Configuration {
                 description = "Service-Description",
                 requires = null,
                 instancesRetrievable = customService.instancesRetrievable,
-                bindingRetrievable = customService.bindingRetrievable,
+                bindingsRetrievable = customService.bindingRetrievable,
 
                 plans = customService.plans.map { customPlan ->
                   Plan(

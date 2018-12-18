@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class ServiceInstance(
+data class ServiceInstance(
     @JsonProperty("service_id")
     val serviceId: String?,
     @JsonProperty("plan_id")

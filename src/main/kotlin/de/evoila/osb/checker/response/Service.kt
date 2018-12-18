@@ -18,8 +18,8 @@ data class Service(
     val planUpdatable: Boolean?,
     @JsonProperty("instances_retrievable")
     val instancesRetrievable: Boolean?,
-    @JsonProperty("binding_retrievable")
-    val bindingRetrievable: Boolean?,
+    @JsonProperty("bindings_retrievable")
+    val bindingsRetrievable: Boolean?,
 
     val plans: List<Plan>
 )

@@ -2,11 +2,13 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
+import de.evoila.osb.checker.response.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
 import org.springframework.stereotype.Service
+import kotlin.test.assertTrue
 
 @Service
 class BindingRequestRunner(
@@ -30,7 +32,7 @@ class BindingRequestRunner(
     JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json").matches(response.body())
   }
 
-  fun runPutBindingRequest(requestBody: RequestBody, expectedStatusCode: Int, instanceId: String, bindingId: String) {
+  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String): Int {
 
     val response = RestAssured.with()
         .log().ifValidationFails()
@@ -38,35 +40,75 @@ class BindingRequestRunner(
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .body(requestBody)
+        .param("accepts_incomplete", true)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
         .log().ifValidationFails()
         .assertThat()
-        .statusCode(expectedStatusCode)
         .extract()
 
     if (response.statusCode() in listOf(200, 201)) {
       JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json").matches(response.body())
     }
+
+    return response.statusCode()
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, expectedStatusCode: Int, instanceId: String, bindingId: String) {
-
-    var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
-    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
-
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
-
-    RestAssured.with()
+  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String? {
+    val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
+        .get("/v2/service_instances/$instanceId/service_bindings/$bindingId/last_operation")
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .extract()
+        .response()
+
+    assertTrue("Expected StatusCode is $expectedFinalStatusCode but was ${response.statusCode} ")
+    { response.statusCode in listOf(expectedFinalStatusCode, 200) }
+
+    return if (response.statusCode == 200) {
+
+      val responseBody = response.jsonPath()
+          .getObject("", LastOperationResponse::class.java)
+
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
+
+      if (responseBody.state == "in progress") {
+        Thread.sleep(10000)
+        return waitForFinish(instanceId, bindingId, expectedFinalStatusCode)
+      }
+      assertTrue("Expected response body \"succeeded\" or \"failed\" but was ${responseBody.state}")
+      { responseBody.state in listOf("succeeded", "failed") }
+
+      responseBody.state
+    } else {
+      ""
+    }
+  }
+
+  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String): Int {
+
+    var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
+    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
+
+    return RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("Authorization", configuration.correctToken))
+        .contentType(ContentType.JSON)
+        .param("service_id", serviceId)
+        .param("plan_id", planId)
+        .param("accepts_incomplete", true)
         .delete(path)
         .then()
         .log().ifValidationFails()
         .assertThat()
-        .statusCode(expectedStatusCode)
+        .extract()
+        .response().statusCode
   }
 
   fun putWithoutHeader() {

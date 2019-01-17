@@ -35,7 +35,7 @@ class BindingRequestRunner(
   fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String): Int {
 
     val response = RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
@@ -43,7 +43,7 @@ class BindingRequestRunner(
         .param("accepts_incomplete", true)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
-        .log().ifValidationFails()
+        .log().all()
         .assertThat()
         .extract()
 
@@ -54,7 +54,7 @@ class BindingRequestRunner(
     return response.statusCode()
   }
 
-  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String? {
+  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
@@ -96,7 +96,7 @@ class BindingRequestRunner(
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
     return RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
@@ -105,7 +105,7 @@ class BindingRequestRunner(
         .param("accepts_incomplete", true)
         .delete(path)
         .then()
-        .log().ifValidationFails()
+        .log().all()
         .assertThat()
         .extract()
         .response().statusCode

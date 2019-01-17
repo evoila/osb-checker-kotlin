@@ -142,8 +142,10 @@ class BindingJUnit5 : TestBase() {
             dynamicTest("DELETE provision and if the service broker is async polling afterwards") {
               val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
               assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
+
               if (statusCode == 202) {
-                provisionRequestRunner.waitForFinish(instanceId, 410)
+                val state = provisionRequestRunner.waitForFinish(instanceId, 410)
+                assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
               }
             }
         ))
@@ -157,9 +159,9 @@ class BindingJUnit5 : TestBase() {
           assertTrue { statusCode in listOf(201, 202) }
 
           if (statusCode == 202) {
-            bindingRequestRunner.waitForFinish(instanceId, bindingId, 200)
+            val state = bindingRequestRunner.waitForFinish(instanceId, bindingId, 200)
+            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
           }
-
         }
     )
 
@@ -176,7 +178,8 @@ class BindingJUnit5 : TestBase() {
     assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
 
     if (statusCode == 202) {
-      bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
+      val state = bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
+      assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
     }
   }
 
@@ -213,7 +216,8 @@ class BindingJUnit5 : TestBase() {
           assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
 
           if (statusCode == 202) {
-            assert(provisionRequestRunner.waitForFinish(instanceId, 200) == "succeeded")
+            val state = provisionRequestRunner.waitForFinish(instanceId, 200)
+            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
           }
         })
 

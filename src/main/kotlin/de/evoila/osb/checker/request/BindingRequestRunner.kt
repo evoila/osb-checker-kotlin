@@ -54,7 +54,7 @@ class BindingRequestRunner(
     return response.statusCode()
   }
 
-  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String? {
+  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))

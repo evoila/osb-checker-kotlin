@@ -58,14 +58,14 @@ class ProvisionRequestRunner(
 
   fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody): Int {
     val response = RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
         .then()
-        .log().ifValidationFails()
+        .log().all()
         .assertThat()
         .extract()
 
@@ -76,7 +76,7 @@ class ProvisionRequestRunner(
     return response.statusCode()
   }
 
-  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int): String? {
+  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int): String {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
@@ -120,13 +120,13 @@ class ProvisionRequestRunner(
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
-        .log().ifValidationFails()
+        .log().all()
         .extract()
         .statusCode()
   }
@@ -139,13 +139,13 @@ class ProvisionRequestRunner(
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()
-        .log().ifValidationFails()
+        .log().all()
         .header(Header("X-Broker-API-Version", configuration.apiVersion))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
-        .log().ifValidationFails()
+        .log().all  ()
         .extract()
         .statusCode()
   }

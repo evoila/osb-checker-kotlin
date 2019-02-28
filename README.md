@@ -42,25 +42,26 @@ config:
   apiVersion: 2.13
   user: user
   password: password
-##Optional
+##The following configuration are Optional
   usingAppGuid: true
 
-  parameters:
+  provisionParameters:
      plan-id-1-here:
         parameter1 : 1
         parameter2 : foo
       plan-id-2-here:
         parameter1 : 2
         parameter2 : bar
+
+  bindingParameters:
+      plan-id-here:
+        key : value
         
   services:
-    -
-    id: service-id-here
-    plans:
-    -
-      id: plan-id-here
-   
-    bindable: true
+    - id: service-id-here
+      bindable: true
+      plans:
+        - id: plan-id-here
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
@@ -198,7 +199,7 @@ In case you want to run all tests call for example `java -jar osb-checker-kotlin
 All Tests make a series of rest calls on the defined service and validate their behaviour afterwards.
 Some Tests need certain endpoints to work as defined in the osb specification.
 For example: The binding test can only run if the provisioning and catalog endpoint work.
-It is recommended to use the checker accordingly the ease up debugging of the service broker.
+It is recommended to use the checker accordingly, to ease up debugging of the service broker.
 
 ### Catalog
 

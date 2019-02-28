@@ -199,7 +199,7 @@ In case you want to run all tests call for example `java -jar osb-checker-kotlin
 All Tests make a series of rest calls on the defined service and validate their behaviour afterwards.
 Some Tests need certain endpoints to work as defined in the osb specification.
 For example: The binding test can only run if the provisioning and catalog endpoint work.
-It is recommended to use the checker accordingly the ease up debugging of the service broker.
+It is recommended to use the checker accordingly, to ease up debugging of the service broker.
 
 ### Catalog
 

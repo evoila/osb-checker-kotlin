@@ -22,7 +22,7 @@ class Configuration {
   lateinit var wrongUserToken: String
   lateinit var wrongPasswordToken: String
 
-
+  var skipTLSVerification: Boolean = false
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()

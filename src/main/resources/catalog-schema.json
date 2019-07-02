@@ -90,6 +90,23 @@
                   "type": "string",
                   "pattern": "\\S+"
                 },
+                "maintenance_info": {
+                  "type": "object",
+                  "required": [
+                    "version"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "pattern": "^(.*)$"
+                    },
+                    "description": {
+                      "type": "string",
+                      "pattern": "\\S+"
+                    }
+                  }
+                },
                 "name": {
                   "type": "string",
                   "pattern": "^[a-z0-9-]+$"

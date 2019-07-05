@@ -107,9 +107,9 @@ class ProvisionJUnit5 : TestBase() {
     ).forEach {
       dynamicNodes.add(
           DynamicTest.dynamicTest("PUT ${it.message}") {
-            val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
-            assertTrue("Expected status code is 400 but was $statusCode") {
-              400 == statusCode
+            val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
+            assertTrue("Expected status code is 400 but was ${response.statusCode()}") {
+              400 == response.statusCode()
             }
           }
       )
@@ -148,12 +148,12 @@ class ProvisionJUnit5 : TestBase() {
       {
         val provisionBody = it.requestBody
 
-        val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(
+        val response = provisionRequestRunner.runDeleteProvisionRequestAsync(
             serviceId = provisionBody.service_id,
             planId = provisionBody.plan_id,
             instanceId = instanceId
         )
-        assertTrue("Should decline a invalid DELETE request with 400 but was $statusCode") { statusCode == 400 }
+        assertTrue("Should decline a invalid DELETE request with 400 but was ${response.statusCode()}") { response.statusCode() == 400 }
       }
       )
     }

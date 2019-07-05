@@ -7,6 +7,8 @@ import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.response.Plan
 import de.evoila.osb.checker.response.Service
+import io.restassured.response.ExtractableResponse
+import io.restassured.response.Response
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -140,11 +142,11 @@ class BindingJUnit5 : TestBase() {
     return dynamicContainer("Deleting provision",
         listOf(
             dynamicTest("DELETE provision and if the service broker is async polling afterwards") {
-              val statusCode = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
-              assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
+              val response = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
+              assertTrue("StatusCode should be 200 or 202 but was $response.") { response.statusCode() in listOf(200, 202) }
 
-              if (statusCode == 202) {
-                provisionRequestRunner.waitForFinish(instanceId, 410)
+              if (response.statusCode() == 202) {
+                provisionRequestRunner.waitForFinish(instanceId, 410, operationData(response))
               }
             }
         ))
@@ -209,12 +211,12 @@ class BindingJUnit5 : TestBase() {
     val provisionTests = listOf(
         dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
 
-          val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
+          val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
 
-          assertTrue("expected status code 200, 201, 202 but was $statusCode") { statusCode in listOf(200, 201, 202) }
+          assertTrue("expected status code 200, 201, 202 but was $response") { response.statusCode() in listOf(200, 201, 202) }
 
-          if (statusCode == 202) {
-            val state = provisionRequestRunner.waitForFinish(instanceId, 200)
+          if (response.statusCode() == 202) {
+            val state = provisionRequestRunner.waitForFinish(instanceId, 200, operationData(response))
             assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
           }
         })
@@ -225,4 +227,6 @@ class BindingJUnit5 : TestBase() {
       provisionTests
     })
   }
+
+  private fun operationData(response: ExtractableResponse<Response>): String = response.body().jsonPath().get("operation")
 }

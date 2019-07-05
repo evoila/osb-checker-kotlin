@@ -9,14 +9,17 @@ class RestAssureConfig(
     configuration: Configuration
 ) {
   init {
-    configuration.correctToken = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${configuration.password}".toByteArray())}"
-    configuration.wrongUserToken = "Basic ${Base64.getEncoder().encodeToString("${UUID.randomUUID()}:${configuration.password}".toByteArray())}"
-    configuration.wrongPasswordToken = "Basic ${Base64.getEncoder().encodeToString("${configuration.user}:${UUID.randomUUID()}".toByteArray())}"
+    configuration.correctToken = encode(configuration.user, configuration.password)
+    configuration.wrongUserToken = encode(UUID.randomUUID().toString(), configuration.password)
+    configuration.wrongPasswordToken = encode(configuration.user, UUID.randomUUID().toString())
 
     RestAssured.baseURI = configuration.url
     RestAssured.port = configuration.port
-    if(configuration.skipTLSVerification){
+    if (configuration.skipTLSVerification) {
       RestAssured.useRelaxedHTTPSValidation()
     }
   }
+
+  private fun encode(user: String, password: String): String =
+      "Basic ${Base64.getEncoder().encodeToString("$user:$password".toByteArray())}"
 }

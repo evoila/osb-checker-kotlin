@@ -15,6 +15,8 @@ class RestAssureConfig(
 
     RestAssured.baseURI = configuration.url
     RestAssured.port = configuration.port
+    if(configuration.skipTLSVerification){
+      RestAssured.useRelaxedHTTPSValidation()
+    }
   }
-
 }

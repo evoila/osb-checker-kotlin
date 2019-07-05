@@ -42,6 +42,7 @@ config:
   apiVersion: 2.13
   user: user
   password: password
+  skipTLSVerification: false
 ##The following configuration are Optional
   usingAppGuid: true
 

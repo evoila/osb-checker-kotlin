@@ -144,8 +144,7 @@ class BindingJUnit5 : TestBase() {
               assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
 
               if (statusCode == 202) {
-                val state = provisionRequestRunner.waitForFinish(instanceId, 410)
-                assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
+                provisionRequestRunner.waitForFinish(instanceId, 410)
               }
             }
         ))
@@ -178,8 +177,7 @@ class BindingJUnit5 : TestBase() {
     assertTrue("StatusCode should be 200 or 202 but was $statusCode.") { statusCode in listOf(200, 202) }
 
     if (statusCode == 202) {
-      val state = bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
-      assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
+      bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
     }
   }
 

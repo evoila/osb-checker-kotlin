@@ -168,7 +168,6 @@ class BindingRequestRunner(
         .statusCode(401)
   }
 
-
   fun deleteNoAuth() {
     RestAssured.with()
         .log().ifValidationFails()

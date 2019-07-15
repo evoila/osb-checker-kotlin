@@ -28,7 +28,6 @@ class Configuration {
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   var services = mutableListOf<CustomServices>()
 
-
   fun initCustomCatalog(): Catalog? {
     return if (services.isNotEmpty()) {
 

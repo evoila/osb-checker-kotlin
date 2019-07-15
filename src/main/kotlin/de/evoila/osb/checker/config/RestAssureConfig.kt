@@ -29,5 +29,4 @@ class RestAssureConfig(
     private val supportedApiVersions = listOf(2.13, 2.14)
     private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
   }
-
 }

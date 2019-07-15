@@ -30,7 +30,7 @@ class CatalogRequestRunner(
 
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .get("/v2/catalog")
         .then()
@@ -44,7 +44,7 @@ class CatalogRequestRunner(
   fun correctRequest(): Catalog {
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .get("/v2/catalog")
         .then()
@@ -61,7 +61,7 @@ class CatalogRequestRunner(
   fun noAuth() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -72,7 +72,7 @@ class CatalogRequestRunner(
   fun wrongUser() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.wrongUserToken))
         .get("/v2/catalog")
         .then()
@@ -84,7 +84,7 @@ class CatalogRequestRunner(
   fun wrongPassword() {
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", configuration.apiVersion))
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.wrongPasswordToken))
         .get("/v2/catalog")
         .then()

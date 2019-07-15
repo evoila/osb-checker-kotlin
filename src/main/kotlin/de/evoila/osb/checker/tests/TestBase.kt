@@ -20,10 +20,10 @@ abstract class TestBase {
 
   @Autowired
   lateinit var configuration: Configuration
-
 }
 
 data class TestCase<out T : RequestBody>(
     val requestBody: T,
     val message: String
 )
+

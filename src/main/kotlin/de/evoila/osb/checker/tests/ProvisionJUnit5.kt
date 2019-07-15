@@ -106,7 +106,7 @@ class ProvisionJUnit5 : TestBase() {
         )
     ).forEach {
       dynamicNodes.add(
-          DynamicTest.dynamicTest("PUT ${it.message}") {
+          dynamicTest("PUT ${it.message}") {
             val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
             assertTrue("Expected status code is 400 but was $statusCode") {
               400 == statusCode

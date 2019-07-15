@@ -66,6 +66,7 @@ config:
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
+Currently the application can test 2.13 or 2.14 Service Brokers. Therefor apiVersion MUST be set to one 2.13 or 2.14.
 usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.

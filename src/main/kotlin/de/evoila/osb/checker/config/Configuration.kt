@@ -6,9 +6,7 @@ import de.evoila.osb.checker.response.Service
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
 import kotlin.collections.HashMap
-import kotlin.test.assertTrue
 
 @Component
 @ConfigurationProperties(prefix = "config")
@@ -30,11 +28,6 @@ class Configuration {
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
 
   var services = mutableListOf<CustomServices>()
-
-  @PostConstruct
-  fun validateApiVersion() {
-    assertTrue(apiVersion in supportedApiVersions, noSupportedApiVersion)
-  }
 
   fun initCustomCatalog(): Catalog? {
 

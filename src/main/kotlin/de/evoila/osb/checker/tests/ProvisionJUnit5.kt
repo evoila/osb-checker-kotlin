@@ -4,7 +4,6 @@ import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -106,7 +105,7 @@ class ProvisionJUnit5 : TestBase() {
         )
     ).forEach {
       dynamicNodes.add(
-          DynamicTest.dynamicTest("PUT ${it.message}") {
+          dynamicTest("PUT ${it.message}") {
             val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
             assertTrue("Expected status code is 400 but was ${response.statusCode()}") {
               400 == response.statusCode()

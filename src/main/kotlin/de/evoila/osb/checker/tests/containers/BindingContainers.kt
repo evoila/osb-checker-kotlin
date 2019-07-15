@@ -32,7 +32,6 @@ class BindingContainers(
   }
 
   fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicContainer {
-
     return DynamicContainer.dynamicContainer(VALID_BINDING_MESSAGE,
         createValidBindingTests(bindingId, binding, instanceId)
             .plus(validDeleteTest(binding, instanceId, bindingId)))
@@ -96,9 +95,13 @@ class BindingContainers(
     }
   }
 
-  fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicContainer {
+  fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning): DynamicContainer {
+    return DynamicContainer.dynamicContainer("Provision and in case of a async service broker polling, for later binding",
+        createValidProvisionTests(instanceId, provision, planName))
+  }
 
-    val provisionTests = listOf(
+  private fun createValidProvisionTests(instanceId: String, provision: ProvisionBody.ValidProvisioning, planName: String): List<DynamicTest> {
+    return listOf(
         DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
 
           val statusCode = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
@@ -110,6 +113,10 @@ class BindingContainers(
             assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
           }
         })
+  }
+
+  fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicContainer {
+    val provisionTests = createValidProvisionTests(instanceId, provision, planName)
 
     return DynamicContainer.dynamicContainer("Provision and in case of a async service broker polling, for later binding", if (isRetrievable) {
       provisionTests.plus(validRetrievableInstanceContainer(instanceId, provision, isRetrievable))

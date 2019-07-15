@@ -33,7 +33,6 @@ class BindingJUnit5 : TestBase() {
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
         val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
-
         val provision = ProvisionBody.ValidProvisioning(service, plan)
         val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
 
@@ -49,24 +48,13 @@ class BindingJUnit5 : TestBase() {
           }
         }
 
-        val testContainers = mutableListOf(bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision,
-            service.instancesRetrievable ?: false))
-
-        if (configuration.apiVersion < 2.14) {
-          testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId))
-        } else {
-          val bindable = plan.bindable ?: service.bindable
-
-          if (bindable) {
-            testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId, service.bindingsRetrievable
+        val testContainers = mutableListOf(
+            bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
                 ?: false))
-          }
-        }
-        testContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
-
-        dynamicNodes.add(
-            dynamicContainer(VALID_BINDING_MESSAGE, testContainers)
         )
+        testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId, configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false))
+        testContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
+        dynamicNodes.add(dynamicContainer(VALID_BINDING_MESSAGE, testContainers))
       }
     }
 
@@ -93,8 +81,8 @@ class BindingJUnit5 : TestBase() {
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     dynamicNodes.add(
-        bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision, service.instancesRetrievable
-            ?: false)
+        bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
+            ?: false))
     )
 
     val invalidBindings = mutableListOf<DynamicNode>()

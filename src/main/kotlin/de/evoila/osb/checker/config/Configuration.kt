@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import kotlin.collections.HashMap
+import kotlin.test.assertTrue
 
 @Component
 @ConfigurationProperties(prefix = "config")
@@ -32,7 +33,7 @@ class Configuration {
 
   @PostConstruct
   fun validateApiVersion() {
-    assert(apiVersion in supportedApiVersions)
+    assertTrue(apiVersion in supportedApiVersions, noSupportedApiVersion)
   }
 
   fun initCustomCatalog(): Catalog? {
@@ -90,5 +91,6 @@ class Configuration {
   companion object {
     val notAnId = UUID.randomUUID().toString()
     private val supportedApiVersions = listOf(2.13, 2.14)
+    private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
   }
 }

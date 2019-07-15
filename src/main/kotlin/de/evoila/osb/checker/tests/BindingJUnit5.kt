@@ -135,6 +135,5 @@ class BindingJUnit5 : TestBase() {
 
   companion object {
     private const val VALID_BINDING_MESSAGE = "Running a valid provision and if the service is bindable a valid binding. Deleting both afterwards. In case of a async service broker poll afterwards."
-    private val CAN_BE_RETRIVABLE = listOf("2.14", "2.15")
   }
 }

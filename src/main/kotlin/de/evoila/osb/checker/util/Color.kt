@@ -33,11 +33,11 @@ enum class Color constructor(
   companion object {
 
     fun valueOf(result: TestExecutionResult): Color {
-      when (result.status) {
-        TestExecutionResult.Status.SUCCESSFUL -> return Color.SUCCESSFUL
-        TestExecutionResult.Status.ABORTED -> return Color.ABORTED
-        TestExecutionResult.Status.FAILED -> return Color.FAILED
-        else -> return Color.NONE
+      return when (result.status) {
+        TestExecutionResult.Status.SUCCESSFUL -> SUCCESSFUL
+        TestExecutionResult.Status.ABORTED -> ABORTED
+        TestExecutionResult.Status.FAILED -> FAILED
+        else -> NONE
       }
     }
 
@@ -45,9 +45,9 @@ enum class Color constructor(
       return if (testIdentifier.isContainer) CONTAINER else TEST
     }
 
-    val SUCCESSFUL = GREEN
+    private val SUCCESSFUL = GREEN
 
-    val ABORTED = YELLOW
+    private val ABORTED = YELLOW
 
     val FAILED = RED
 
@@ -55,7 +55,7 @@ enum class Color constructor(
 
     val CONTAINER = CYAN
 
-    val TEST = BLUE
+    private val TEST = BLUE
 
     val DYNAMIC = PURPLE
 

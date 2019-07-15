@@ -6,7 +6,9 @@ import de.evoila.osb.checker.response.Service
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 import kotlin.collections.HashMap
+import kotlin.test.assertTrue
 
 @Component
 @ConfigurationProperties(prefix = "config")
@@ -15,7 +17,7 @@ class Configuration {
   lateinit var url: String
 
   var port: Int = 80
-  lateinit var apiVersion: String
+  var apiVersion: Double = 0.0
   lateinit var user: String
   lateinit var password: String
   lateinit var correctToken: String
@@ -27,8 +29,12 @@ class Configuration {
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
 
-  final var services = mutableListOf<CustomServices>()
+  var services = mutableListOf<CustomServices>()
 
+  @PostConstruct
+  fun validateApiVersion() {
+    assertTrue(apiVersion in supportedApiVersions, noSupportedApiVersion)
+  }
 
   fun initCustomCatalog(): Catalog? {
 
@@ -83,6 +89,8 @@ class Configuration {
   }
 
   companion object {
-    val NOT_AN_ID = UUID.randomUUID().toString()
+    val notAnId = UUID.randomUUID().toString()
+    private val supportedApiVersions = listOf(2.13, 2.14)
+    private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
   }
 }

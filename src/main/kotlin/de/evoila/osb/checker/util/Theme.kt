@@ -77,11 +77,11 @@ enum class Theme(
         return tiles[4]
     }
 
-    fun aborted(): String {
+    private fun aborted(): String {
         return tiles[5]
     }
 
-    fun failed(): String {
+    private fun failed(): String {
         return tiles[6]
     }
 

@@ -18,6 +18,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.PrintWriter
 import java.util.logging.Level
+import kotlin.system.exitProcess
 
 @SpringBootApplication
 class Application
@@ -99,7 +100,5 @@ fun main(args: Array<String>) {
   launcher.execute(request)
   summaryGenerator.summary.printTo(PrintWriter(System.out))
 
-  System.exit(
-      summaryGenerator.summary.failures.size
-  )
+  exitProcess(summaryGenerator.summary.failures.size)
 }

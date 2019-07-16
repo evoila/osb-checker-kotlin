@@ -26,11 +26,9 @@ class Configuration {
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
-
   var services = mutableListOf<CustomServices>()
 
   fun initCustomCatalog(): Catalog? {
-
     return if (services.isNotEmpty()) {
 
       Catalog(
@@ -83,7 +81,5 @@ class Configuration {
 
   companion object {
     val notAnId = UUID.randomUUID().toString()
-    private val supportedApiVersions = listOf(2.13, 2.14)
-    private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
   }
 }

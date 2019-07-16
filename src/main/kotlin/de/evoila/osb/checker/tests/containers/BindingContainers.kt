@@ -52,8 +52,7 @@ class BindingContainers(
   fun createValidBindingTests(bindingId: String, binding: BindingBody, instanceId: String): List<DynamicTest> {
     return listOf(
         DynamicTest.dynamicTest("Running a valid binding with bindingId $bindingId") {
-          val statusCode = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId)
-          assertTrue { statusCode in listOf(201, 202) }
+          val statusCode = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId, 201, 202)
 
           if (statusCode == 202) {
             val state = bindingRequestRunner.waitForFinish(instanceId, bindingId, 200)
@@ -65,9 +64,7 @@ class BindingContainers(
 
   fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String): DynamicTest =
       DynamicTest.dynamicTest("Deleting binding with bindingId $bindingId") {
-        val statusCode = bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, instanceId, bindingId)
-
-        assertTrue("$STATUS_CODE_MESSAGE $statusCode.") { statusCode in listOf(200, 202) }
+        val statusCode = bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, instanceId, bindingId, 200, 202)
 
         if (statusCode == 202) {
           bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)

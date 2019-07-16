@@ -26,11 +26,9 @@ class Configuration {
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
   val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
-
   var services = mutableListOf<CustomServices>()
 
   fun initCustomCatalog(): Catalog? {
-
     return if (services.isNotEmpty()) {
 
       Catalog(

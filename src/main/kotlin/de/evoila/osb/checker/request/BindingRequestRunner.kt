@@ -7,6 +7,7 @@ import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
+import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import kotlin.test.assertTrue
 
@@ -32,10 +33,9 @@ class BindingRequestRunner(
     JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json").matches(response.body())
   }
 
-  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String): Int {
-
+  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): Int {
     val response = RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
@@ -43,11 +43,12 @@ class BindingRequestRunner(
         .param("accepts_incomplete", configuration.apiVersion > 2.13)
         .put("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
+        .statusCode(IsIn(expectedStatusCodes.asList()))
         .extract()
 
-    if (response.statusCode() in listOf(200, 201)) {
+    if (response.statusCode() == 200) {
       JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json").matches(response.body())
     }
 
@@ -64,9 +65,9 @@ class BindingRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
         .extract()
         .response()
-
     assertTrue("Expected StatusCode is $expectedFinalStatusCode but was ${response.statusCode} ")
     { response.statusCode in listOf(expectedFinalStatusCode, 200) }
 
@@ -90,13 +91,13 @@ class BindingRequestRunner(
     }
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String): Int {
+  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCode : Int): Int {
 
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
     return RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
@@ -105,8 +106,9 @@ class BindingRequestRunner(
         .param("accepts_incomplete", configuration.apiVersion > 2.13)
         .delete(path)
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
+        .statusCode(IsIn(expectedStatusCode.asList()))
         .extract()
         .response().statusCode
   }

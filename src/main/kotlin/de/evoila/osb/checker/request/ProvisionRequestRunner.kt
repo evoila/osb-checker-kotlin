@@ -10,6 +10,12 @@ import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
 import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
+import org.hamcrest.Matchers
+import org.hamcrest.beans.HasProperty
+import org.hamcrest.collection.IsArrayContaining
+import org.hamcrest.collection.IsIn
+import org.hamcrest.core.Every
+import org.hamcrest.core.IsCollectionContaining
 import org.springframework.stereotype.Service
 import kotlin.test.assertTrue
 
@@ -43,8 +49,8 @@ class ProvisionRequestRunner(
     }
   }
 
-  fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody): Int {
-    return RestAssured.with()
+  fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
+    RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
@@ -54,20 +60,21 @@ class ProvisionRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .statusCode(IsIn(listOf(201, 422)))
         .extract()
         .statusCode()
   }
 
   fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody): ExtractableResponse<Response> {
     val response = RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
         .then()
-        .log().all()
+        .log().ifValidationFails()
         .assertThat()
         .extract()
 
@@ -115,40 +122,36 @@ class ProvisionRequestRunner(
     }
   }
 
-  fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?): Int {
-
+  fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
     var path = "/v2/service_instances/$instanceId"
-
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
-    return RestAssured.with()
-        .log().all()
+    RestAssured.with()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
-        .log().all()
+        .log().ifValidationFails()
+        .statusCode(IsIn(listOf(200, 422)))
         .extract()
-        .statusCode()
   }
 
   fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?): ExtractableResponse<Response> {
-
     var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
-
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
 
     return RestAssured.with()
-        .log().all()
+        .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
-        .log().all  ()
+        .log().ifValidationFails()
         .extract()
   }
 

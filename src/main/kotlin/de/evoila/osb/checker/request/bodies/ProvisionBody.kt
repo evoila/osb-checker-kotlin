@@ -22,7 +22,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  data class NoServiceFieldProvisioning(
+  data class NoPlanFieldProvisioning(
       var service_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString()
@@ -33,7 +33,7 @@ abstract class ProvisionBody : RequestBody {
     )
   }
 
-  data class NoPlanFieldProvisioning(
+  data class NoServiceFieldProvisioning(
       var plan_id: String?,
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString()

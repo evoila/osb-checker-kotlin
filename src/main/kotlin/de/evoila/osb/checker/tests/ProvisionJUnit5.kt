@@ -65,13 +65,13 @@ class ProvisionJUnit5 : TestBase() {
         ),
         TestCase(
             requestBody = ProvisionBody.NoServiceFieldProvisioning(
-                service
+                plan
             ),
             message = "should reject if missing service_id field"
         ),
         TestCase(
             requestBody = ProvisionBody.NoPlanFieldProvisioning(
-                plan
+                service
             ),
             message = "should reject if missing plan_id field"
         ),
@@ -102,10 +102,7 @@ class ProvisionJUnit5 : TestBase() {
     ).forEach {
       dynamicNodes.add(
           dynamicTest("PUT ${it.message}") {
-            val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
-            assertTrue("Expected status code is 400 but was ${response.statusCode()}") {
-              400 == response.statusCode()
-            }
+            provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody, 400)
           }
       )
     }
@@ -139,16 +136,15 @@ class ProvisionJUnit5 : TestBase() {
             )
         )
     ).forEach {
-      dynamicNodes.add(dynamicTest("DELETE ${it.message}")
-      {
+      dynamicNodes.add(dynamicTest("DELETE ${it.message}") {
         val provisionBody = it.requestBody
 
-        val response = provisionRequestRunner.runDeleteProvisionRequestAsync(
+        provisionRequestRunner.runDeleteProvisionRequestAsync(
             serviceId = provisionBody.service_id,
             planId = provisionBody.plan_id,
-            instanceId = instanceId
+            instanceId = instanceId,
+            expectedFinalStatusCodes = intArrayOf(400)
         )
-        assertTrue("Should decline a invalid DELETE request with 400 but was ${response.statusCode()}") { response.statusCode() == 400 }
       }
       )
     }

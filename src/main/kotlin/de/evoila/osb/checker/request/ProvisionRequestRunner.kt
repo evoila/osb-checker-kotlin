@@ -10,12 +10,7 @@ import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
 import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
-import org.hamcrest.Matchers
-import org.hamcrest.beans.HasProperty
-import org.hamcrest.collection.IsArrayContaining
 import org.hamcrest.collection.IsIn
-import org.hamcrest.core.Every
-import org.hamcrest.core.IsCollectionContaining
 import org.springframework.stereotype.Service
 import kotlin.test.assertTrue
 
@@ -24,8 +19,8 @@ class ProvisionRequestRunner(
     val configuration: Configuration
 ) {
 
-  fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance? {
-    val response = RestAssured.with()
+  fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
+    return RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
@@ -34,23 +29,17 @@ class ProvisionRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .statusCode(200)
+        .and()
+        .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-instance-response-schema.json"))
         .extract()
         .response()
-
-    return if (retrievable) {
-      assertTrue("Expected StatusCode is 200 but was ${response.statusCode}") { response.statusCode == 200 }
-
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response.body)
-
-      return response.jsonPath().getObject("", ServiceInstance::class.java)
-    } else {
-
-      null
-    }
+        .jsonPath()
+        .getObject("", ServiceInstance::class.java)
   }
 
   fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
-    RestAssured.with()
+    val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
@@ -61,11 +50,15 @@ class ProvisionRequestRunner(
         .log().ifValidationFails()
         .assertThat()
         .statusCode(IsIn(listOf(201, 422)))
+        .and()
         .extract()
-        .statusCode()
+
+    if (response.statusCode() == 201) {
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
+    }
   }
 
-  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody): ExtractableResponse<Response> {
+  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
@@ -75,6 +68,7 @@ class ProvisionRequestRunner(
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
         .then()
         .log().ifValidationFails()
+        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
         .assertThat()
         .extract()
 
@@ -96,11 +90,9 @@ class ProvisionRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
         .extract()
         .response()
-
-    assertTrue("Expected StatusCode is $expectedFinalStatusCode but was ${response.statusCode} ")
-    { response.statusCode in listOf(expectedFinalStatusCode, 200) }
 
     return if (response.statusCode == 200) {
 
@@ -139,7 +131,7 @@ class ProvisionRequestRunner(
         .extract()
   }
 
-  fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?): ExtractableResponse<Response> {
+  fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?, expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
     var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
@@ -152,6 +144,8 @@ class ProvisionRequestRunner(
         .delete(path)
         .then()
         .log().ifValidationFails()
+        .assertThat()
+        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
         .extract()
   }
 

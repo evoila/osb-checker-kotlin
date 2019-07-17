@@ -23,20 +23,13 @@ class BindingContainers(
     return DynamicContainer.dynamicContainer("Deleting provision",
         listOf(
             DynamicTest.dynamicTest(DELETE_PROVISION_MESSAGE) {
-              val response = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id)
-              assertTrue("$STATUS_CODE_MESSAGE $response.") { response.statusCode() in listOf(200, 202) }
+              val response = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id, intArrayOf(200, 202))
 
               if (response.statusCode() == 202) {
                 provisionRequestRunner.waitForFinish(instanceId, 410, operationData(response))
               }
             }
         ))
-  }
-
-  fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String): DynamicContainer {
-    return DynamicContainer.dynamicContainer(VALID_BINDING_MESSAGE,
-        createValidBindingTests(bindingId, binding, instanceId)
-            .plus(validDeleteTest(binding, instanceId, bindingId)))
   }
 
   fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String, isRetrievable: Boolean): DynamicContainer {
@@ -84,9 +77,8 @@ class BindingContainers(
 
       val serviceInstance = provisionRequestRunner.getProvision(instanceId, isRetrievable)
 
-      assertNotNull(serviceInstance, "did not receive a service instance as a response")
       assertTrue("When retrieving the instance the response did not match the expected value. \n" +
-          "service_id: expected ${provision.service_id} actual ${serviceInstance!!.serviceId} \n" +
+          "service_id: expected ${provision.service_id} actual ${serviceInstance.serviceId} \n" +
           "plan_id: expected ${provision.plan_id} actual ${serviceInstance.planId}")
       {
         serviceInstance.serviceId == provision.service_id && serviceInstance.planId == provision.plan_id
@@ -94,18 +86,11 @@ class BindingContainers(
     }
   }
 
-  fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning): DynamicContainer {
-    return DynamicContainer.dynamicContainer("Provision and in case of a async service broker polling, for later binding",
-        createValidProvisionTests(instanceId, provision, planName))
-  }
-
   private fun createValidProvisionTests(instanceId: String, provision: ProvisionBody.ValidProvisioning, planName: String): List<DynamicTest> {
     return listOf(
         DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
 
-          val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision)
-
-          assertTrue("expected status code 200, 201, 202 but was ${response.statusCode()}") { response.statusCode() in listOf(200, 201, 202) }
+          val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 201, 202, 200)
 
           if (response.statusCode() == 202) {
             val state = provisionRequestRunner.waitForFinish(instanceId, 200, operationData(response))
@@ -129,6 +114,5 @@ class BindingContainers(
   companion object {
     private const val VALID_BINDING_MESSAGE = "Running PUT binding and DELETE binding afterwards"
     private const val DELETE_PROVISION_MESSAGE = "DELETE provision and if the service broker is async polling afterwards"
-    private const val STATUS_CODE_MESSAGE = "StatusCode should be 200 or 202 but was"
   }
 }

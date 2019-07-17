@@ -65,13 +65,13 @@ class ProvisionJUnit5 : TestBase() {
         ),
         TestCase(
             requestBody = ProvisionBody.NoServiceFieldProvisioning(
-                service
+                plan
             ),
             message = "should reject if missing service_id field"
         ),
         TestCase(
             requestBody = ProvisionBody.NoPlanFieldProvisioning(
-                plan
+                service
             ),
             message = "should reject if missing plan_id field"
         ),

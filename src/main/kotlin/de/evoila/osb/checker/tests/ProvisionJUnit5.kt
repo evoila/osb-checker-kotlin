@@ -28,14 +28,10 @@ class ProvisionJUnit5 : TestBase() {
     dynamicNodes.add(
         dynamicContainer("should handle sync requests correctly", listOf(
             dynamicTest("Sync PUT request") {
-              val statusCodePut = provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
-              assertTrue("Should return  201 in case of a sync service broker or 422 if it's async but it was $statusCodePut.")
-              { statusCodePut in listOf(201, 422) }
+              provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
             },
             dynamicTest("Sync DELETE request") {
-              val statusCodePut = provisionRequestRunner.runDeleteProvisionRequestSync(instanceId, provisionRequestBody.service_id, provisionRequestBody.plan_id)
-              assertTrue("Should return  200 in case of a sync Service Broker or 422 if it's async but it was $statusCodePut.")
-              { statusCodePut in listOf(200, 422) }
+              provisionRequestRunner.runDeleteProvisionRequestSync(instanceId, provisionRequestBody.service_id, provisionRequestBody.plan_id)
             }
         ))
     )
@@ -69,13 +65,13 @@ class ProvisionJUnit5 : TestBase() {
         ),
         TestCase(
             requestBody = ProvisionBody.NoServiceFieldProvisioning(
-                service
+                plan
             ),
             message = "should reject if missing service_id field"
         ),
         TestCase(
             requestBody = ProvisionBody.NoPlanFieldProvisioning(
-                plan
+                service
             ),
             message = "should reject if missing plan_id field"
         ),
@@ -106,10 +102,7 @@ class ProvisionJUnit5 : TestBase() {
     ).forEach {
       dynamicNodes.add(
           dynamicTest("PUT ${it.message}") {
-            val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody)
-            assertTrue("Expected status code is 400 but was ${response.statusCode()}") {
-              400 == response.statusCode()
-            }
+            provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody, 400)
           }
       )
     }
@@ -143,16 +136,15 @@ class ProvisionJUnit5 : TestBase() {
             )
         )
     ).forEach {
-      dynamicNodes.add(dynamicTest("DELETE ${it.message}")
-      {
+      dynamicNodes.add(dynamicTest("DELETE ${it.message}") {
         val provisionBody = it.requestBody
 
-        val response = provisionRequestRunner.runDeleteProvisionRequestAsync(
+        provisionRequestRunner.runDeleteProvisionRequestAsync(
             serviceId = provisionBody.service_id,
             planId = provisionBody.plan_id,
-            instanceId = instanceId
+            instanceId = instanceId,
+            expectedFinalStatusCodes = intArrayOf(400)
         )
-        assertTrue("Should decline a invalid DELETE request with 400 but was ${response.statusCode()}") { response.statusCode() == 400 }
       }
       )
     }

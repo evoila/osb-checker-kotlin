@@ -5,14 +5,12 @@ import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.tests.containers.BindingContainers
-import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
-import kotlin.test.assertTrue
 
 class BindingJUnit5 : TestBase() {
 
@@ -100,18 +98,13 @@ class BindingJUnit5 : TestBase() {
     ).forEach {
       invalidBindings.add(
           dynamicTest("PUT ${it.message}")
-          { assertTrue { 400 == bindingRequestRunner.runPutBindingRequest(it.requestBody, instanceId, bindingId) } }
+          { bindingRequestRunner.runPutBindingRequest(it.requestBody, instanceId, bindingId, 400) }
       )
       invalidBindings.add(
           dynamicTest("DELETE ${it.message}")
           {
             val bindingRequestBody = it.requestBody
-
-            bindingRequestRunner.runDeleteBindingRequest(
-                serviceId = bindingRequestBody.service_id,
-                planId = bindingRequestBody.plan_id,
-                instanceId = instanceId,
-                bindingId = bindingId)
+            bindingRequestRunner.runDeleteBindingRequest(bindingRequestBody.service_id, bindingRequestBody.plan_id, instanceId, bindingId, 410)
           }
       )
     }

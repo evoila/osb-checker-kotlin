@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.response
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Plan(
@@ -9,5 +10,7 @@ data class Plan(
     val description: String,
     val plan_updatable: String?,
     val bindable: Boolean?,
-    val metadata: PlanMetadata?
+    val metadata: PlanMetadata?,
+    @JsonProperty("maximum_polling_duration")
+    val maximum_polling_duration: Int = 86400
 )

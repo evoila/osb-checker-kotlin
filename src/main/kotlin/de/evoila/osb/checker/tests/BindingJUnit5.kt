@@ -47,10 +47,10 @@ class BindingJUnit5 : TestBase() {
         }
 
         val testContainers = mutableListOf(
-            bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
+            bindingContainerFactory.validProvisionContainer(instanceId, plan, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
                 ?: false))
         )
-        testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId, configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false))
+        testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId, configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false, plan))
         testContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
         dynamicNodes.add(dynamicContainer(VALID_BINDING_MESSAGE, testContainers))
       }
@@ -79,7 +79,7 @@ class BindingJUnit5 : TestBase() {
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     dynamicNodes.add(
-        bindingContainerFactory.validProvisionContainer(instanceId, plan.name, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
+        bindingContainerFactory.validProvisionContainer(instanceId, plan, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
             ?: false))
     )
 

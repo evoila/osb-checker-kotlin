@@ -3,17 +3,23 @@ package de.evoila.osb.checker.request
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.LastOperationResponse
+import de.evoila.osb.checker.response.LastOperationResponse.*
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
+import io.restassured.response.ExtractableResponse
+import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
+import java.time.Instant
 import kotlin.test.assertTrue
 
 @Service
 class BindingRequestRunner(
-    val configuration: Configuration
+    configuration: Configuration
+) : PollingRequestHandler(
+    configuration
 ) {
 
   fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
@@ -33,7 +39,7 @@ class BindingRequestRunner(
     JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json").matches(response.body())
   }
 
-  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): Int {
+  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
@@ -52,47 +58,19 @@ class BindingRequestRunner(
       JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json").matches(response.body())
     }
 
-    return response.statusCode()
+    return response
   }
 
-  fun waitForFinish(instanceId: String, bindingId: String, expectedFinalStatusCode: Int): String {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/$instanceId/service_bindings/$bindingId/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
-        .extract()
-        .response()
-    assertTrue("Expected StatusCode is $expectedFinalStatusCode but was ${response.statusCode} ")
-    { response.statusCode in listOf(expectedFinalStatusCode, 200) }
-
-    return if (response.statusCode == 200) {
-
-      val responseBody = response.jsonPath()
-          .getObject("", LastOperationResponse::class.java)
-
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
-
-      if (responseBody.state == "in progress") {
-        Thread.sleep(10000)
-        return waitForFinish(instanceId, bindingId, expectedFinalStatusCode)
-      }
-      assertTrue("Expected response body \"succeeded\" or \"failed\" but was ${responseBody.state}")
-      { responseBody.state in listOf("succeeded", "failed") }
-
-      responseBody.state
-    } else {
-      ""
-    }
+  fun polling(instanceId: String, bindingId: String, expectedFinalStatusCode: Int, operationData: String, maxPollingDuration: Int): State {
+    val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
+    return waitForFinish(
+        "/v2/service_instances/$instanceId/service_bindings/$bindingId/last_operation",
+        expectedFinalStatusCode,
+        operationData,
+        latestAcceptablePollingInstant)
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCode : Int): Int {
-
+  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCode: Int): ExtractableResponse<Response> {
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
@@ -110,7 +88,6 @@ class BindingRequestRunner(
         .assertThat()
         .statusCode(IsIn(expectedStatusCode.asList()))
         .extract()
-        .response().statusCode
   }
 
   fun putWithoutHeader() {

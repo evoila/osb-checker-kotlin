@@ -4,13 +4,13 @@ import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.response.LastOperationResponse.State.*
 import de.evoila.osb.checker.response.Plan
 import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.springframework.stereotype.Service
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Service
@@ -26,41 +26,45 @@ class BindingContainers(
               val response = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id, intArrayOf(200, 202))
 
               if (response.statusCode() == 202) {
-                provisionRequestRunner.waitForFinish(instanceId, 410, operationData(response))
+                assertTrue(DELETE_RESULT_MESSAGE) {
+                  GONE == provisionRequestRunner.polling(instanceId, 410, operationData(response), plan.maximum_polling_duration)
+                }
               }
             }
         ))
   }
 
-  fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String, isRetrievable: Boolean): DynamicContainer {
+  fun validBindingContainer(binding: BindingBody, instanceId: String, bindingId: String, isRetrievable: Boolean, plan: Plan): DynamicContainer {
 
     return DynamicContainer.dynamicContainer(VALID_BINDING_MESSAGE, if (isRetrievable) {
-      createValidBindingTests(bindingId, binding, instanceId)
-          .plus(listOf(validRetrievableBindingContainer(instanceId, bindingId), validDeleteTest(binding, instanceId, bindingId)))
+      createValidBindingTests(bindingId, binding, instanceId, plan)
+          .plus(listOf(validRetrievableBindingContainer(instanceId, bindingId), validDeleteTest(binding, instanceId, bindingId, plan)))
     } else {
-      createValidBindingTests(bindingId, binding, instanceId).plus(validDeleteTest(binding, instanceId, bindingId))
+      createValidBindingTests(bindingId, binding, instanceId, plan).plus(validDeleteTest(binding, instanceId, bindingId, plan))
     })
   }
 
-  fun createValidBindingTests(bindingId: String, binding: BindingBody, instanceId: String): List<DynamicTest> {
+  fun createValidBindingTests(bindingId: String, binding: BindingBody, instanceId: String, plan: Plan): List<DynamicTest> {
     return listOf(
         DynamicTest.dynamicTest("Running a valid binding with bindingId $bindingId") {
-          val statusCode = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId, 201, 202)
+          val response = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId, 201, 202)
 
-          if (statusCode == 202) {
-            val state = bindingRequestRunner.waitForFinish(instanceId, bindingId, 200)
-            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
+          if (response.statusCode() == 202) {
+            val state = bindingRequestRunner.polling(instanceId, bindingId, 200, operationData(response), plan.maximum_polling_duration)
+            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { SUCCEEDED == state }
           }
         }
     )
   }
 
-  fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String): DynamicTest =
+  fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String, plan: Plan): DynamicTest =
       DynamicTest.dynamicTest("Deleting binding with bindingId $bindingId") {
-        val statusCode = bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, instanceId, bindingId, 200, 202)
+        val response = bindingRequestRunner.runDeleteBindingRequest(binding.service_id, binding.plan_id, instanceId, bindingId, 200, 202)
 
-        if (statusCode == 202) {
-          bindingRequestRunner.waitForFinish(instanceId, bindingId, 410)
+        if (response.statusCode() == 202) {
+          assertTrue(DELETE_RESULT_MESSAGE) {
+            GONE == bindingRequestRunner.polling(instanceId, bindingId, 410, operationData(response), plan.maximum_polling_duration)
+          }
         }
       }
 
@@ -86,21 +90,20 @@ class BindingContainers(
     }
   }
 
-  private fun createValidProvisionTests(instanceId: String, provision: ProvisionBody.ValidProvisioning, planName: String): List<DynamicTest> {
+  private fun createValidProvisionTests(instanceId: String, provision: ProvisionBody.ValidProvisioning, plan: Plan): List<DynamicTest> {
     return listOf(
-        DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $planName id: ${provision.plan_id}") {
-
+        DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $plan id: ${provision.plan_id}") {
           val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 201, 202, 200)
 
           if (response.statusCode() == 202) {
-            val state = provisionRequestRunner.waitForFinish(instanceId, 200, operationData(response))
-            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
+            val state = provisionRequestRunner.polling(instanceId, 200, operationData(response), plan.maximum_polling_duration)
+            assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { SUCCEEDED == state }
           }
         })
   }
 
-  fun validProvisionContainer(instanceId: String, planName: String, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicContainer {
-    val provisionTests = createValidProvisionTests(instanceId, provision, planName)
+  fun validProvisionContainer(instanceId: String, plan: Plan, provision: ProvisionBody.ValidProvisioning, isRetrievable: Boolean): DynamicContainer {
+    val provisionTests = createValidProvisionTests(instanceId, provision, plan)
 
     return DynamicContainer.dynamicContainer("Provision and in case of a async service broker polling, for later binding", if (isRetrievable) {
       provisionTests.plus(validRetrievableInstanceContainer(instanceId, provision, isRetrievable))
@@ -114,5 +117,6 @@ class BindingContainers(
   companion object {
     private const val VALID_BINDING_MESSAGE = "Running PUT binding and DELETE binding afterwards"
     private const val DELETE_PROVISION_MESSAGE = "DELETE provision and if the service broker is async polling afterwards"
+    private const val DELETE_RESULT_MESSAGE = "Delete has to result in 410"
   }
 }

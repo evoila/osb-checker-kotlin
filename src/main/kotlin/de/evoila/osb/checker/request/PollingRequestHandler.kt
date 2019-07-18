@@ -1,0 +1,55 @@
+package de.evoila.osb.checker.request
+
+import de.evoila.osb.checker.config.Configuration
+import de.evoila.osb.checker.response.LastOperationResponse
+import io.restassured.RestAssured
+import io.restassured.http.ContentType
+import io.restassured.http.Header
+import io.restassured.module.jsv.JsonSchemaValidator
+import org.hamcrest.collection.IsIn
+import java.time.Instant
+import kotlin.test.assertTrue
+
+abstract class PollingRequestHandler(
+    val configuration: Configuration
+) {
+
+  fun waitForFinish(path: String,
+                    expectedFinalStatusCode: Int,
+                    operationData: String,
+                    latestAcceptablePollingInstant: Instant
+
+  ): LastOperationResponse.State {
+
+    val response = RestAssured.with()
+        .log().ifValidationFails()
+        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+        .header(Header("Authorization", configuration.correctToken))
+        .contentType(ContentType.JSON)
+        .queryParam("operation", operationData)
+        .get(path)
+        .then()
+        .log().ifValidationFails()
+        .assertThat()
+        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
+        .extract()
+        .response()
+
+    assertTrue("") { Instant.now().isBefore(latestAcceptablePollingInstant) }
+
+    if (response.statusCode == 410) {
+      return LastOperationResponse.State.GONE
+    }
+
+    JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response)
+    val responseBody = response.jsonPath()
+        .getObject("", LastOperationResponse::class.java)
+
+    return if (responseBody.state == LastOperationResponse.State.IN_PROGRESS) {
+      Thread.sleep(10000)
+      waitForFinish(path, expectedFinalStatusCode, operationData, latestAcceptablePollingInstant)
+    } else {
+      responseBody.state
+    }
+  }
+}

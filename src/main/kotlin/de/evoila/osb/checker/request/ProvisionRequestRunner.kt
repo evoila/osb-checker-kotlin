@@ -2,7 +2,7 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse
+import de.evoila.osb.checker.response.LastOperationResponse.*
 import de.evoila.osb.checker.response.ServiceInstance
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
@@ -12,11 +12,13 @@ import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
-import kotlin.test.assertTrue
+import java.time.Instant
 
 @Service
 class ProvisionRequestRunner(
-    val configuration: Configuration
+    configuration: Configuration
+) : PollingRequestHandler(
+    configuration
 ) {
 
   fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
@@ -79,40 +81,11 @@ class ProvisionRequestRunner(
     return response
   }
 
-  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int, operationData: String): String {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .queryParam("operation", operationData)
-        .get("/v2/service_instances/$instanceId/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
-        .extract()
-        .response()
-
-    return if (response.statusCode == 200) {
-
-      val responseBody = response.jsonPath()
-          .getObject("", LastOperationResponse::class.java)
-
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
-
-      if (responseBody.state == "in progress") {
-        Thread.sleep(10000)
-        return waitForFinish(instanceId, expectedFinalStatusCode, operationData)
-      }
-      assertTrue("Expected response body \"succeeded\" or \"failed\" but was ${responseBody.state}")
-      { responseBody.state in listOf("succeeded", "failed") }
-
-      responseBody.state
-    } else {
-      ""
-    }
+  fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String, maxPollingDuration: Int): State {
+    val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
+    return super.waitForFinish("/v2/service_instances/$instanceId/last_operation", expectedFinalStatusCode, operationData, latestAcceptablePollingInstant)
   }
+
 
   fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
     var path = "/v2/service_instances/$instanceId"

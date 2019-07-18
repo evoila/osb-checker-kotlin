@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class CatalogRequestRunner(
-    val configuration: Configuration
-) {
+    configuration: Configuration
+) : RequestHandler(configuration) {
 
   fun withoutHeader() {
     RestAssured.with()
@@ -30,8 +30,7 @@ class CatalogRequestRunner(
 
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
@@ -44,8 +43,7 @@ class CatalogRequestRunner(
   fun correctRequest(): Catalog {
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()

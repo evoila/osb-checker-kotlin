@@ -22,6 +22,8 @@ class Configuration {
   lateinit var wrongUserToken: String
   lateinit var wrongPasswordToken: String
 
+  var useRequestIdentity: Boolean = false
+
   var skipTLSVerification: Boolean = false
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()

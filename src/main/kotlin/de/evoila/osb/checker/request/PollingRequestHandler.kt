@@ -4,15 +4,14 @@ import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.response.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
-import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
 import org.hamcrest.collection.IsIn
 import java.time.Instant
 import kotlin.test.assertTrue
 
 abstract class PollingRequestHandler(
-    val configuration: Configuration
-) {
+    configuration: Configuration
+) : RequestHandler(configuration) {
 
   fun waitForFinish(path: String,
                     expectedFinalStatusCode: Int,
@@ -23,8 +22,7 @@ abstract class PollingRequestHandler(
 
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .queryParam("operation", operationData)
         .get(path)

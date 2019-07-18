@@ -2,8 +2,7 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse
-import de.evoila.osb.checker.response.LastOperationResponse.*
+import de.evoila.osb.checker.response.LastOperationResponse.State
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -13,7 +12,6 @@ import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import java.time.Instant
-import kotlin.test.assertTrue
 
 @Service
 class BindingRequestRunner(
@@ -26,8 +24,7 @@ class BindingRequestRunner(
 
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
@@ -42,8 +39,7 @@ class BindingRequestRunner(
   fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .param("accepts_incomplete", configuration.apiVersion > 2.13)
@@ -76,8 +72,7 @@ class BindingRequestRunner(
 
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .param("service_id", serviceId)
         .param("plan_id", planId)

@@ -24,8 +24,7 @@ class ProvisionRequestRunner(
   fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId")
         .then()
@@ -43,8 +42,7 @@ class ProvisionRequestRunner(
   fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId")
@@ -63,8 +61,7 @@ class ProvisionRequestRunner(
   fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
@@ -94,8 +91,7 @@ class ProvisionRequestRunner(
 
     RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
@@ -111,8 +107,7 @@ class ProvisionRequestRunner(
 
     return RestAssured.with()
         .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
+        .headers(validHeaders)
         .contentType(ContentType.JSON)
         .delete(path)
         .then()

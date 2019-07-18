@@ -92,7 +92,7 @@ class BindingContainers(
 
   private fun createValidProvisionTests(instanceId: String, provision: ProvisionBody.ValidProvisioning, plan: Plan): List<DynamicTest> {
     return listOf(
-        DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan $plan id: ${provision.plan_id}") {
+        DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId for service ${provision.service_id} and plan id: ${provision.plan_id}") {
           val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 201, 202, 200)
 
           if (response.statusCode() == 202) {

@@ -58,6 +58,9 @@
           "bindings_retrievable": {
             "type": "boolean"
           },
+          "allow_context_updates": {
+            "type": "boolean"
+          },
           "metadata": {
             "type": "object"
           },

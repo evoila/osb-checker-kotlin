@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
-import kotlin.test.assertTrue
 
 class ProvisionJUnit5 : TestBase() {
 
@@ -17,7 +16,6 @@ class ProvisionJUnit5 : TestBase() {
 
   @TestFactory
   fun runSyncTest(): List<DynamicNode> {
-
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val instanceId = UUID.randomUUID().toString()
     val service = catalog.services.first()
@@ -28,34 +26,34 @@ class ProvisionJUnit5 : TestBase() {
       ProvisionBody.ValidProvisioning(service, plan)
     }
     val dynamicNodes = mutableListOf<DynamicNode>()
-
     dynamicNodes.add(
         dynamicContainer("should handle sync requests correctly", listOf(
             dynamicTest("Sync PUT request") {
               provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
             },
             dynamicTest("Sync DELETE request") {
-              provisionRequestRunner.runDeleteProvisionRequestSync(instanceId, provisionRequestBody.service_id, provisionRequestBody.plan_id)
+              provisionRequestRunner.runDeleteProvisionRequestSync(
+                  instanceId = instanceId,
+                  serviceId = provisionRequestBody.service_id,
+                  planId = provisionRequestBody.plan_id)
             }
         ))
     )
+
     return dynamicNodes
   }
 
   @TestFactory
   fun runInvalidAsyncPutTest(): List<DynamicNode> {
-
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
     val instanceId = UUID.randomUUID().toString()
-
     val dynamicNodes = mutableListOf<DynamicNode>()
-
     listOf(
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
-                service_id = null,
+                service_id = "",
                 plan_id = plan.id
             ),
             message = "should reject if missing service_id"
@@ -63,7 +61,7 @@ class ProvisionJUnit5 : TestBase() {
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = service.id,
-                plan_id = null
+                plan_id = ""
             ),
             message = "should reject if missing plan_id"
         ),
@@ -116,19 +114,16 @@ class ProvisionJUnit5 : TestBase() {
 
   @TestFactory
   fun runInvalidAsyncDeleteTest(): List<DynamicNode> {
-
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
     val instanceId = UUID.randomUUID().toString()
-
     val dynamicNodes = mutableListOf<DynamicNode>()
-
     listOf(
         TestCase(
             message = "should reject if service_id is missing",
             requestBody = ProvisionBody.ValidProvisioning(
-                service_id = null,
+                service_id = "",
                 plan_id = plan.id
             )
         ),
@@ -136,7 +131,7 @@ class ProvisionJUnit5 : TestBase() {
             message = "should reject if plan_id is missing",
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = service.id,
-                plan_id = null
+                plan_id = ""
             )
         )
     ).forEach {

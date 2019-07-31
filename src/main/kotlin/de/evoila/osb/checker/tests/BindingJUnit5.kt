@@ -92,7 +92,8 @@ class BindingJUnit5 : TestBase() {
             instanceId = instanceId,
             plan = plan,
             provision = provision, isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
-            ?: false))
+            ?: false)
+        )
     )
     val invalidBindings = mutableListOf<DynamicNode>()
     listOf(
@@ -121,7 +122,7 @@ class BindingJUnit5 : TestBase() {
                 planId = bindingRequestBody.plan_id,
                 instanceId = instanceId,
                 bindingId = bindingId,
-                expectedStatusCode = *intArrayOf(410))
+                expectedStatusCodes = *intArrayOf(410))
           }
       )
     }

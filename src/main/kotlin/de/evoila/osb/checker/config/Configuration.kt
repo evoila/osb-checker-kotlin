@@ -53,9 +53,7 @@ class Configuration {
                       id = customPlan.id,
                       name = "Plan-Name",
                       bindable = customPlan.bindable,
-                      description = "Plan-Description",
-                      metadata = null,
-                      plan_updatable = null
+                      description = "Plan-Description"
                   )
                 }
             )
@@ -77,7 +75,7 @@ class Configuration {
 
     class CustomPlan {
       lateinit var id: String
-      var bindable: Boolean? = null
+      var bindable: Boolean = false
     }
   }
 

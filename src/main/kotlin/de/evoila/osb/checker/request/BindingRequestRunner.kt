@@ -66,7 +66,7 @@ class BindingRequestRunner(
         latestAcceptablePollingInstant)
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCode: Int): ExtractableResponse<Response> {
+  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
@@ -81,7 +81,7 @@ class BindingRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
-        .statusCode(IsIn(expectedStatusCode.asList()))
+        .statusCode(IsIn(expectedStatusCodes.asList()))
         .extract()
   }
 

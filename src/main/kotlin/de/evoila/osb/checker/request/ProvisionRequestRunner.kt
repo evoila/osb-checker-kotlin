@@ -58,7 +58,8 @@ class ProvisionRequestRunner(
     }
   }
 
-  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int): ExtractableResponse<Response> {
+  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int)
+      : ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)
@@ -80,15 +81,18 @@ class ProvisionRequestRunner(
 
   fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String, maxPollingDuration: Int): State {
     val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
-    return super.waitForFinish("/v2/service_instances/$instanceId/last_operation", expectedFinalStatusCode, operationData, latestAcceptablePollingInstant)
-  }
 
+    return super.waitForFinish(path = "/v2/service_instances/$instanceId/last_operation",
+        expectedFinalStatusCode = expectedFinalStatusCode,
+        operationData = operationData,
+        latestAcceptablePollingInstant = latestAcceptablePollingInstant
+    )
+  }
 
   fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
     var path = "/v2/service_instances/$instanceId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
-
     RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)
@@ -100,7 +104,10 @@ class ProvisionRequestRunner(
         .extract()
   }
 
-  fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?, expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
+  fun runDeleteProvisionRequestAsync(instanceId: String,
+                                     serviceId: String?,
+                                     planId: String?,
+                                     expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
     var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
     path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
     path = planId?.let { "$path&plan_id=$planId" } ?: path
@@ -231,7 +238,6 @@ class ProvisionRequestRunner(
         .statusCode(401)
         .extract()
   }
-
 
   fun lastOpNoAuth() {
     RestAssured.with()

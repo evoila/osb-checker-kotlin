@@ -9,10 +9,14 @@ import java.util.*
 abstract class ProvisionBody : RequestBody {
 
   data class ValidProvisioning(
-      var service_id: String?,
-      var plan_id: String?,
-      var organization_guid: String? = UUID.randomUUID().toString(),
-      var space_guid: String? = UUID.randomUUID().toString(),
+      @JsonInclude(JsonInclude.Include.NON_EMPTY)
+      var service_id: String,
+      @JsonInclude(JsonInclude.Include.NON_EMPTY)
+      var plan_id: String,
+      @JsonInclude(JsonInclude.Include.NON_EMPTY)
+      var organization_guid: String = UUID.randomUUID().toString(),
+      @JsonInclude(JsonInclude.Include.NON_EMPTY)
+      var space_guid: String = UUID.randomUUID().toString(),
       @JsonInclude(JsonInclude.Include.NON_NULL)
       var parameters: Map<String, Any>? = null,
       @JsonInclude(JsonInclude.Include.NON_NULL)

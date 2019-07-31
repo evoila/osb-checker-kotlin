@@ -22,7 +22,11 @@ class ProvisionJUnit5 : TestBase() {
     val instanceId = UUID.randomUUID().toString()
     val service = catalog.services.first()
     val plan = service.plans.first()
-    val provisionRequestBody = ProvisionBody.ValidProvisioning(service, plan)
+    val provisionRequestBody = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null) {
+      ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
+    } else {
+      ProvisionBody.ValidProvisioning(service, plan)
+    }
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     dynamicNodes.add(

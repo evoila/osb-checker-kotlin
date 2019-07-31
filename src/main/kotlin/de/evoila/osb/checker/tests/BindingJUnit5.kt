@@ -21,36 +21,44 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runValidBindings(): List<DynamicNode> {
-
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val dynamicNodes = mutableListOf<DynamicNode>()
 
     catalog.services.forEach { service ->
       service.plans.forEach { plan ->
-
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
         val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
-        val provision = ProvisionBody.ValidProvisioning(service, plan)
-        val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id) else BindingBody.ValidBinding(service.id, plan.id)
+        val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
+          ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
+        else ProvisionBody.ValidProvisioning(service, plan)
+
+        val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id)
+        else BindingBody.ValidBinding(service.id, plan.id)
 
         configuration.provisionParameters.let {
           if (it.containsKey(plan.id)) {
             provision.parameters = it[plan.id]
           }
         }
-
         configuration.bindingParameters.let {
           if (it.containsKey(plan.id)) {
             binding.parameters = it[plan.id]
           }
         }
-
         val testContainers = mutableListOf(
-            bindingContainerFactory.validProvisionContainer(instanceId, plan, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
-                ?: false))
+            bindingContainerFactory.validProvisionContainer(
+                instanceId = instanceId,
+                plan = plan,
+                provision = provision,
+                isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable ?: false))
         )
-        testContainers.add(bindingContainerFactory.validBindingContainer(binding, instanceId, bindingId, configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false, plan))
+        testContainers.add(bindingContainerFactory.validBindingContainer(
+            binding = binding,
+            instanceId = instanceId,
+            bindingId = bindingId,
+            isRetrievable = configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false,
+            plan = plan))
         testContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
         dynamicNodes.add(dynamicContainer(VALID_BINDING_MESSAGE, testContainers))
       }
@@ -61,7 +69,6 @@ class BindingJUnit5 : TestBase() {
 
   @TestFactory
   fun runInvalidBindingAttempts(): List<DynamicNode> {
-
     val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
     val service = catalog.services.first()
     val plan = service.plans.first()
@@ -72,27 +79,32 @@ class BindingJUnit5 : TestBase() {
       return emptyList()
     }
 
-    val provision = ProvisionBody.ValidProvisioning(catalog.services.first(), plan)
+    val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null) {
+      ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
+    } else {
+      ProvisionBody.ValidProvisioning(service, plan)
+    }
     val instanceId = UUID.randomUUID().toString()
     val bindingId = UUID.randomUUID().toString()
-
     val dynamicNodes = mutableListOf<DynamicNode>()
-
     dynamicNodes.add(
-        bindingContainerFactory.validProvisionContainer(instanceId, plan, provision, configuration.apiVersion > 2.13 && (service.instancesRetrievable
+        bindingContainerFactory.validProvisionContainer(
+            instanceId = instanceId,
+            plan = plan,
+            provision = provision, isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
             ?: false))
     )
-
     val invalidBindings = mutableListOf<DynamicNode>()
-
     listOf(
         TestCase(
             requestBody =
-            if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id) else BindingBody.ValidBinding(null, plan.id),
+            if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id)
+            else BindingBody.ValidBinding(null, plan.id),
             message = "should reject if missing service_id"
         ),
         TestCase(
-            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null) else BindingBody.ValidBinding(service.id, null),
+            requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null)
+            else BindingBody.ValidBinding(service.id, null),
             message = "should reject if missing plan_id"
         )
     ).forEach {
@@ -104,17 +116,23 @@ class BindingJUnit5 : TestBase() {
           dynamicTest("DELETE ${it.message}")
           {
             val bindingRequestBody = it.requestBody
-            bindingRequestRunner.runDeleteBindingRequest(bindingRequestBody.service_id, bindingRequestBody.plan_id, instanceId, bindingId, 410)
+            bindingRequestRunner.runDeleteBindingRequest(
+                serviceId = bindingRequestBody.service_id,
+                planId = bindingRequestBody.plan_id,
+                instanceId = instanceId,
+                bindingId = bindingId,
+                expectedStatusCode = *intArrayOf(410))
           }
       )
     }
-
     dynamicNodes.add(dynamicContainer("Running invalid bindings", invalidBindings))
     dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
+
     return dynamicNodes
   }
 
   companion object {
-    private const val VALID_BINDING_MESSAGE = "Running a valid provision and if the service is bindable a valid binding. Deleting both afterwards. In case of a async service broker poll afterwards."
+    private const val VALID_BINDING_MESSAGE = "Running a valid provision and if the service is bindable a valid" +
+        " binding. Deleting both afterwards. In case of a async service broker poll afterwards."
   }
 }

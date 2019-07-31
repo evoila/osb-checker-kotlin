@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.request.bodies
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import de.evoila.osb.checker.response.MaintenanceInfo
 import de.evoila.osb.checker.response.Plan
 import de.evoila.osb.checker.response.Service
 import java.util.*
@@ -13,12 +14,20 @@ abstract class ProvisionBody : RequestBody {
       var organization_guid: String? = UUID.randomUUID().toString(),
       var space_guid: String? = UUID.randomUUID().toString(),
       @JsonInclude(JsonInclude.Include.NON_NULL)
-      var parameters: Map<String, Any>? = null
+      var parameters: Map<String, Any>? = null,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      var maintenance_info: MaintenanceInfo? = null
   ) : ProvisionBody() {
 
     constructor(service: Service, plan: Plan) : this(
         service_id = service.id,
         plan_id = plan.id
+    )
+
+    constructor(service: Service, plan: Plan, maintenance_info: MaintenanceInfo) : this(
+        service_id = service.id,
+        plan_id = plan.id,
+        maintenance_info = maintenance_info
     )
   }
 

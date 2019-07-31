@@ -26,7 +26,7 @@ class RestAssureConfig(
       "Basic ${Base64.getEncoder().encodeToString("$user:$password".toByteArray())}"
 
   companion object {
-    private val supportedApiVersions = listOf(2.13, 2.14)
+    private val supportedApiVersions = listOf(2.13, 2.14, 2.15)
     private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
   }
 }

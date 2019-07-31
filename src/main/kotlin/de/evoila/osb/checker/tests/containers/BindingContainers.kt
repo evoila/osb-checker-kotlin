@@ -27,7 +27,7 @@ class BindingContainers(
 
               if (response.statusCode() == 202) {
                 assertTrue(DELETE_RESULT_MESSAGE) {
-                  GONE == provisionRequestRunner.polling(instanceId, 410, operationData(response), plan.maximum_polling_duration)
+                  GONE == provisionRequestRunner.polling(instanceId, 410, operationData(response), plan.maximumPollingDuration)
                 }
               }
             }
@@ -50,7 +50,7 @@ class BindingContainers(
           val response = bindingRequestRunner.runPutBindingRequest(binding, instanceId, bindingId, 201, 202)
 
           if (response.statusCode() == 202) {
-            val state = bindingRequestRunner.polling(instanceId, bindingId, 200, operationData(response), plan.maximum_polling_duration)
+            val state = bindingRequestRunner.polling(instanceId, bindingId, 200, operationData(response), plan.maximumPollingDuration)
             assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { SUCCEEDED == state }
           }
         }
@@ -63,7 +63,7 @@ class BindingContainers(
 
         if (response.statusCode() == 202) {
           assertTrue(DELETE_RESULT_MESSAGE) {
-            GONE == bindingRequestRunner.polling(instanceId, bindingId, 410, operationData(response), plan.maximum_polling_duration)
+            GONE == bindingRequestRunner.polling(instanceId, bindingId, 410, operationData(response), plan.maximumPollingDuration)
           }
         }
       }
@@ -96,7 +96,7 @@ class BindingContainers(
           val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 201, 202, 200)
 
           if (response.statusCode() == 202) {
-            val state = provisionRequestRunner.polling(instanceId, 200, operationData(response), plan.maximum_polling_duration)
+            val state = provisionRequestRunner.polling(instanceId, 200, operationData(response), plan.maximumPollingDuration)
             assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { SUCCEEDED == state }
           }
         })

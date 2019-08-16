@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.config
 
 import io.restassured.RestAssured
+import io.restassured.builder.RequestSpecBuilder
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.test.assertTrue

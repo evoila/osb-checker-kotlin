@@ -137,10 +137,9 @@ class ProvisionJUnit5 : TestBase() {
     ).forEach {
       dynamicNodes.add(dynamicTest("DELETE ${it.message}") {
         val provisionBody = it.requestBody
-
         provisionRequestRunner.runDeleteProvisionRequestAsync(
-            serviceId = provisionBody.service_id,
-            planId = provisionBody.plan_id,
+            serviceId = nullIfNotSet(provisionBody.service_id),
+            planId = nullIfNotSet(provisionBody.plan_id),
             instanceId = instanceId,
             expectedFinalStatusCodes = intArrayOf(400)
         )
@@ -149,5 +148,13 @@ class ProvisionJUnit5 : TestBase() {
     }
 
     return dynamicNodes
+  }
+
+  private fun nullIfNotSet(value: String): String? {
+    return if (value.isNotEmpty()) {
+      value
+    } else {
+      null
+    }
   }
 }

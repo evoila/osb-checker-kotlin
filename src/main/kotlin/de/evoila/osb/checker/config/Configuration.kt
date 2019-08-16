@@ -23,7 +23,6 @@ class Configuration {
   lateinit var wrongPasswordToken: String
 
   var useRequestIdentity: Boolean = false
-
   var skipTLSVerification: Boolean = false
   var usingAppGuid: Boolean = true
   val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
@@ -81,5 +80,6 @@ class Configuration {
 
   companion object {
     val notAnId = UUID.randomUUID().toString()
+    const val FIX_GUID = "0a54bae0-b3ae-4b90-953e-155653c38106"
   }
 }

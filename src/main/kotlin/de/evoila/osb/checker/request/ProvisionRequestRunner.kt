@@ -54,7 +54,8 @@ class ProvisionRequestRunner(
         .extract()
 
     if (response.statusCode() == 201) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json")
+          .matches(response.body())
     }
   }
 
@@ -73,7 +74,8 @@ class ProvisionRequestRunner(
         .extract()
 
     if (response.statusCode() in listOf(201, 202, 200)) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json")
+          .matches(response.body())
     }
 
     return response

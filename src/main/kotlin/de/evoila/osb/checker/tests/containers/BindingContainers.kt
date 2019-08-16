@@ -201,6 +201,5 @@ class BindingContainers(
     private const val DELETE_RESULT_MESSAGE = "Delete has to result in 410"
     private const val VALID_PROVISION_DISPLAY_NAME = "Creating Service Instance"
     private const val VALID_FETCH_PROVISION = " , fetching it"
-
   }
 }

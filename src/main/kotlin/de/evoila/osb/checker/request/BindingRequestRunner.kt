@@ -21,7 +21,6 @@ class BindingRequestRunner(
 ) {
 
   fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
-
     val response = RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)
@@ -33,10 +32,14 @@ class BindingRequestRunner(
         .statusCode(expectedStatusCode)
         .extract()
 
-    JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json").matches(response.body())
+    JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json")
+        .matches(response.body())
   }
 
-  fun runPutBindingRequest(requestBody: RequestBody, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
+  fun runPutBindingRequest(requestBody: RequestBody,
+                           instanceId: String,
+                           bindingId: String,
+                           vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)
@@ -51,22 +54,31 @@ class BindingRequestRunner(
         .extract()
 
     if (response.statusCode() == 200) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json").matches(response.body())
+      JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json")
+          .matches(response.body())
     }
 
     return response
   }
 
-  fun polling(instanceId: String, bindingId: String, expectedFinalStatusCode: Int, operationData: String, maxPollingDuration: Int): State {
+  fun polling(instanceId: String,
+              bindingId: String,
+              expectedFinalStatusCode: Int,
+              operationData: String,
+              maxPollingDuration: Int): State {
     val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
+
     return waitForFinish(
-        "/v2/service_instances/$instanceId/service_bindings/$bindingId/last_operation",
-        expectedFinalStatusCode,
-        operationData,
-        latestAcceptablePollingInstant)
+        path = "/v2/service_instances/$instanceId/service_bindings/$bindingId/last_operation",
+        expectedFinalStatusCode = expectedFinalStatusCode,
+        operationData = operationData,
+        latestAcceptablePollingInstant = latestAcceptablePollingInstant)
   }
 
-  fun runDeleteBindingRequest(serviceId: String?, planId: String?, instanceId: String, bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
+  fun runDeleteBindingRequest(serviceId: String?,
+                              planId: String?,
+                              instanceId: String,
+                              bindingId: String, vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     var path = "/v2/service_instances/$instanceId/service_bindings/$bindingId"
     path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 

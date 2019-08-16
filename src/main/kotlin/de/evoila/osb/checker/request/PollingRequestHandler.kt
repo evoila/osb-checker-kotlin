@@ -17,9 +17,7 @@ abstract class PollingRequestHandler(
                     expectedFinalStatusCode: Int,
                     operationData: String,
                     latestAcceptablePollingInstant: Instant
-
   ): LastOperationResponse.State {
-
     val response = RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)

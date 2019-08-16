@@ -2,6 +2,7 @@ package de.evoila.osb.checker.tests
 
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.response.catalog.MaintenanceInfo
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -54,14 +55,24 @@ class ProvisionJUnit5 : TestBase() {
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = "",
-                plan_id = plan.id
+                plan_id = plan.id,
+                maintenance_info = if (configuration.apiVersion == 2.15) {
+                  plan.maintenanceInfo
+                } else {
+                  null
+                }
             ),
             message = "should reject if missing service_id"
         ),
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = service.id,
-                plan_id = ""
+                plan_id = "",
+                maintenance_info = if (configuration.apiVersion == 2.15) {
+                  plan.maintenanceInfo
+                } else {
+                  null
+                }
             ),
             message = "should reject if missing plan_id"
         ),
@@ -91,13 +102,23 @@ class ProvisionJUnit5 : TestBase() {
         ),
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
-                "Invalid", plan.id
+                "Invalid", plan.id,
+                maintenance_info = if (configuration.apiVersion == 2.15) {
+                  plan.maintenanceInfo
+                } else {
+                  null
+                }
             ),
             message = "should reject if missing service_id is Invalid"
         ),
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
-                service.id, "Invalid"
+                service.id, "Invalid",
+                maintenance_info = if (configuration.apiVersion == 2.15) {
+                  plan.maintenanceInfo
+                } else {
+                  null
+                }
             ),
             message = "should reject if missing plan_id is Invalid"
         )
@@ -105,6 +126,17 @@ class ProvisionJUnit5 : TestBase() {
       dynamicNodes.add(
           dynamicTest("PUT ${it.message}") {
             provisionRequestRunner.runPutProvisionRequestAsync(instanceId, it.requestBody, 400)
+          }
+      )
+    }
+
+    if (configuration.apiVersion == 2.15) {
+
+      ProvisionBody.ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422"))
+      dynamicNodes.add(
+          dynamicTest("PUT should request if maintenance_info doesn't match") {
+            provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
+                ProvisionBody.ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422")), 422)
           }
       )
     }

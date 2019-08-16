@@ -23,12 +23,13 @@ class BindingRequestRunner(
   fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId/service_bindings/$bindingId")
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .headers(expectedResponseHeaders)
         .statusCode(expectedStatusCode)
         .extract()
 
@@ -42,7 +43,7 @@ class BindingRequestRunner(
                            vararg expectedStatusCodes: Int): ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .param("accepts_incomplete", configuration.apiVersion > 2.13)
@@ -50,6 +51,7 @@ class BindingRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .headers(expectedResponseHeaders)
         .statusCode(IsIn(expectedStatusCodes.asList()))
         .extract()
 
@@ -84,7 +86,7 @@ class BindingRequestRunner(
 
     return RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .param("service_id", serviceId)
         .param("plan_id", planId)
@@ -93,6 +95,7 @@ class BindingRequestRunner(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .headers(expectedResponseHeaders)
         .statusCode(IsIn(expectedStatusCodes.asList()))
         .extract()
   }

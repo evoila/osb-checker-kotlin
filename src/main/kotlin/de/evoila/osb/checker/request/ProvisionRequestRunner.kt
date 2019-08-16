@@ -24,14 +24,14 @@ class ProvisionRequestRunner(
   fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
     return RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .get("/v2/service_instances/$instanceId")
         .then()
         .log().ifValidationFails()
         .assertThat()
         .statusCode(200)
-        .and()
+        .headers(expectedResponseHeaders)
         .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-instance-response-schema.json"))
         .extract()
         .response()
@@ -42,7 +42,7 @@ class ProvisionRequestRunner(
   fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId")
@@ -50,7 +50,6 @@ class ProvisionRequestRunner(
         .log().ifValidationFails()
         .assertThat()
         .statusCode(IsIn(listOf(201, 422)))
-        .and()
         .extract()
 
     if (response.statusCode() == 201) {
@@ -63,7 +62,7 @@ class ProvisionRequestRunner(
       : ExtractableResponse<Response> {
     val response = RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .body(requestBody)
         .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
@@ -96,11 +95,12 @@ class ProvisionRequestRunner(
     path = planId?.let { "$path&plan_id=$planId" } ?: path
     RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
         .log().ifValidationFails()
+        .headers(expectedResponseHeaders)
         .statusCode(IsIn(listOf(200, 422)))
         .extract()
   }
@@ -115,12 +115,13 @@ class ProvisionRequestRunner(
 
     return RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
         .delete(path)
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .headers(expectedResponseHeaders)
         .statusCode(IsIn(expectedFinalStatusCodes.asList()))
         .extract()
   }

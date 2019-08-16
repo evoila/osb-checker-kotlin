@@ -21,7 +21,7 @@ abstract class PollingRequestHandler(
 
     val request = RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .contentType(ContentType.JSON)
 
     operationData?.let { request.queryParam("operation", it) }
@@ -30,6 +30,7 @@ abstract class PollingRequestHandler(
         .then()
         .log().ifValidationFails()
         .assertThat()
+        .headers(expectedResponseHeaders)
         .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
         .extract()
         .response()

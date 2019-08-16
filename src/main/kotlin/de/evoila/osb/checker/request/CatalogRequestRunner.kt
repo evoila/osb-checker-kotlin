@@ -25,31 +25,28 @@ class CatalogRequestRunner(
   }
 
   fun correctRequestAndValidateResponse() {
-
-    val catalogSchema = matchesJsonSchemaInClasspath("catalog-schema.json")
-
     RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
         .assertThat()
         .statusCode(200)
-        .contentType(ContentType.JSON)
-        .body(catalogSchema)
+        .body(matchesJsonSchemaInClasspath("catalog-schema.json"))
+        .headers(expectedResponseHeaders)
   }
 
   fun correctRequest(): Catalog {
     return RestAssured.with()
         .log().ifValidationFails()
-        .headers(validHeaders)
+        .headers(validRequestHeaders)
         .get("/v2/catalog")
         .then()
         .log().ifValidationFails()
         .assertThat()
         .statusCode(200)
-        .contentType(ContentType.JSON)
+        .headers(expectedResponseHeaders)
         .extract()
         .response()
         .jsonPath()
@@ -89,5 +86,6 @@ class CatalogRequestRunner(
         .log().ifValidationFails()
         .assertThat()
         .statusCode(401)
+
   }
 }

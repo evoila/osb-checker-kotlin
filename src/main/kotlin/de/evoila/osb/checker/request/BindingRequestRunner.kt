@@ -2,7 +2,7 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse
+import de.evoila.osb.checker.response.operations.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header

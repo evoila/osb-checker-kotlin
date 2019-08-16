@@ -4,13 +4,11 @@ import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
-import de.evoila.osb.checker.response.Plan
-import io.restassured.response.ExtractableResponse
-import io.restassured.response.Response
+import de.evoila.osb.checker.response.catalog.Plan
+import de.evoila.osb.checker.response.operations.AsyncProvision
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.springframework.stereotype.Service
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Service
@@ -19,14 +17,15 @@ class BindingContainers(
     val bindingRequestRunner: BindingRequestRunner
 ) {
 
-  fun validDeleteProvisionContainer(instanceId: String, service: de.evoila.osb.checker.response.Service, plan: Plan): DynamicContainer {
+  fun validDeleteProvisionContainer(instanceId: String, service: de.evoila.osb.checker.response.catalog.Service, plan: Plan): DynamicContainer {
     return DynamicContainer.dynamicContainer("Deleting provision",
         listOf(
             DynamicTest.dynamicTest(DELETE_PROVISION_MESSAGE) {
               val response = provisionRequestRunner.runDeleteProvisionRequestAsync(instanceId, service.id, plan.id, intArrayOf(200, 202))
 
               if (response.statusCode() == 202) {
-                provisionRequestRunner.waitForFinish(instanceId, 410, operationData(response))
+                val provision = response.jsonPath().getObject("", AsyncProvision::class.java)
+                provisionRequestRunner.waitForFinish(instanceId, 410, provision.operation)
               }
             }
         ))
@@ -93,7 +92,9 @@ class BindingContainers(
           val response = provisionRequestRunner.runPutProvisionRequestAsync(instanceId, provision, 201, 202, 200)
 
           if (response.statusCode() == 202) {
-            val state = provisionRequestRunner.waitForFinish(instanceId, 200, operationData(response))
+            val provision = response.jsonPath().getObject("", AsyncProvision::class.java)
+
+            val state = provisionRequestRunner.waitForFinish(instanceId, 200, provision.operation)
             assertTrue("Expected the final polling state to be \"succeeded\" but was $state") { "succeeded" == state }
           }
         })
@@ -108,8 +109,6 @@ class BindingContainers(
       provisionTests
     })
   }
-
-  private fun operationData(response: ExtractableResponse<Response>): String = response.body().jsonPath().get("operation")
 
   companion object {
     private const val VALID_BINDING_MESSAGE = "Running PUT binding and DELETE binding afterwards"

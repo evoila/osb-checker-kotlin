@@ -1,8 +1,8 @@
 package de.evoila.osb.checker.request.bodies
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import de.evoila.osb.checker.response.Plan
-import de.evoila.osb.checker.response.Service
+import de.evoila.osb.checker.response.catalog.Plan
+import de.evoila.osb.checker.response.catalog.Service
 import java.util.*
 
 abstract class ProvisionBody : RequestBody {

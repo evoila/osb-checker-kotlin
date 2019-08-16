@@ -19,7 +19,11 @@
     "description": {
       "type": "string",
       "pattern": "\\S+"
+    },
+    "operation": {
+      "description": "A identifier that represents the operation.",
+      "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

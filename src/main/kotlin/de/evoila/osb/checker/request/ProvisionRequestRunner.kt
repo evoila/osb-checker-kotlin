@@ -2,8 +2,8 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse
-import de.evoila.osb.checker.response.ServiceInstance
+import de.evoila.osb.checker.response.operations.LastOperationResponse
+import de.evoila.osb.checker.response.catalog.ServiceInstance
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -79,13 +79,16 @@ class ProvisionRequestRunner(
     return response
   }
 
-  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int, operationData: String): String {
-    val response = RestAssured.with()
+  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int, operationData: String?): String {
+    val request = RestAssured.with()
         .log().ifValidationFails()
         .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
         .header(Header("Authorization", configuration.correctToken))
         .contentType(ContentType.JSON)
-        .queryParam("operation", operationData)
+
+    operationData?.let { request.queryParam("operation", it) }
+
+    val response = request
         .get("/v2/service_instances/$instanceId/last_operation")
         .then()
         .log().ifValidationFails()

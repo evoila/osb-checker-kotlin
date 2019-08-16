@@ -1,4 +1,4 @@
-package de.evoila.osb.checker.response
+package de.evoila.osb.checker.response.catalog
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty

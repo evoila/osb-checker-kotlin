@@ -1,8 +1,8 @@
 package de.evoila.osb.checker.config
 
-import de.evoila.osb.checker.response.Catalog
-import de.evoila.osb.checker.response.Plan
-import de.evoila.osb.checker.response.Service
+import de.evoila.osb.checker.response.catalog.Catalog
+import de.evoila.osb.checker.response.catalog.Plan
+import de.evoila.osb.checker.response.catalog.Service
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

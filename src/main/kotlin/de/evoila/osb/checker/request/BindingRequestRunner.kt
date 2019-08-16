@@ -2,7 +2,7 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse.State
+import de.evoila.osb.checker.response.operations.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -64,8 +64,8 @@ class BindingRequestRunner(
   fun polling(instanceId: String,
               bindingId: String,
               expectedFinalStatusCode: Int,
-              operationData: String,
-              maxPollingDuration: Int): State {
+              operationData: String?,
+              maxPollingDuration: Int): LastOperationResponse.State {
     val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
 
     return waitForFinish(

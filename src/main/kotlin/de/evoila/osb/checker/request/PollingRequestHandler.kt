@@ -1,7 +1,7 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
-import de.evoila.osb.checker.response.LastOperationResponse
+import de.evoila.osb.checker.response.operations.LastOperationResponse
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.module.jsv.JsonSchemaValidator
@@ -15,15 +15,18 @@ abstract class PollingRequestHandler(
 
   fun waitForFinish(path: String,
                     expectedFinalStatusCode: Int,
-                    operationData: String,
+                    operationData: String?,
                     latestAcceptablePollingInstant: Instant
   ): LastOperationResponse.State {
-    val response = RestAssured.with()
+
+    val request = RestAssured.with()
         .log().ifValidationFails()
         .headers(validHeaders)
         .contentType(ContentType.JSON)
-        .queryParam("operation", operationData)
-        .get(path)
+
+    operationData?.let { request.queryParam("operation", it) }
+
+    val response = request.get(path)
         .then()
         .log().ifValidationFails()
         .assertThat()

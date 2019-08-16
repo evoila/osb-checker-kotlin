@@ -1,7 +1,7 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
-import de.evoila.osb.checker.response.Catalog
+import de.evoila.osb.checker.response.catalog.Catalog
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header

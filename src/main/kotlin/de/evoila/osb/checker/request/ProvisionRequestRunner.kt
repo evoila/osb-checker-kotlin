@@ -2,8 +2,8 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.LastOperationResponse.*
-import de.evoila.osb.checker.response.ServiceInstance
+import de.evoila.osb.checker.response.catalog.ServiceInstance
+import de.evoila.osb.checker.response.operations.LastOperationResponse.State
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -81,9 +81,8 @@ class ProvisionRequestRunner(
     return response
   }
 
-  fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String, maxPollingDuration: Int): State {
+  fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String?, maxPollingDuration: Int): State {
     val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
-
     return super.waitForFinish(path = "/v2/service_instances/$instanceId/last_operation",
         expectedFinalStatusCode = expectedFinalStatusCode,
         operationData = operationData,

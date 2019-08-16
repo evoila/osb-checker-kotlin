@@ -1,4 +1,4 @@
-package de.evoila.osb.checker.response
+package de.evoila.osb.checker.response.catalog
 
 data class MaintenanceInfo(
     val version: String,

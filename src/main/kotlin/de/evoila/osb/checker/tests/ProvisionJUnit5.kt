@@ -21,7 +21,7 @@ class ProvisionJUnit5 : TestBase() {
     val instanceId = UUID.randomUUID().toString()
     val service = catalog.services.first()
     val plan = service.plans.first()
-    val provisionRequestBody = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null) {
+    val provisionRequestBody = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null) {
       ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
     } else {
       ProvisionBody.ValidProvisioning(service, plan)
@@ -56,7 +56,7 @@ class ProvisionJUnit5 : TestBase() {
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = "",
                 plan_id = plan.id,
-                maintenance_info = if (configuration.apiVersion == 2.15) {
+                maintenance_info = if (configuration.apiVersion >= 2.15) {
                   plan.maintenanceInfo
                 } else {
                   null
@@ -68,7 +68,7 @@ class ProvisionJUnit5 : TestBase() {
             requestBody = ProvisionBody.ValidProvisioning(
                 service_id = service.id,
                 plan_id = "",
-                maintenance_info = if (configuration.apiVersion == 2.15) {
+                maintenance_info = if (configuration.apiVersion >= 2.15) {
                   plan.maintenanceInfo
                 } else {
                   null
@@ -114,7 +114,7 @@ class ProvisionJUnit5 : TestBase() {
         TestCase(
             requestBody = ProvisionBody.ValidProvisioning(
                 service.id, "Invalid",
-                maintenance_info = if (configuration.apiVersion == 2.15) {
+                maintenance_info = if (configuration.apiVersion >= 2.15) {
                   plan.maintenanceInfo
                 } else {
                   null
@@ -130,11 +130,10 @@ class ProvisionJUnit5 : TestBase() {
       )
     }
 
-    if (configuration.apiVersion == 2.15) {
-
+    if (configuration.apiVersion >= 2.15) {
       ProvisionBody.ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422"))
       dynamicNodes.add(
-          dynamicTest("PUT should request if maintenance_info doesn't match") {
+          dynamicTest("PUT should reject if maintenance_info doesn't match") {
             provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
                 ProvisionBody.ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422")), 422)
           }

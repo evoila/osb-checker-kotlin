@@ -16,269 +16,275 @@ import java.time.Instant
 
 @Service
 class ProvisionRequestRunner(
-    configuration: Configuration
+        configuration: Configuration
 ) : PollingRequestHandler(
-    configuration
+        configuration
 ) {
 
-  fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
-    return RestAssured.with()
-        .log().ifValidationFails()
-        .headers(validRequestHeaders)
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/$instanceId")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(200)
-        .headers(expectedResponseHeaders)
-        .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-instance-response-schema.json"))
-        .extract()
-        .response()
-        .jsonPath()
-        .getObject("", ServiceInstance::class.java)
-  }
-
-  fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .headers(validRequestHeaders)
-        .contentType(ContentType.JSON)
-        .body(requestBody)
-        .put("/v2/service_instances/$instanceId")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(listOf(201, 422)))
-        .extract()
-
-    if (response.statusCode() == 201) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json")
-          .matches(response.body())
-    }
-  }
-
-  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int)
-      : ExtractableResponse<Response> {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .headers(validRequestHeaders)
-        .contentType(ContentType.JSON)
-        .body(requestBody)
-        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
-        .assertThat()
-        .extract()
-
-    if (response.statusCode() in listOf(201, 202, 200)) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json")
-          .matches(response.body())
+    fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + instanceId)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(200)
+                .headers(expectedResponseHeaders)
+                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_FETCH_INSTANCE_BODY))
+                .extract()
+                .response()
+                .jsonPath()
+                .getObject("", ServiceInstance::class.java)
     }
 
-    return response
-  }
+    fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .put(SERVICE_INSTANCE_PATH + instanceId)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(IsIn(listOf(201, 422)))
+                .extract()
 
-  fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String?, maxPollingDuration: Int): State {
-    val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
-    return super.waitForFinish(path = "/v2/service_instances/$instanceId/last_operation",
-        expectedFinalStatusCode = expectedFinalStatusCode,
-        operationData = operationData,
-        latestAcceptablePollingInstant = latestAcceptablePollingInstant
-    )
-  }
+        if (response.statusCode() == 201) {
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_PROVISION_RESPONSE)
+                    .matches(response.body())
+        } else {
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE)
+                    .matches(response.body())
+        }
+    }
 
-  fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
-    var path = "/v2/service_instances/$instanceId"
-    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
-    RestAssured.with()
-        .log().ifValidationFails()
-        .headers(validRequestHeaders)
-        .contentType(ContentType.JSON)
-        .delete(path)
-        .then()
-        .log().ifValidationFails()
-        .headers(expectedResponseHeaders)
-        .statusCode(IsIn(listOf(200, 422)))
-        .extract()
-  }
+    fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int)
+            : ExtractableResponse<Response> {
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .put(SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .assertThat()
+                .extract()
 
-  fun runDeleteProvisionRequestAsync(instanceId: String,
-                                     serviceId: String?,
-                                     planId: String?,
-                                     expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
-    var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
-    path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
+        if (response.statusCode() in listOf(201, 202, 200)) {
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_PROVISION_RESPONSE)
+                    .matches(response.body())
+        } else {
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE)
+                    .matches(response.body())
+        }
 
-    return RestAssured.with()
-        .log().ifValidationFails()
-        .headers(validRequestHeaders)
-        .contentType(ContentType.JSON)
-        .delete(path)
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .headers(expectedResponseHeaders)
-        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
-        .extract()
-  }
+        return response
+    }
 
-  fun putWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+    fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String?, maxPollingDuration: Int): State {
+        val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
+        return super.waitForFinish(path = SERVICE_INSTANCE_PATH + instanceId + LAST_OPERATION,
+                expectedFinalStatusCode = expectedFinalStatusCode,
+                operationData = operationData,
+                latestAcceptablePollingInstant = latestAcceptablePollingInstant
+        )
+    }
 
-  fun deleteWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true&service_id=Invalid&plan_id=Invalid")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+    fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
+        var path = SERVICE_INSTANCE_PATH + instanceId
+        path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
+        path = planId?.let { "$path&plan_id=$planId" } ?: path
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .delete(path)
+                .then()
+                .log().ifValidationFails()
+                .headers(expectedResponseHeaders)
+                .statusCode(IsIn(listOf(200, 422)))
+                .extract()
 
-  fun lastOperationWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+        if (response.statusCode() != 200) {
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE).matches(response.body())
+        }
+    }
 
-  fun putNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun runDeleteProvisionRequestAsync(instanceId: String,
+                                       serviceId: String?,
+                                       planId: String?,
+                                       expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
+        var path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
+        path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
+        path = planId?.let { "$path&plan_id=$planId" } ?: path
 
-  fun putWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .delete(path)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .headers(expectedResponseHeaders)
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .extract()
+    }
 
-  fun putWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun putWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
 
-  fun deleteNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun deleteWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .delete("$SERVICE_INSTANCE_PATH${Configuration.notAnId}$ACCEPTS_INCOMPLETE&service_id=Invalid&plan_id=Invalid")
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
 
-  fun deleteWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun lastOperationWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
 
-  fun deleteWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun putNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
 
-  fun lastOpNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun putWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
 
-  fun lastOpWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun putWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
 
-  fun lastOpWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun deleteNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun deleteWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun deleteWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    companion object {
+        private const val PATH_ERROR_CODE = "service-broker-error-response.json"
+        private const val PATH_FETCH_INSTANCE_BODY = "fetch-instance-response-schema.json"
+    }
 }

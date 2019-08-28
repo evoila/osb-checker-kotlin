@@ -206,7 +206,7 @@ It is recommended to use the checker accordingly, to ease up debugging of the se
 ### Catalog
 
 when starting the application with the parameter -cat/-catalog, it will:
-- call `curl http://username:password@broker-url/v2/catalog -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+- call `curl http://username:password@broker-url/v2/catalog -X GET -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
 - check if the service broker returns 200 and validate if the catalog from the response follows schema.
 
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management), for more information about service broker catalogs.

@@ -5,13 +5,11 @@
   "type": "object",
   "properties": {
     "error": {
-      "type": "string",
-      "pattern": "([a-z]+[A-Z]+\\w+)+"
+      "type": "string"
     },
     "description":{
-      "type":"string",
-      "pattern": "\\S+"
+      "type":"string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

@@ -33,7 +33,7 @@ class BindingRequestRunner(
                 .statusCode(expectedStatusCode)
                 .extract()
 
-        JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-binding-response-schema.json")
+        JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_TO_FETCH)
                 .matches(response.body())
     }
 
@@ -56,7 +56,7 @@ class BindingRequestRunner(
                 .extract()
 
         if (response.statusCode() == 200) {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath("binding-response-schema.json")
+            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_TO_BINDING)
                     .matches(response.body())
         }
 
@@ -194,5 +194,7 @@ class BindingRequestRunner(
 
     companion object {
         const val SERVICE_BINDING_PATH = "/service_bindings/"
+        private const val PATH_TO_FETCH = "fetch-binding-response-schema.json"
+        private const val PATH_TO_BINDING = "binding-response-schema.json"
     }
 }

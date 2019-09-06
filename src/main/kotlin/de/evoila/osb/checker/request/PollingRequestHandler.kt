@@ -41,7 +41,10 @@ abstract class PollingRequestHandler(
             return LastOperationResponse.State.GONE
         }
 
-        JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(response)
+        val responseBodyString = response.jsonPath().prettify()
+        assert(JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json")
+                .matches(responseBodyString)) { "Expected a valid polling result body but was $responseBodyString" }
+
         val responseBody = response.jsonPath()
                 .getObject("", LastOperationResponse::class.java)
 
@@ -54,7 +57,6 @@ abstract class PollingRequestHandler(
     }
 
     companion object {
-        const val PATH_PROVISION_RESPONSE = "provision-response-schema.json"
         const val ACCEPTS_INCOMPLETE = "?accepts_incomplete=true"
         const val LAST_OPERATION = "/last_operation"
         const val SERVICE_INSTANCE_PATH = "/v2/service_instances/"

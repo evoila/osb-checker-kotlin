@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
+import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.catalog.ServiceInstance
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State
@@ -32,14 +33,15 @@ class ProvisionRequestRunner(
                 .assertThat()
                 .statusCode(200)
                 .headers(expectedResponseHeaders)
-                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_FETCH_INSTANCE_BODY))
+                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_INSTANCE.path))
                 .extract()
                 .response()
                 .jsonPath()
                 .getObject("", ServiceInstance::class.java)
     }
 
-    fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
+    fun runPutProvisionRequestSync(instanceId: String,
+                                   requestBody: RequestBody) {
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -47,23 +49,29 @@ class ProvisionRequestRunner(
                 .body(requestBody)
                 .put(SERVICE_INSTANCE_PATH + instanceId)
                 .then()
-                .log().ifValidationFails()
                 .assertThat()
+                .log().ifValidationFails()
                 .statusCode(IsIn(listOf(201, 422)))
                 .extract()
 
         if (response.statusCode() == 201) {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_PROVISION_RESPONSE)
-                    .matches(response.body())
+            val responseBodyString = response.jsonPath().prettify()
+            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_PROVISION.path)
+                    .matches(responseBodyString)) { "Expected a valid provision response but was:\n$responseBodyString" }
         } else {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE)
-                    .matches(response.body())
+            val responseBodyString = response.jsonPath().prettify()
+            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
         }
     }
 
-    fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int)
+    fun runPutProvisionRequestAsync(instanceId: String,
+                                    requestBody: RequestBody,
+                                    vararg expectedFinalStatusCodes: Int,
+                                    expectedResponseBodyType: ResponseBodyType)
             : ExtractableResponse<Response> {
-        val response = RestAssured.with()
+
+        return RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
                 .contentType(ContentType.JSON)
@@ -72,18 +80,9 @@ class ProvisionRequestRunner(
                 .then()
                 .log().ifValidationFails()
                 .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(expectedResponseBodyType.path))
                 .assertThat()
                 .extract()
-
-        if (response.statusCode() in listOf(201, 202, 200)) {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_PROVISION_RESPONSE)
-                    .matches(response.body())
-        } else {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE)
-                    .matches(response.body())
-        }
-
-        return response
     }
 
     fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String?, maxPollingDuration: Int): State {
@@ -111,7 +110,9 @@ class ProvisionRequestRunner(
                 .extract()
 
         if (response.statusCode() != 200) {
-            JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_ERROR_CODE).matches(response.body())
+            val responseBodyString = response.jsonPath().prettify()
+            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
         }
     }
 
@@ -281,10 +282,5 @@ class ProvisionRequestRunner(
                 .log().ifValidationFails()
                 .assertThat()
                 .statusCode(401)
-    }
-
-    companion object {
-        private const val PATH_ERROR_CODE = "service-broker-error-response.json"
-        private const val PATH_FETCH_INSTANCE_BODY = "fetch-instance-response-schema.json"
     }
 }

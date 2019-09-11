@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class ProvisionRequestRunner(
-        configuration: Configuration
-) : PollingRequestHandler(
-        configuration
-) {
+class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
     fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
         return RestAssured.with()
@@ -40,8 +36,7 @@ class ProvisionRequestRunner(
                 .getObject("", ServiceInstance::class.java)
     }
 
-    fun runPutProvisionRequestSync(instanceId: String,
-                                   requestBody: RequestBody) {
+    fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -65,11 +60,12 @@ class ProvisionRequestRunner(
         }
     }
 
-    fun runPutProvisionRequestAsync(instanceId: String,
-                                    requestBody: RequestBody,
-                                    vararg expectedFinalStatusCodes: Int,
-                                    expectedResponseBodyType: ResponseBodyType)
-            : ExtractableResponse<Response> {
+    fun runPutProvisionRequestAsync(
+            instanceId: String,
+            requestBody: RequestBody,
+            vararg expectedFinalStatusCodes: Int,
+            expectedResponseBodyType: ResponseBodyType
+    ): ExtractableResponse<Response> {
 
         return RestAssured.with()
                 .log().ifValidationFails()
@@ -85,7 +81,12 @@ class ProvisionRequestRunner(
                 .extract()
     }
 
-    fun polling(instanceId: String, expectedFinalStatusCode: Int, operationData: String?, maxPollingDuration: Int): State {
+    fun polling(
+            instanceId: String,
+            expectedFinalStatusCode: Int,
+            operationData: String?,
+            maxPollingDuration: Int
+    ): State {
         val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
         return super.waitForFinish(path = SERVICE_INSTANCE_PATH + instanceId + LAST_OPERATION,
                 expectedFinalStatusCode = expectedFinalStatusCode,
@@ -116,10 +117,12 @@ class ProvisionRequestRunner(
         }
     }
 
-    fun runDeleteProvisionRequestAsync(instanceId: String,
-                                       serviceId: String?,
-                                       planId: String?,
-                                       expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
+    fun runDeleteProvisionRequestAsync(
+            instanceId: String,
+            serviceId: String?,
+            planId: String?,
+            expectedFinalStatusCodes: IntArray
+    ): ExtractableResponse<Response> {
         var path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
         path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
         path = planId?.let { "$path&plan_id=$planId" } ?: path

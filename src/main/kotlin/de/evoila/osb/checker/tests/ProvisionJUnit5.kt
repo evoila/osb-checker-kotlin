@@ -3,6 +3,7 @@ package de.evoila.osb.checker.tests
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.request.bodies.ProvisionBody.ValidProvisioning
 import de.evoila.osb.checker.response.catalog.MaintenanceInfo
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -23,17 +24,17 @@ class ProvisionJUnit5 : TestBase() {
         val service = catalog.services.first()
         val plan = service.plans.first()
         val provisionRequestBody = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null) {
-            ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
+            ValidProvisioning(service, plan, plan.maintenanceInfo)
         } else {
-            ProvisionBody.ValidProvisioning(service, plan)
+            ValidProvisioning(service, plan)
         }
         val dynamicNodes = mutableListOf<DynamicNode>()
         dynamicNodes.add(
                 dynamicContainer("should handle sync requests correctly", listOf(
-                        dynamicTest("Sync PUT request") {
+                        dynamicTest("Sync PUT provision request") {
                             provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
                         },
-                        dynamicTest("Sync DELETE request") {
+                        dynamicTest("Sync DELETE provision request") {
                             provisionRequestRunner.runDeleteProvisionRequestSync(
                                     instanceId = instanceId,
                                     serviceId = provisionRequestBody.service_id,
@@ -54,7 +55,7 @@ class ProvisionJUnit5 : TestBase() {
         val dynamicNodes = mutableListOf<DynamicNode>()
         listOf(
                 TestCase(
-                        requestBody = ProvisionBody.ValidProvisioning(
+                        requestBody = ValidProvisioning(
                                 service_id = "",
                                 plan_id = plan.id,
                                 maintenance_info = if (configuration.apiVersion >= 2.15) {
@@ -67,7 +68,7 @@ class ProvisionJUnit5 : TestBase() {
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.ValidProvisioning(
+                        requestBody = ValidProvisioning(
                                 service_id = service.id,
                                 plan_id = "",
                                 maintenance_info = if (configuration.apiVersion >= 2.15) {
@@ -80,35 +81,26 @@ class ProvisionJUnit5 : TestBase() {
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.NoServiceFieldProvisioning(
-                                plan
-                        ),
+                        requestBody = ProvisionBody.NoServiceFieldProvisioning(plan),
                         message = "should reject if missing service_id field",
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.NoPlanFieldProvisioning(
-                                service
-                        ),
+                        requestBody = ProvisionBody.NoPlanFieldProvisioning(service),
                         message = "should reject if missing plan_id field",
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.NoSpaceFieldProvisioning(
-                                service, plan
-                        ),
+                        requestBody = ProvisionBody.NoSpaceFieldProvisioning(service, plan),
+                        message = "should reject if missing service_id field",
+                        responseBodyType = ERR
+                ),
+                TestCase(requestBody = ProvisionBody.NoOrgFieldProvisioning(service, plan),
                         message = "should reject if missing service_id field",
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.NoOrgFieldProvisioning(
-                                service, plan
-                        ),
-                        message = "should reject if missing service_id field",
-                        responseBodyType = ERR
-                ),
-                TestCase(
-                        requestBody = ProvisionBody.ValidProvisioning(
+                        requestBody = ValidProvisioning(
                                 "Invalid", plan.id,
                                 maintenance_info = if (configuration.apiVersion == 2.15) {
                                     plan.maintenanceInfo
@@ -120,7 +112,7 @@ class ProvisionJUnit5 : TestBase() {
                         responseBodyType = ERR
                 ),
                 TestCase(
-                        requestBody = ProvisionBody.ValidProvisioning(
+                        requestBody = ValidProvisioning(
                                 service.id, "Invalid",
                                 maintenance_info = if (configuration.apiVersion >= 2.15) {
                                     plan.maintenanceInfo
@@ -144,15 +136,17 @@ class ProvisionJUnit5 : TestBase() {
         }
 
         if (configuration.apiVersion >= 2.15) {
-            ProvisionBody.ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422"))
+            ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422"))
             dynamicNodes.add(
                     dynamicTest("PUT should reject if maintenance_info doesn't match") {
                         provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
-                                requestBody = ProvisionBody.ValidProvisioning(service,
+                                requestBody = ValidProvisioning(service,
                                         plan,
-                                        MaintenanceInfo("Invalid", "Should return 422")),
+                                        MaintenanceInfo("Invalid", "Should return 422")
+                                ),
                                 expectedFinalStatusCodes = *intArrayOf(422),
-                                expectedResponseBodyType = ERR_MAINTENANCE_INFO)
+                                expectedResponseBodyType = ERR_MAINTENANCE_INFO
+                        )
                     }
             )
         }
@@ -170,18 +164,12 @@ class ProvisionJUnit5 : TestBase() {
         listOf(
                 TestCase(
                         message = "should reject if service_id is missing",
-                        requestBody = ProvisionBody.ValidProvisioning(
-                                service_id = "",
-                                plan_id = plan.id
-                        ),
+                        requestBody = ValidProvisioning("", plan.id),
                         responseBodyType = ERR
                 ),
                 TestCase(
                         message = "should reject if plan_id is missing",
-                        requestBody = ProvisionBody.ValidProvisioning(
-                                service_id = service.id,
-                                plan_id = ""
-                        ),
+                        requestBody = ValidProvisioning(service.id, ""),
                         responseBodyType = ERR
                 )
         ).forEach {

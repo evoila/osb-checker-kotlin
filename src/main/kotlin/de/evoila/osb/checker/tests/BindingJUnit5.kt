@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.tests
 
 import de.evoila.osb.checker.request.BindingRequestRunner
+import de.evoila.osb.checker.request.ResponseBodyType
 import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
@@ -97,7 +98,15 @@ class BindingJUnit5 : TestBase() {
                         ?: false)
                 )
         )
-        val invalidBindings = mutableListOf<DynamicNode>()
+        val bindingTests = mutableListOf<DynamicNode>(
+                dynamicContainer("Running sync tests",
+                        bindingContainerFactory.createSyncBindingTest(
+                                binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id)
+                                else BindingBody.ValidBinding(service.id, plan.id),
+                                bindingId = bindingId,
+                                instanceId = instanceId
+                        )
+                ))
         listOf(
                 TestCase(
                         requestBody =
@@ -113,24 +122,31 @@ class BindingJUnit5 : TestBase() {
                         responseBodyType = VALID_BINDING
                 )
         ).forEach {
-            invalidBindings.add(
-                    dynamicTest("PUT ${it.message}")
-                    { bindingRequestRunner.runPutBindingRequest(it.requestBody, instanceId, bindingId, 400) }
+            bindingTests.add(
+                    dynamicTest("PUT ${it.message}") {
+                        bindingRequestRunner.runPutBindingRequestAsync(
+                                requestBody = it.requestBody,
+                                instanceId = instanceId,
+                                bindingId = bindingId,
+                                expectedStatusCodes = *intArrayOf(400),
+                                expectedResponseBody = ERR
+                        )
+                    }
             )
-            invalidBindings.add(
-                    dynamicTest("DELETE ${it.message}")
-                    {
+            bindingTests.add(
+                    dynamicTest("DELETE ${it.message}") {
                         val bindingRequestBody = it.requestBody
-                        bindingRequestRunner.runDeleteBindingRequest(
+                        bindingRequestRunner.runDeleteBindingRequestAsync(
                                 serviceId = bindingRequestBody.service_id,
                                 planId = bindingRequestBody.plan_id,
                                 instanceId = instanceId,
                                 bindingId = bindingId,
-                                expectedStatusCodes = *intArrayOf(410))
+                                expectedStatusCodes = *intArrayOf(410)
+                        )
                     }
             )
         }
-        dynamicNodes.add(dynamicContainer("Running invalid bindings", invalidBindings))
+        dynamicNodes.add(dynamicContainer("Running invalid bindings", bindingTests))
         dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
 
         return dynamicNodes

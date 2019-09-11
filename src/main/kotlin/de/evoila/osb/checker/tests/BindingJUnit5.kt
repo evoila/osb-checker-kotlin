@@ -1,10 +1,13 @@
 package de.evoila.osb.checker.tests
 
 import de.evoila.osb.checker.request.BindingRequestRunner
-import de.evoila.osb.checker.request.ResponseBodyType
-import de.evoila.osb.checker.request.ResponseBodyType.*
+import de.evoila.osb.checker.request.ResponseBodyType.ERR
+import de.evoila.osb.checker.request.ResponseBodyType.VALID_BINDING
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.response.catalog.Catalog
+import de.evoila.osb.checker.response.catalog.Plan
+import de.evoila.osb.checker.response.catalog.Service
 import de.evoila.osb.checker.tests.containers.BindingContainers
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -29,8 +32,7 @@ class BindingJUnit5 : TestBase() {
             service.plans.forEach { plan ->
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()
-                val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys
-                        ?: configuration.usingAppGuid
+                val needsAppGuid = needAppGUID(plan)
                 val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
                     ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
                 else ProvisionBody.ValidProvisioning(service, plan)
@@ -71,17 +73,11 @@ class BindingJUnit5 : TestBase() {
     }
 
     @TestFactory
-    fun runInvalidBindingAttempts(): List<DynamicNode> {
+    fun runSyncAndInvalidBindingAttempts(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
-        val service = catalog.services.first()
-        val plan = service.plans.first()
-        val bindable = plan.bindable ?: service.bindable
-        val needsAppGuid: Boolean = plan.metadata?.customParameters?.usesServicesKeys ?: configuration.usingAppGuid
-
-        if (!bindable) {
-            return emptyList()
-        }
-
+        val service = findBindableService(catalog) ?: return emptyList()
+        val plan = findBindablePlan(service)
+        val needsAppGuid: Boolean = needAppGUID(plan)
         val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null) {
             ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
         } else {
@@ -99,7 +95,7 @@ class BindingJUnit5 : TestBase() {
                 )
         )
         val bindingTests = mutableListOf<DynamicNode>(
-                dynamicContainer("Running sync tests",
+                dynamicContainer("should handle sync requests correctly",
                         bindingContainerFactory.createSyncBindingTest(
                                 binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id)
                                 else BindingBody.ValidBinding(service.id, plan.id),
@@ -146,11 +142,20 @@ class BindingJUnit5 : TestBase() {
                     }
             )
         }
-        dynamicNodes.add(dynamicContainer("Running invalid bindings", bindingTests))
+        dynamicNodes.add(dynamicContainer("Create a Service Instance and run sync and invalid bindings attempts", bindingTests))
         dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
 
         return dynamicNodes
     }
+
+    private fun findBindableService(catalog: Catalog): Service? =
+            catalog.services.firstOrNull { service -> service.bindable }
+
+    private fun findBindablePlan(service: Service): Plan =
+            service.plans.first { plan -> plan.bindable ?: true }
+
+    fun needAppGUID(plan: Plan): Boolean = plan.metadata?.customParameters?.usesServicesKeys
+            ?: configuration.usingAppGuid
 
     companion object {
         private const val VALID_BINDING_MESSAGE = "Running a valid provision and if the service is bindable a valid" +

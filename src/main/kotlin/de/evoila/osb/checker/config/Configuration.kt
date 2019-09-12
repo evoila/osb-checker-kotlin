@@ -13,7 +13,6 @@ import kotlin.collections.HashMap
 class Configuration {
 
     lateinit var url: String
-
     var port: Int = 80
     var apiVersion: Double = 0.0
     lateinit var user: String
@@ -21,7 +20,6 @@ class Configuration {
     lateinit var correctToken: String
     lateinit var wrongUserToken: String
     lateinit var wrongPasswordToken: String
-
     var useRequestIdentity: Boolean = false
     var useOriginatingIdentity: Boolean = false
     var skipTLSVerification: Boolean = false
@@ -32,7 +30,6 @@ class Configuration {
 
     fun initCustomCatalog(): Catalog? {
         return if (services.isNotEmpty()) {
-
             Catalog(
                     services.map { customService ->
                         Service(
@@ -47,7 +44,6 @@ class Configuration {
                                 requires = null,
                                 instancesRetrievable = customService.instancesRetrievable,
                                 bindingsRetrievable = customService.bindingRetrievable,
-
                                 plans = customService.plans.map { customPlan ->
                                     Plan(
                                             id = customPlan.id,
@@ -70,7 +66,6 @@ class Configuration {
         var bindable = true
         var instancesRetrievable = false
         var bindingRetrievable = false
-
 
         class CustomPlan {
             lateinit var id: String

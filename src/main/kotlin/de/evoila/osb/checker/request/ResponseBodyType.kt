@@ -9,5 +9,6 @@ enum class ResponseBodyType(val path: String) {
     ERR_ASYNC_REQUIRED("service-broker-async-required.json"),
     ERR_CONCURRENCY("service-broker-concurrency-response.json"),
     ERR_REQUIRES_APP("service-broker-error-response.json"),
-    ERR("service-broker-error-response.json");
+    ERR("service-broker-error-response.json"),
+    NO_SCHEMA("no-schema.json")
 }

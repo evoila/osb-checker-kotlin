@@ -112,6 +112,26 @@ class BindingContainers(
                         assertTrue("Expected the final polling state to be \"succeeded\" but was $state")
                         { SUCCEEDED == state }
                     }
+                },
+                DynamicTest.dynamicTest("Running PUT binding with same attribute again. Expecting StatusCode 200.") {
+                    val response = bindingRequestRunner.runPutBindingRequestAsync(
+                            requestBody = binding,
+                            instanceId = instanceId,
+                            bindingId = bindingId,
+                            expectedStatusCodes = *intArrayOf(200),
+                            expectedResponseBody = NO_SCHEMA
+                    )
+                },
+                DynamicTest.dynamicTest("Running PUT binding with different attribute again. Expecting StatusCode 409.") {
+                    val response = bindingRequestRunner.runPutBindingRequestAsync(
+                            requestBody = binding.copy(
+
+                            ),
+                            instanceId = instanceId,
+                            bindingId = bindingId,
+                            expectedStatusCodes = *intArrayOf(409),
+                            expectedResponseBody = NO_SCHEMA
+                    )
                 }
         )
     }
@@ -119,8 +139,8 @@ class BindingContainers(
     fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String, plan: Plan): DynamicTest =
             DynamicTest.dynamicTest("Deleting binding with bindingId $bindingId") {
                 val response = bindingRequestRunner.runDeleteBindingRequestAsync(
-                        serviceId = binding.service_id,
-                        planId = binding.plan_id,
+                        serviceId = binding.serviceId,
+                        planId = binding.planId,
                         instanceId = instanceId,
                         bindingId = bindingId,
                         expectedStatusCodes = *intArrayOf(200, 202)
@@ -244,8 +264,8 @@ class BindingContainers(
                 bindingRequestRunner.runDeleteBindingRequestSync(
                         instanceId = instanceId,
                         bindingId = bindingId,
-                        serviceId = binding.service_id,
-                        planId = binding.plan_id
+                        serviceId = binding.serviceId,
+                        planId = binding.planId
                 )
             }
     )

@@ -37,8 +37,12 @@ class BindingJUnit5 : TestBase() {
                     ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
                 else ProvisionBody.ValidProvisioning(service, plan)
 
-                val binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id)
-                else BindingBody.ValidBinding(service.id, plan.id)
+                val binding = if (needsAppGuid) BindingBody(
+                        serviceId = service.id,
+                        planId = plan.id,
+                        appGuid = UUID.randomUUID().toString()
+                )
+                else BindingBody(serviceId = service.id, planId = plan.id)
 
                 configuration.provisionParameters.let {
                     if (it.containsKey(plan.id)) {
@@ -101,8 +105,11 @@ class BindingJUnit5 : TestBase() {
         val bindingTests = mutableListOf<DynamicNode>(
                 dynamicContainer("should handle sync requests correctly",
                         bindingContainerFactory.createSyncBindingTest(
-                                binding = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, plan.id)
-                                else BindingBody.ValidBinding(service.id, plan.id),
+                                binding = if (needsAppGuid) BindingBody(
+                                        serviceId = service.id,
+                                        planId = plan.id,
+                                        appGuid = UUID.randomUUID().toString())
+                                else BindingBody(service.id, plan.id),
                                 bindingId = bindingId,
                                 instanceId = instanceId
                         )
@@ -110,14 +117,14 @@ class BindingJUnit5 : TestBase() {
         listOf(
                 TestCase(
                         requestBody =
-                        if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(null, plan.id)
-                        else BindingBody.ValidBinding(null, plan.id),
+                        if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
+                        else BindingBody(null, plan.id),
                         message = "should reject if missing service_id",
                         responseBodyType = VALID_BINDING
                 ),
                 TestCase(
-                        requestBody = if (needsAppGuid) BindingBody.ValidBindingWithAppGuid(service.id, null)
-                        else BindingBody.ValidBinding(service.id, null),
+                        requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
+                        else BindingBody(service.id, null),
                         message = "should reject if missing plan_id",
                         responseBodyType = VALID_BINDING
                 )
@@ -137,8 +144,8 @@ class BindingJUnit5 : TestBase() {
                     dynamicTest("DELETE ${it.message}") {
                         val bindingRequestBody = it.requestBody
                         bindingRequestRunner.runDeleteBindingRequestAsync(
-                                serviceId = bindingRequestBody.service_id,
-                                planId = bindingRequestBody.plan_id,
+                                serviceId = bindingRequestBody.serviceId,
+                                planId = bindingRequestBody.planId,
                                 instanceId = instanceId,
                                 bindingId = bindingId,
                                 expectedStatusCodes = *intArrayOf(410)

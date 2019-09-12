@@ -55,9 +55,7 @@ class Configuration {
                         )
                     }
             )
-        } else {
-            null
-        }
+        } else null
     }
 
     class CustomServices {

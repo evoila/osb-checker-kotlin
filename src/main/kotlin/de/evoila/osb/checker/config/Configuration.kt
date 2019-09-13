@@ -12,74 +12,68 @@ import kotlin.collections.HashMap
 @ConfigurationProperties(prefix = "config")
 class Configuration {
 
-  lateinit var url: String
+    lateinit var url: String
+    var port: Int = 80
+    var apiVersion: Double = 0.0
+    lateinit var user: String
+    lateinit var password: String
+    lateinit var correctToken: String
+    lateinit var wrongUserToken: String
+    lateinit var wrongPasswordToken: String
+    var useRequestIdentity: Boolean = false
+    var useOriginatingIdentity: Boolean = false
+    var skipTLSVerification: Boolean = false
+    var usingAppGuid: Boolean = true
+    val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+    val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
+    var services = mutableListOf<CustomServices>()
 
-  var port: Int = 80
-  var apiVersion: Double = 0.0
-  lateinit var user: String
-  lateinit var password: String
-  lateinit var correctToken: String
-  lateinit var wrongUserToken: String
-  lateinit var wrongPasswordToken: String
-
-  var skipTLSVerification: Boolean = false
-  var usingAppGuid: Boolean = true
-  val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
-  val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
-  var services = mutableListOf<CustomServices>()
-
-  fun initCustomCatalog(): Catalog? {
-    return if (services.isNotEmpty()) {
-
-      Catalog(
-          services.map { customService ->
-            Service(
-                id = customService.id,
-                name = "Service-Name",
-                dashboardClient = null,
-                bindable = customService.bindable,
-                tags = null,
-                metadata = null,
-                planUpdatable = null,
-                description = "Service-Description",
-                requires = null,
-                instancesRetrievable = customService.instancesRetrievable,
-                bindingsRetrievable = customService.bindingRetrievable,
-
-                plans = customService.plans.map { customPlan ->
-                  Plan(
-                      id = customPlan.id,
-                      name = "Plan-Name",
-                      bindable = customPlan.bindable,
-                      description = "Plan-Description",
-                      metadata = null,
-                      plan_updatable = null
-                  )
-                }
+    fun initCustomCatalog(): Catalog? {
+        return if (services.isNotEmpty()) {
+            Catalog(
+                    services.map { customService ->
+                        Service(
+                                id = customService.id,
+                                name = "Service-Name",
+                                dashboardClient = null,
+                                bindable = customService.bindable,
+                                tags = null,
+                                metadata = null,
+                                planUpdatable = null,
+                                description = "Service-Description",
+                                requires = null,
+                                instancesRetrievable = customService.instancesRetrievable,
+                                bindingsRetrievable = customService.bindingRetrievable,
+                                plans = customService.plans.map { customPlan ->
+                                    Plan(
+                                            id = customPlan.id,
+                                            name = "Plan-Name",
+                                            bindable = customPlan.bindable,
+                                            description = "Plan-Description"
+                                    )
+                                }
+                        )
+                    }
             )
-          }
-      )
-    } else {
-
-      null
+        } else null
     }
-  }
 
-  class CustomServices {
-    lateinit var id: String
-    var plans = mutableListOf<CustomPlan>()
-    var bindable = true
-    var instancesRetrievable = false
-    var bindingRetrievable = false
+    class CustomServices {
+        lateinit var id: String
+        var plans = mutableListOf<CustomPlan>()
+        var bindable = true
+        var instancesRetrievable = false
+        var bindingRetrievable = false
 
-
-    class CustomPlan {
-      lateinit var id: String
-      var bindable: Boolean? = null
+        class CustomPlan {
+            lateinit var id: String
+            var bindable: Boolean = true
+        }
     }
-  }
 
-  companion object {
-    val notAnId = UUID.randomUUID().toString()
-  }
+    companion object {
+        val notAnId = UUID.randomUUID().toString()
+        const val FIX_GUID = "0a54bae0-b3ae-4b90-953e-155653c38106"
+        const val originatingIdentityEncoded: String = "checker eyAidXNlcl9pZCI6IDEyMzQgfQ=="
+    }
 }

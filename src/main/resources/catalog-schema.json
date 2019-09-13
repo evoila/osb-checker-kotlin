@@ -52,6 +52,15 @@
           "bindable": {
             "type": "boolean"
           },
+          "instances_retrievable": {
+            "type": "boolean"
+          },
+          "bindings_retrievable": {
+            "type": "boolean"
+          },
+          "allow_context_updates": {
+            "type": "boolean"
+          },
           "metadata": {
             "type": "object"
           },
@@ -90,6 +99,9 @@
                   "type": "string",
                   "pattern": "\\S+"
                 },
+                "maximum_polling_duration": {
+                  "type": "integer"
+                },
                 "maintenance_info": {
                   "type": "object",
                   "required": [
@@ -125,13 +137,22 @@
                   "type": "boolean"
                 },
                 "schemas": {
-                  "type": ["object", "null"],
+                  "type": [
+                    "object",
+                    "null"
+                  ],
                   "properties": {
                     "service_instance": {
-                      "type": ["object", "null"],
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "properties": {
                         "create": {
-                          "type": ["object", "null"],
+                          "type": [
+                            "object",
+                            "null"
+                          ],
                           "properties": {
                             "parameters": {
                               "type": "object"
@@ -139,7 +160,10 @@
                           }
                         },
                         "update": {
-                          "type": ["object", "null"],
+                          "type": [
+                            "object",
+                            "null"
+                          ],
                           "properties": {
                             "parameters": {
                               "type": "object"
@@ -150,7 +174,10 @@
                       "additionalProperties": false
                     },
                     "service_binding": {
-                      "type": ["object", "null"],
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "properties": {
                         "create": {
                           "type": "object",

@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.config
 
 import io.restassured.RestAssured
+import io.restassured.builder.RequestSpecBuilder
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.test.assertTrue
@@ -26,7 +27,8 @@ class RestAssureConfig(
       "Basic ${Base64.getEncoder().encodeToString("$user:$password".toByteArray())}"
 
   companion object {
-    private val supportedApiVersions = listOf(2.13, 2.14)
-    private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following: $supportedApiVersions"
+    private val supportedApiVersions = listOf(2.13, 2.14, 2.15)
+    private val noSupportedApiVersion = "You entered a not supported Api Version. Please use one of the following:" +
+        " $supportedApiVersions"
   }
 }

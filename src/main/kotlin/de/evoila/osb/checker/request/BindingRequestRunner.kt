@@ -13,11 +13,16 @@ import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 @Service
 class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
     fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-GET-binding-${UUID.randomUUID()}")
+        }
+
         RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -36,6 +41,10 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
             instanceId: String,
             bindingId: String
     ) {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-binding-${UUID.randomUUID()}")
+        }
+
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -49,11 +58,11 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
                 .extract()
 
         if (response.statusCode() == 201) {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_BINDING.path)
                     .matches(responseBodyString)) { "Expected a valid binding response but was:\n$responseBodyString" }
         } else {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
                     .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
         }
@@ -66,6 +75,10 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
             vararg expectedStatusCodes: Int,
             expectedResponseBody: ResponseBodyType
     ): ExtractableResponse<Response> {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-binding-${UUID.randomUUID()}")
+        }
+
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -116,6 +129,10 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
         var path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId
         path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-binding-${UUID.randomUUID()}")
+        }
+
         return RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -136,6 +153,11 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
         var path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId
         path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
         path = planId?.let { "$path&plan_id=$planId" } ?: path
+
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-binding-${UUID.randomUUID()}")
+        }
+
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -148,7 +170,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
                 .extract()
 
         if (response.statusCode() != 200) {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
                     .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
         }
@@ -248,7 +270,6 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
 
     companion object {
         const val SERVICE_BINDING_PATH = "/service_bindings/"
-        private const val PATH_TO_FETCH = "fetch-binding-response-schema.json"
         private const val PATH_TO_BINDING = "binding-response-schema.json"
     }
 }

@@ -14,11 +14,15 @@ import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 @Service
 class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
     fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-GET-instance-${UUID.randomUUID()}")
+        }
         return RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -37,6 +41,10 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     }
 
     fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+        }
+
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -50,13 +58,13 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .extract()
 
         if (response.statusCode() == 201) {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_PROVISION.path)
                     .matches(responseBodyString)) { "Expected a valid provision response but was:\n$responseBodyString" }
         } else {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
-                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
+                    .matches(responseBodyString)) { "Expected OSB error code \"async required\" but was:\n$responseBodyString" }
         }
     }
 
@@ -66,6 +74,9 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
             vararg expectedFinalStatusCodes: Int,
             expectedResponseBodyType: ResponseBodyType
     ): ExtractableResponse<Response> {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+        }
 
         return RestAssured.with()
                 .log().ifValidationFails()
@@ -99,6 +110,11 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         var path = SERVICE_INSTANCE_PATH + instanceId
         path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
         path = planId?.let { "$path&plan_id=$planId" } ?: path
+
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+        }
+
         val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
@@ -111,7 +127,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .extract()
 
         if (response.statusCode() != 200) {
-            val responseBodyString = response.jsonPath().prettify()
+            val responseBodyString = getGetResponseBodyAsString(response)
             assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
                     .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
         }
@@ -126,6 +142,10 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         var path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
         path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
         path = planId?.let { "$path&plan_id=$planId" } ?: path
+
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+        }
 
         return RestAssured.with()
                 .log().ifValidationFails()

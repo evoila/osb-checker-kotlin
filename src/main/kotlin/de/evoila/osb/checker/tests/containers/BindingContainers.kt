@@ -114,7 +114,7 @@ class BindingContainers(
                     }
                 },
                 DynamicTest.dynamicTest("Running PUT binding with same attribute again. Expecting StatusCode 200.") {
-                    val response = bindingRequestRunner.runPutBindingRequestAsync(
+                    bindingRequestRunner.runPutBindingRequestAsync(
                             requestBody = binding,
                             instanceId = instanceId,
                             bindingId = bindingId,
@@ -123,9 +123,9 @@ class BindingContainers(
                     )
                 },
                 DynamicTest.dynamicTest("Running PUT binding with different attribute again. Expecting StatusCode 409.") {
-                    val response = bindingRequestRunner.runPutBindingRequestAsync(
+                    bindingRequestRunner.runPutBindingRequestAsync(
                             requestBody = binding.copy(
-
+                                    planId = UUID.randomUUID().toString()
                             ),
                             instanceId = instanceId,
                             bindingId = bindingId,

@@ -7,6 +7,7 @@ import io.restassured.http.ContentType
 import io.restassured.module.jsv.JsonSchemaValidator
 import org.hamcrest.collection.IsIn
 import java.time.Instant
+import java.util.*
 import kotlin.test.assertTrue
 
 abstract class PollingRequestHandler(
@@ -18,6 +19,9 @@ abstract class PollingRequestHandler(
                       operationData: String?,
                       latestAcceptablePollingInstant: Instant
     ): LastOperationResponse.State {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-GET-last-operation-${UUID.randomUUID()}")
+        }
 
         val request = RestAssured.with()
                 .log().ifValidationFails()
@@ -35,7 +39,9 @@ abstract class PollingRequestHandler(
                 .extract()
                 .response()
 
-        assertTrue("") { Instant.now().isBefore(latestAcceptablePollingInstant) }
+        //TODO test maximum polling duration with more detail
+        assertTrue("Took longer than it should!!")
+        { Instant.now().isBefore(latestAcceptablePollingInstant) }
 
         if (response.statusCode == 410) {
             return LastOperationResponse.State.GONE

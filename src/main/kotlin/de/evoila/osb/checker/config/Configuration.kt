@@ -20,9 +20,10 @@ class Configuration {
     lateinit var correctToken: String
     lateinit var wrongUserToken: String
     lateinit var wrongPasswordToken: String
+    var originatingIdentity: OriginatingIdentity? = null
     var useRequestIdentity: Boolean = false
-    var useOriginatingIdentity: Boolean = false
     var skipTLSVerification: Boolean = false
+    //TODO add optional fields for not using appGUID and it should fail
     var usingAppGuid: Boolean = true
     val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
@@ -58,6 +59,11 @@ class Configuration {
         } else null
     }
 
+    class OriginatingIdentity {
+        var platform: String = ""
+        var value: Map<String, Any> = hashMapOf()
+    }
+
     class CustomServices {
         lateinit var id: String
         var plans = mutableListOf<CustomPlan>()
@@ -74,6 +80,6 @@ class Configuration {
     companion object {
         val notAnId = UUID.randomUUID().toString()
         const val FIX_GUID = "0a54bae0-b3ae-4b90-953e-155653c38106"
-        const val originatingIdentityEncoded: String = "checker eyAidXNlcl9pZCI6IDEyMzQgfQ=="
+        //TODO this need be be configurable, since the checker doesn't know how the sb uses this value.
     }
 }

@@ -5,6 +5,7 @@
 - [Usage](#usage)
     - [Configuration](#configuration)
     - [Parameters](#parameters)
+    - [Originating Identity](#originating-identity)
     - [Declaring Services](#declaring-services)
     - [Declaring Test Runs](#declaring-test-runs)
 - [Test](#test)
@@ -32,19 +33,32 @@ Afterwards you can find `osb-checker-kotlin-1.0.jar` in `osb-checker-kotlin/buil
 
 To run the application put a file with the name application.yml into the same location as the osb-checker-kotlin-1.0.jar file. For more information on how to configurate a spring boot application see [here](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html). 
  The .yml file needs the following schema.
- 
+
 ```yaml
 
 ##Define the service broker connection here
 config:
   url: http://localhost
   port : 80
-  apiVersion: 2.13
+  apiVersion: 2.15
   user: user
   password: password
   skipTLSVerification: false
 ##The following configuration are Optional
   usingAppGuid: true
+  useRequestIdentity: true
+  
+  originatingIdentity:
+      platform: kubernetes
+      value:
+        username: duke,
+        groups:
+          - admin
+          - dev
+        extra:
+          mydata:
+            - data1
+            - data3
 
   provisionParameters:
      plan-id-1-here:
@@ -66,10 +80,12 @@ config:
 ```
 
 url, port, apiVersion, user and password are mandatory and MUST be set.
-Currently the application can test 2.13 or 2.14 Service Brokers. Therefor apiVersion MUST be set to 2.13 or 2.14.
+Currently the application can test 2.13, 2.14 or 2.15 Service Brokers. Therefor apiVersion MUST be set to 2.13, 2.14 or 2.15.
 usingAppGuid, parameters and services are optional.
 
 usingAppGuid sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
+
+if useRequestIdentity is set to true, the osb-checker will set 'X-Broker-API-Request-Identity' Header, for each request and verify if the header is present in the response.
 
 ### Parameters
 
@@ -115,6 +131,32 @@ bindingParameters:
     plan-id-here:
       key : value
       schemaName: a_name
+```
+
+### Originating Identity
+
+If you wish to check the brokers behaviour with the header 'X-Broker-API-Request-Identity' you define the value like in the following examples.
+Set the unencoded value content in the value field.
+
+```yaml
+  originatingIdentity:
+    platform: kubernetes
+    value:
+      username: duke,
+      groups:
+        - admin
+        - dev
+      extra:
+        mydata:
+          - data1
+          - data3
+```
+
+```yaml
+  originatingIdentity:
+    platform: cloudfoundry
+    value:
+      user_id: myid
 ```
 
 ### Declaring Services

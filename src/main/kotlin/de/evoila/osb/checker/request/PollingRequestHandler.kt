@@ -40,6 +40,10 @@ abstract class PollingRequestHandler(
                 .extract()
                 .response()
 
+        if (response.statusCode == 410) {
+            return LastOperationResponse.State.GONE
+        }
+
         val responseBody = response.jsonPath()
                 .getObject("", LastOperationResponse::class.java)
 
@@ -49,14 +53,9 @@ abstract class PollingRequestHandler(
             assert(false) { "Instance creation took longer than it should!!" }
         }
 
-        if (response.statusCode == 410) {
-            return LastOperationResponse.State.GONE
-        }
-
         val responseBodyString = response.jsonPath().prettify()
         assert(JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json")
                 .matches(responseBodyString)) { "Expected a valid polling result body but was $responseBodyString" }
-
 
         return if (responseBody.state == LastOperationResponse.State.IN_PROGRESS) {
             Thread.sleep(10000)

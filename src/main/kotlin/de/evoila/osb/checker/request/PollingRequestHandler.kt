@@ -2,6 +2,7 @@ package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.response.operations.LastOperationResponse
+import de.evoila.osb.checker.response.operations.LastOperationResponse.State.FAILED
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import io.restassured.module.jsv.JsonSchemaValidator
@@ -39,9 +40,14 @@ abstract class PollingRequestHandler(
                 .extract()
                 .response()
 
-        //TODO test maximum polling duration with more detail
-        assertTrue("Took longer than it should!!")
-        { Instant.now().isBefore(latestAcceptablePollingInstant) }
+        val responseBody = response.jsonPath()
+                .getObject("", LastOperationResponse::class.java)
+
+        if (Instant.now().isBefore(latestAcceptablePollingInstant)) {
+            assert(responseBody.state != FAILED)
+            { "When it takes more time than defined in maximumPollingDuration the Operation needs be defined as FAILED but was ${responseBody.state}" }
+            assert(false) { "Instance creation took longer than it should!!" }
+        }
 
         if (response.statusCode == 410) {
             return LastOperationResponse.State.GONE
@@ -51,8 +57,6 @@ abstract class PollingRequestHandler(
         assert(JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json")
                 .matches(responseBodyString)) { "Expected a valid polling result body but was $responseBodyString" }
 
-        val responseBody = response.jsonPath()
-                .getObject("", LastOperationResponse::class.java)
 
         return if (responseBody.state == LastOperationResponse.State.IN_PROGRESS) {
             Thread.sleep(10000)

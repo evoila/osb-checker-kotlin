@@ -79,7 +79,5 @@ class Configuration {
 
     companion object {
         val notAnId = UUID.randomUUID().toString()
-        const val FIX_GUID = "0a54bae0-b3ae-4b90-953e-155653c38106"
-        //TODO this need be be configurable, since the checker doesn't know how the sb uses this value.
     }
 }

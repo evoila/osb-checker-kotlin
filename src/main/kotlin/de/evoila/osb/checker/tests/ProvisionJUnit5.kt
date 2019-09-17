@@ -18,30 +18,43 @@ class ProvisionJUnit5 : TestBase() {
     lateinit var provisionRequestRunner: ProvisionRequestRunner
 
     @TestFactory
-    fun runSyncTest(): List<DynamicNode> {
+    fun runGetInstanceAndSyncTests(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
-        val instanceId = UUID.randomUUID().toString()
-        val service = catalog.services.first()
-        val plan = service.plans.first()
-        val provisionRequestBody = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null) {
-            ValidProvisioning(service, plan, plan.maintenanceInfo)
-        } else {
-            ValidProvisioning(service, plan)
-        }
         val dynamicNodes = mutableListOf<DynamicNode>()
-        dynamicNodes.add(
-                dynamicContainer("should handle sync requests correctly", listOf(
-                        dynamicTest("Sync PUT provision request") {
-                            provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
-                        },
-                        dynamicTest("Sync DELETE provision request") {
-                            provisionRequestRunner.runDeleteProvisionRequestSync(
-                                    instanceId = instanceId,
-                                    serviceId = provisionRequestBody.service_id,
-                                    planId = provisionRequestBody.plan_id)
-                        }
-                ))
-        )
+
+        catalog.services.forEach { service ->
+            service.plans.forEach { plan ->
+                val instanceId = UUID.randomUUID().toString()
+                val provisionRequestBody = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null) {
+                    ValidProvisioning(service, plan, plan.maintenanceInfo)
+                } else {
+                    ValidProvisioning(service, plan)
+                }
+
+                service.instancesRetrievable?.let { instancesRetrievable ->
+                    if (instancesRetrievable
+                    ) {
+                        dynamicNodes.add(dynamicTest("should return 4XX when trying to retrieve a non existing service instance.") {
+                            provisionRequestRunner.getProvision(instanceId, *IntArray(100) { 400 + it })
+                        })
+                    }
+                }
+
+                dynamicNodes.add(
+                        dynamicContainer("should handle sync requests correctly", listOf(
+                                dynamicTest("Sync PUT provision request") {
+                                    provisionRequestRunner.runPutProvisionRequestSync(instanceId, provisionRequestBody)
+                                },
+                                dynamicTest("Sync DELETE provision request") {
+                                    provisionRequestRunner.runDeleteProvisionRequestSync(
+                                            instanceId = instanceId,
+                                            serviceId = provisionRequestBody.service_id,
+                                            planId = provisionRequestBody.plan_id)
+                                }
+                        ))
+                )
+            }
+        }
 
         return dynamicNodes
     }

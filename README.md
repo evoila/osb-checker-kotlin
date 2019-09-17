@@ -74,7 +74,6 @@ config:
         
   services:
     - id: service-id-here
-      bindable: true
       plans:
         - id: plan-id-here
 ```
@@ -169,12 +168,9 @@ To define a specific set of services and plans for testing define them under ser
          plans:
            - id: plan-id-here
            - id: plan-id2-here
-             bindable: false
-         bindable: true     
        - id: service-id2-here
          plans:
           - id: plan-id3-here
-         bindable: false   
 ```
 
 this config would run the following provisions and bindings when running the binding test:

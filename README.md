@@ -160,7 +160,8 @@ Set the unencoded value content in the value field.
 
 ### Declaring Services
 
-To define a specific set of services and plans for testing define them under services like this:
+The checker runs all it's tests on every service and plan defined in the service brokers catalog. If this is not desired, the developer can provide
+a list of service and plan ids to direct the checker to the plans he would like to test. All details about the plans will be fetched from the actual catalog.
 
 ```yaml
      services:
@@ -172,55 +173,14 @@ To define a specific set of services and plans for testing define them under ser
          plans:
           - id: plan-id3-here
 ```
+This config would run tests only for the defined plans.
 
-this config would run the following provisions and bindings when running the binding test:
-
-- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
-```json
-{
-  "service_id": "service-id-here",
-  "plan_id": "plan-id-here",
-  "organization_guid": "org-guid-here",
-  "space_guid": "space-guid-here"
-}
+```yaml
+     services:
+       - id: service-id-here
 ```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
+This configuration would run all plans that are defined within the service with the id 'service-id-here'.
 
-- `curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id?accepts_incomplete=true -d `
-```json
-{
-  "service_id": "service-id-here",
-  "plan_id": "plan-id-here",
-  "organization_guid": "org-guid-here",
-  "space_guid": "space-guid-here"
-}
-```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-
-- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
-```json
-{
-  "service_id": "service-id2-here",
-  "plan_id": "plan-id-here",
-  "organization_guid": "org-guid-here",
-  "space_guid": "space-guid-here"
-}
-```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-
-
-- `curl http://username:password@broker-url/v2/service_instances/:instance_id?accepts_incomplete=true -d `
-```json
-{
-  "service_id": "service-id2-here",
-  "plan_id": "plan-id3-here",
-  "organization_guid": "org-guid-here",
-  "space_guid": "space-guid-here"
-}
-```
-` -X PUT -H "X-Broker-API-Version: api-version-here" -H "Content-Type: application/json"`
-
-If no catalog is set the checker will use the catalog the service broker provides by itself.
 
 ### Declaring Test Runs
 
@@ -233,6 +193,7 @@ There are five different options to run tests. Possibles commands are:
 * contract: -con/-contract
 
 In case you want to run all tests call for example `java -jar osb-checker-kotlin-1.0.jar -cat -provision -bind -auth -con`
+or just `java -jar osb-checker-kotlin-1.0.jar`
 
 ## Test
 

@@ -28,4 +28,3 @@ data class TestCase<out T : RequestBody>(
         val message: String,
         val responseBodyType: ResponseBodyType
 )
-

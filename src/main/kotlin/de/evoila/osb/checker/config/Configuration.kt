@@ -1,8 +1,6 @@
 package de.evoila.osb.checker.config
 
 import de.evoila.osb.checker.response.catalog.Catalog
-import de.evoila.osb.checker.response.catalog.Plan
-import de.evoila.osb.checker.response.catalog.Service
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
@@ -27,36 +25,24 @@ class Configuration {
     var usingAppGuid: Boolean = true
     val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
-    var services = mutableListOf<CustomServices>()
+    var services = mutableListOf<CustomService>()
 
-    fun initCustomCatalog(): Catalog? {
+    fun initCustomCatalog(fullCatalog: Catalog): Catalog {
         return if (services.isNotEmpty()) {
-            Catalog(
-                    services.map { customService ->
-                        Service(
-                                id = customService.id,
-                                name = "Service-Name",
-                                dashboardClient = null,
-                                bindable = customService.bindable,
-                                tags = null,
-                                metadata = null,
-                                planUpdatable = null,
-                                description = "Service-Description",
-                                requires = null,
-                                instancesRetrievable = customService.instancesRetrievable,
-                                bindingsRetrievable = customService.bindingRetrievable,
-                                plans = customService.plans.map { customPlan ->
-                                    Plan(
-                                            id = customPlan.id,
-                                            name = "Plan-Name",
-                                            bindable = customPlan.bindable,
-                                            description = "Plan-Description"
-                                    )
+            fullCatalog.copy(
+                    services = fullCatalog.services.filter { service ->
+                        services.firstOrNull { service.id == it.id }?.let { true } ?: false
+                    }.map {
+                        it.copy(
+                                plans = it.plans.filter { plan ->
+                                    val customService = services.first { customService -> customService.id == it.id }
+                                    customService.plans.firstOrNull { customPlan -> customPlan.id == plan.id }?.let { true }
+                                            ?: false
                                 }
                         )
                     }
             )
-        } else null
+        } else fullCatalog
     }
 
     class OriginatingIdentity {
@@ -64,16 +50,12 @@ class Configuration {
         var value: Map<String, Any> = hashMapOf()
     }
 
-    class CustomServices {
+    class CustomService {
         lateinit var id: String
         var plans = mutableListOf<CustomPlan>()
-        var bindable = true
-        var instancesRetrievable = false
-        var bindingRetrievable = false
 
         class CustomPlan {
             lateinit var id: String
-            var bindable: Boolean = true
         }
     }
 

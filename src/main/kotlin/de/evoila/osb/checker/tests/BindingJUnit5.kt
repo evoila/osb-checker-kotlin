@@ -25,7 +25,7 @@ class BindingJUnit5 : TestBase() {
 
     @TestFactory
     fun runValidBindings(): List<DynamicNode> {
-        val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
+        val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
         val dynamicNodes = mutableListOf<DynamicNode>()
 
         catalog.services.forEach { service ->
@@ -78,91 +78,93 @@ class BindingJUnit5 : TestBase() {
 
     @TestFactory
     fun runSyncAndInvalidBindingAttempts(): List<DynamicNode> {
-        val catalog = configuration.initCustomCatalog() ?: catalogRequestRunner.correctRequest()
-        val service = findBindableService(catalog) ?: return emptyList()
-        val plan = findBindablePlan(service)
-        val needsAppGuid: Boolean = needAppGUID(plan)
-        val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
-            ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo) else ProvisionBody.ValidProvisioning(service, plan)
-        val instanceId = UUID.randomUUID().toString()
-        val bindingId = UUID.randomUUID().toString()
+        val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
         val dynamicNodes = mutableListOf<DynamicNode>()
+        findBindableServices(catalog).forEach { service ->
+            findBindablePlans(service).forEach { plan ->
+                val needsAppGuid: Boolean = needAppGUID(plan)
+                val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
+                    ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo) else ProvisionBody.ValidProvisioning(service, plan)
+                val instanceId = UUID.randomUUID().toString()
+                val bindingId = UUID.randomUUID().toString()
 
-        if (service.instancesRetrievable == true) {
-            dynamicNodes.add(dynamicTest("should return status code 4XX when tying to fetch a non existing instance") {
-                bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
-            })
-        }
-        dynamicNodes.add(
-                bindingContainerFactory.validProvisionContainer(
-                        instanceId = instanceId,
-                        plan = plan,
-                        provision = provision,
-                        isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable ?: false)
-                )
-        )
-        val bindingTests = mutableListOf<DynamicNode>(
-                dynamicContainer("should handle sync requests correctly",
-                        bindingContainerFactory.createSyncBindingTest(
-                                binding = if (needsAppGuid) BindingBody(
-                                        serviceId = service.id,
-                                        planId = plan.id,
-                                        appGuid = UUID.randomUUID().toString())
-                                else BindingBody(service.id, plan.id),
-                                bindingId = bindingId,
-                                instanceId = instanceId
-                        )
-                ))
-        listOf(
-                TestCase(
-                        requestBody =
-                        if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
-                        else BindingBody(null, plan.id),
-                        message = "should reject if missing service_id",
-                        responseBodyType = VALID_BINDING
-                ),
-                TestCase(
-                        requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
-                        else BindingBody(service.id, null),
-                        message = "should reject if missing plan_id",
-                        responseBodyType = VALID_BINDING
-                )
-        ).forEach {
-            bindingTests.add(
-                    dynamicTest("PUT ${it.message}") {
-                        bindingRequestRunner.runPutBindingRequestAsync(
-                                requestBody = it.requestBody,
+                if (service.instancesRetrievable == true) {
+                    dynamicNodes.add(dynamicTest("should return status code 4XX when tying to fetch a non existing instance") {
+                        bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
+                    })
+                }
+                dynamicNodes.add(
+                        bindingContainerFactory.validProvisionContainer(
                                 instanceId = instanceId,
-                                bindingId = bindingId,
-                                expectedStatusCodes = *intArrayOf(400),
-                                expectedResponseBody = ERR
+                                plan = plan,
+                                provision = provision,
+                                isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
+                                        ?: false)
                         )
-                    }
-            )
-            bindingTests.add(
-                    dynamicTest("DELETE ${it.message}") {
-                        val bindingRequestBody = it.requestBody
-                        bindingRequestRunner.runDeleteBindingRequestAsync(
-                                serviceId = bindingRequestBody.serviceId,
-                                planId = bindingRequestBody.planId,
-                                instanceId = instanceId,
-                                bindingId = bindingId,
-                                expectedStatusCodes = *intArrayOf(410)
+                )
+                val bindingTests = mutableListOf<DynamicNode>(
+                        dynamicContainer("should handle sync requests correctly",
+                                bindingContainerFactory.createSyncBindingTest(
+                                        binding = if (needsAppGuid) BindingBody(
+                                                serviceId = service.id,
+                                                planId = plan.id,
+                                                appGuid = UUID.randomUUID().toString())
+                                        else BindingBody(service.id, plan.id),
+                                        bindingId = bindingId,
+                                        instanceId = instanceId
+                                )
+                        ))
+                listOf(
+                        TestCase(
+                                requestBody =
+                                if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
+                                else BindingBody(null, plan.id),
+                                message = "should reject if missing service_id",
+                                responseBodyType = VALID_BINDING
+                        ),
+                        TestCase(
+                                requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
+                                else BindingBody(service.id, null),
+                                message = "should reject if missing plan_id",
+                                responseBodyType = VALID_BINDING
                         )
-                    }
-            )
+                ).forEach {
+                    bindingTests.add(
+                            dynamicTest("PUT ${it.message}") {
+                                bindingRequestRunner.runPutBindingRequestAsync(
+                                        requestBody = it.requestBody,
+                                        instanceId = instanceId,
+                                        bindingId = bindingId,
+                                        expectedStatusCodes = *intArrayOf(400),
+                                        expectedResponseBody = ERR
+                                )
+                            }
+                    )
+                    bindingTests.add(
+                            dynamicTest("DELETE ${it.message}") {
+                                val bindingRequestBody = it.requestBody
+                                bindingRequestRunner.runDeleteBindingRequestAsync(
+                                        serviceId = bindingRequestBody.serviceId,
+                                        planId = bindingRequestBody.planId,
+                                        instanceId = instanceId,
+                                        bindingId = bindingId,
+                                        expectedStatusCodes = *intArrayOf(410)
+                                )
+                            }
+                    )
+                }
+                dynamicNodes.add(dynamicContainer("Create a Service Instance and run sync and invalid bindings attempts", bindingTests))
+                dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
+            }
         }
-        dynamicNodes.add(dynamicContainer("Create a Service Instance and run sync and invalid bindings attempts", bindingTests))
-        dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
-
         return dynamicNodes
     }
 
-    private fun findBindableService(catalog: Catalog): Service? =
-            catalog.services.firstOrNull { service -> service.bindable }
+    private fun findBindableServices(catalog: Catalog): List<Service> =
+            catalog.services.filter { service -> service.bindable }
 
-    private fun findBindablePlan(service: Service): Plan =
-            service.plans.first { plan -> plan.bindable ?: true }
+    private fun findBindablePlans(service: Service): List<Plan> =
+            service.plans.filter { plan -> plan.bindable ?: true }
 
     fun needAppGUID(plan: Plan): Boolean = plan.metadata?.customParameters?.usesServicesKeys
             ?: configuration.usingAppGuid

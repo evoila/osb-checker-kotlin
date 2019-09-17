@@ -1,5 +1,6 @@
 package de.evoila.osb.checker.tests.containers
 
+import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.*
@@ -8,6 +9,7 @@ import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State.*
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.operations.AsyncResponse
+import de.evoila.osb.checker.response.operations.ProvisionResponse
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.springframework.stereotype.Service
@@ -18,7 +20,8 @@ import kotlin.test.assertTrue
 @Service
 class BindingContainers(
         val provisionRequestRunner: ProvisionRequestRunner,
-        val bindingRequestRunner: BindingRequestRunner
+        val bindingRequestRunner: BindingRequestRunner,
+        val configuration: Configuration
 ) {
 
     fun validDeleteProvisionContainer(
@@ -194,15 +197,23 @@ class BindingContainers(
                     )
 
                     if (response.statusCode() == 202) {
-                        val provisionResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
+                        val asyncResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
                         val state = provisionRequestRunner.polling(
                                 instanceId = instanceId,
                                 expectedFinalStatusCode = 200,
-                                operationData = provisionResponse.operation,
+                                operationData = asyncResponse.operation,
                                 maxPollingDuration = plan.maximumPollingDuration
                         )
                         assertTrue(EXPECTED_FINAL_POLLING_STATE + state)
                         { SUCCEEDED == state }
+                        if (configuration.testDashboard && !asyncResponse.dashboardUrl.isNullOrEmpty()) {
+                            provisionRequestRunner.testDashboardURL(asyncResponse.dashboardUrl)
+                        }
+                    } else if (configuration.testDashboard) {
+                        val provisionResponse = response.jsonPath().getObject("", ProvisionResponse::class.java)
+                        if (!provisionResponse.dashboardUrl.isNullOrEmpty()) {
+                            provisionRequestRunner.testDashboardURL(provisionResponse.dashboardUrl)
+                        }
                     }
                 },
                 DynamicTest.dynamicTest("Running valid PUT provision with same attributes again. Expecting Status 200.") {

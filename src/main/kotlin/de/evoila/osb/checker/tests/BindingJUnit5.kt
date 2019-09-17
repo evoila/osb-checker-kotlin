@@ -88,11 +88,6 @@ class BindingJUnit5 : TestBase() {
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()
 
-                if (service.instancesRetrievable == true) {
-                    dynamicNodes.add(dynamicTest("should return status code 4XX when tying to fetch a non existing instance") {
-                        bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
-                    })
-                }
                 dynamicNodes.add(
                         bindingContainerFactory.validProvisionContainer(
                                 instanceId = instanceId,
@@ -103,6 +98,9 @@ class BindingJUnit5 : TestBase() {
                         )
                 )
                 val bindingTests = mutableListOf<DynamicNode>(
+                        dynamicTest("should return status code 4XX when tying to fetch a non existing binding") {
+                            bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
+                        },
                         dynamicContainer("should handle sync requests correctly",
                                 bindingContainerFactory.createSyncBindingTest(
                                         binding = if (needsAppGuid) BindingBody(
@@ -153,7 +151,7 @@ class BindingJUnit5 : TestBase() {
                             }
                     )
                 }
-                dynamicNodes.add(dynamicContainer("Create a Service Instance and run sync and invalid bindings attempts", bindingTests))
+                dynamicNodes.add(dynamicContainer("Run sync and invalid bindings attempts", bindingTests))
                 dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
             }
         }

@@ -14,6 +14,7 @@ import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
+import kotlin.test.assertTrue
 
 @Service
 class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
@@ -37,10 +38,9 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
                 .response()
 
         if (expectedStatusCodes.contentEquals(intArrayOf(200))) {
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_BINDING.path)
-                    .matches(response.jsonPath().prettify())) {
-                "Expected a valid GET binding response but was: \"${response.jsonPath().prettify()}\""
-            }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_BINDING.path)
+                    .matches(response.jsonPath().prettify()),
+                    "\nExpected a valid GET binding response but was:\n\"${response.jsonPath().prettify()}\"")
         }
     }
 
@@ -67,12 +67,12 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
 
         if (response.statusCode() == 201) {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_BINDING.path)
-                    .matches(responseBodyString)) { "Expected a valid binding response but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_BINDING.path)
+                    .matches(responseBodyString), "\nExpected a valid binding response but was:\n$responseBodyString")
         } else {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
-                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "\nExpected OSB error code async required but was:\n$responseBodyString")
         }
     }
 
@@ -103,8 +103,8 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
 
         if (response.statusCode() == 200) {
             val responseBodyString = response.body().jsonPath().prettify()
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_TO_BINDING).matches(responseBodyString))
-            { "Expected a valid binding ResponseBody, but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(PATH_TO_BINDING).matches(responseBodyString),
+                    "\nExpected a valid binding ResponseBody, but was:\n$responseBodyString")
         }
 
         return response
@@ -179,8 +179,8 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
 
         if (response.statusCode() != 200) {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
-                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "Expected OSB error code async required but was:\n$responseBodyString")
         }
     }
 

@@ -6,6 +6,11 @@ import de.evoila.osb.checker.request.bodies.RequestBody
 import de.evoila.osb.checker.response.catalog.ServiceInstance
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State
 import io.restassured.RestAssured
+import io.restassured.builder.RequestSpecBuilder
+import io.restassured.config.RedirectConfig
+import io.restassured.config.RedirectConfig.redirectConfig
+import io.restassured.config.RestAssuredConfig
+import io.restassured.config.RestAssuredConfig.config
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
@@ -13,8 +18,10 @@ import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
+import java.net.URL
 import java.time.Instant
 import java.util.*
+import kotlin.test.assertTrue
 
 @Service
 class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
@@ -64,12 +71,12 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
 
         if (response.statusCode() == 201) {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_PROVISION.path)
-                    .matches(responseBodyString)) { "Expected a valid provision response but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_PROVISION.path)
+                    .matches(responseBodyString), "\nExpected a valid provision response but was:\n$responseBodyString")
         } else {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
-                    .matches(responseBodyString)) { "Expected OSB error code \"async required\" but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "\nExpected OSB error code \"async required\" but was:\n$responseBodyString")
         }
     }
 
@@ -133,8 +140,8 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
 
         if (response.statusCode() != 200) {
             val responseBodyString = getGetResponseBodyAsString(response)
-            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
-                    .matches(responseBodyString)) { "Expected OSB error code async required but was:\n$responseBodyString" }
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "\nExpected OSB error code async required but was:\n$responseBodyString")
         }
     }
 
@@ -310,5 +317,25 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .log().ifValidationFails()
                 .assertThat()
                 .statusCode(401)
+    }
+
+    fun testDashboardURL(dashboardUrl: String) {
+        val statusCode = RestAssured.given()
+                .spec(RequestSpecBuilder()
+                        .setConfig(config().redirect(redirectConfig()
+                                .followRedirects(true)
+                                .allowCircularRedirects(false))).build()
+                )
+                .with()
+                .log().ifValidationFails()
+                .get(URL(dashboardUrl))
+                .then()
+                .extract()
+                .statusCode()
+
+        assertTrue(IntArray(100) { 200 + it }.contains(statusCode),
+                "\nExpected Dashboard URL to be reachable, but got StatusCode: $statusCode")
+
+
     }
 }

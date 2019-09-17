@@ -18,12 +18,12 @@ import java.util.*
 @Service
 class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
-    fun runGetBindingRequest(expectedStatusCode: Int, instanceId: String, bindingId: String) {
+    fun runGetBindingRequest(instanceId: String, bindingId: String, vararg expectedStatusCodes: Int) {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-GET-binding-${UUID.randomUUID()}")
         }
 
-        RestAssured.with()
+        val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
                 .contentType(ContentType.JSON)
@@ -32,8 +32,16 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
                 .log().ifValidationFails()
                 .assertThat()
                 .headers(expectedResponseHeaders)
-                .statusCode(expectedStatusCode)
-                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_BINDING.path))
+                .statusCode(IsIn(expectedStatusCodes.asList()))
+                .extract()
+                .response()
+
+        if (expectedStatusCodes.contentEquals(intArrayOf(200))) {
+            assert(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_BINDING.path)
+                    .matches(response.jsonPath().prettify())) {
+                "Expected a valid GET binding response but was: \"${response.jsonPath().prettify()}\""
+            }
+        }
     }
 
     fun runPutBindingRequestSync(

@@ -84,14 +84,13 @@ class BindingJUnit5 : TestBase() {
         val needsAppGuid: Boolean = needAppGUID(plan)
         val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
             ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo) else ProvisionBody.ValidProvisioning(service, plan)
-
         val instanceId = UUID.randomUUID().toString()
         val bindingId = UUID.randomUUID().toString()
         val dynamicNodes = mutableListOf<DynamicNode>()
 
         if (service.instancesRetrievable == true) {
-            dynamicNodes.add(dynamicTest("should return 404 when tying to fetch a non existing instance") {
-                bindingRequestRunner.runGetBindingRequest(404, instanceId, bindingId)
+            dynamicNodes.add(dynamicTest("should return status code 4XX when tying to fetch a non existing instance") {
+                bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
             })
         }
         dynamicNodes.add(

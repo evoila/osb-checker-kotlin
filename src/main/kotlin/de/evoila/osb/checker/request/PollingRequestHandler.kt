@@ -47,7 +47,7 @@ abstract class PollingRequestHandler(
         val responseBody = response.jsonPath()
                 .getObject("", LastOperationResponse::class.java)
 
-        if (Instant.now().isBefore(latestAcceptablePollingInstant)) {
+        if (!Instant.now().isBefore(latestAcceptablePollingInstant)) {
             assert(responseBody.state != FAILED)
             { "When it takes more time than defined in maximumPollingDuration the Operation needs be defined as FAILED but was ${responseBody.state}" }
             assert(false) { "Instance creation took longer than it should!!" }

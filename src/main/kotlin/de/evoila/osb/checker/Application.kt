@@ -25,80 +25,89 @@ class Application
 
 fun main(args: Array<String>) {
 
-  val options = Options()
-      .apply {
-        addOption(
-            Option.builder("cat")
-                .longOpt("catalog")
-                .desc("Indicate if the Catalog Test should run.")
-                .build()
-        )
-        addOption(
-            Option.builder("prov")
-                .longOpt("provision")
-                .desc("Indicate if the Provision Test should run.")
-                .build()
-        )
-        addOption(
-            Option.builder("bind")
-                .longOpt("binding")
-                .desc("Indicate if the Binding Test should run.")
-                .build()
-        )
-        addOption(
-            Option.builder("auth")
-                .longOpt("authentication")
-                .desc("Indicate if the Authentication Test should run.")
-                .build()
-        )
-        addOption(Option.builder("con")
-            .longOpt("contract")
-            .desc("Indicate if the Contract Test should run.")
+    val options = Options()
+            .apply {
+                addOption(
+                        Option.builder("cat")
+                                .longOpt("catalog")
+                                .desc("Indicate if the Catalog Test should run.")
+                                .build()
+                )
+                addOption(
+                        Option.builder("prov")
+                                .longOpt("provision")
+                                .desc("Indicate if the Provision Test should run.")
+                                .build()
+                )
+                addOption(
+                        Option.builder("bind")
+                                .longOpt("binding")
+                                .desc("Indicate if the Binding Test should run.")
+                                .build()
+                )
+                addOption(
+                        Option.builder("auth")
+                                .longOpt("authentication")
+                                .desc("Indicate if the Authentication Test should run.")
+                                .build()
+                )
+                addOption(Option.builder("con")
+                        .longOpt("contract")
+                        .desc("Indicate if the Contract Test should run.")
+                        .build()
+                )
+            }
+
+    val parser = DefaultParser()
+    val commandLine = parser.parse(options, args)
+
+    val selectors = mutableListOf<DiscoverySelector>()
+
+    if (commandLine.hasOption("catalog")) {
+        selectors.add(DiscoverySelectors.selectClass(CatalogJUnit5::class.java))
+    }
+
+    if (commandLine.hasOption("provision")) {
+        selectors.add(DiscoverySelectors.selectClass(ProvisionJUnit5::class.java))
+    }
+
+    if (commandLine.hasOption("binding")) {
+        selectors.add(DiscoverySelectors.selectClass(BindingJUnit5::class.java))
+    }
+
+    if (commandLine.hasOption("authentication")) {
+        selectors.add(DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java))
+    }
+
+    if (commandLine.hasOption("contract")) {
+        selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
+    }
+
+    if (selectors.isEmpty()) {
+        selectors.addAll(
+                listOf(DiscoverySelectors.selectClass(CatalogJUnit5::class.java),
+                        DiscoverySelectors.selectClass(ProvisionJUnit5::class.java),
+                        DiscoverySelectors.selectClass(BindingJUnit5::class.java),
+                        DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java),
+                        DiscoverySelectors.selectClass(ContractJUnit5::class.java)))
+    }
+
+    val summaryGenerator = SummaryGeneratingListener()
+    val launcher = LauncherFactory.create()
+    val treeLogger = TreePrintingListener()
+
+    launcher.registerTestExecutionListeners(
+            LoggingListener.forJavaUtilLogging(Level.INFO),
+            treeLogger,
+            summaryGenerator
+    )
+
+    val request = LauncherDiscoveryRequestBuilder.request()
+            .selectors(selectors)
             .build()
-        )
-      }
 
-  val parser = DefaultParser()
-  val commandLine = parser.parse(options, args)
+    launcher.execute(request)
+    summaryGenerator.summary.printTo(PrintWriter(System.out))
 
-  val selectors = mutableListOf<DiscoverySelector>()
-
-  if (commandLine.hasOption("catalog")) {
-    selectors.add(DiscoverySelectors.selectClass(CatalogJUnit5::class.java))
-  }
-
-  if (commandLine.hasOption("provision")) {
-    selectors.add(DiscoverySelectors.selectClass(ProvisionJUnit5::class.java))
-  }
-
-  if (commandLine.hasOption("binding")) {
-    selectors.add(DiscoverySelectors.selectClass(BindingJUnit5::class.java))
-  }
-
-  if (commandLine.hasOption("authentication")) {
-    selectors.add(DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java))
-  }
-
-  if (commandLine.hasOption("contract")) {
-    selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
-  }
-
-  val summaryGenerator = SummaryGeneratingListener()
-  val launcher = LauncherFactory.create()
-  val treeLogger = TreePrintingListener()
-
-  launcher.registerTestExecutionListeners(
-      LoggingListener.forJavaUtilLogging(Level.INFO),
-      treeLogger,
-      summaryGenerator
-  )
-
-  val request = LauncherDiscoveryRequestBuilder.request()
-      .selectors(selectors)
-      .build()
-
-  launcher.execute(request)
-  summaryGenerator.summary.printTo(PrintWriter(System.out))
-
-  exitProcess(summaryGenerator.summary.failures.size)
+    exitProcess(summaryGenerator.summary.failures.size)
 }

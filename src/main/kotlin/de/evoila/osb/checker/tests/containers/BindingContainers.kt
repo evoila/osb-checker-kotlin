@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Service
@@ -163,7 +164,7 @@ class BindingContainers(
     fun validRetrievableBindingContainer(instanceId: String, bindingId: String, expectedStatusCode: Int): DynamicTest {
         return DynamicTest.dynamicTest("Running GET for retrievable service binding" +
                 " and expecting StatusCode: $expectedStatusCode") {
-            bindingRequestRunner.runGetBindingRequest(expectedStatusCode, instanceId, bindingId)
+            bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, expectedStatusCode)
         }
     }
 
@@ -174,7 +175,8 @@ class BindingContainers(
     ): DynamicTest {
 
         return DynamicTest.dynamicTest("Running valid GET for retrievable service instance") {
-            val serviceInstance = provisionRequestRunner.getProvision(instanceId, isRetrievable)
+            val serviceInstance = provisionRequestRunner.getProvision(instanceId, 200)
+            assertNotNull(serviceInstance, "Expected a valid service Instance Object.")
             assertTrue("When retrieving the instance the response did not match the expected value. \n" +
                     "service_id: expected ${provision.service_id} actual ${serviceInstance.serviceId} \n" +
                     "plan_id: expected ${provision.plan_id} actual ${serviceInstance.planId}")

@@ -3,7 +3,6 @@ package de.evoila.osb.checker.request
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.response.catalog.Catalog
 import io.restassured.RestAssured
-import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
 import org.springframework.stereotype.Service

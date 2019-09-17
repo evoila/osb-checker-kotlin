@@ -19,11 +19,11 @@ import java.util.*
 @Service
 class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
-    fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
+    fun getProvision(instanceId: String, vararg expectedFinalStatusCodes: Int): ServiceInstance? {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-GET-instance-${UUID.randomUUID()}")
         }
-        return RestAssured.with()
+        val response = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
                 .contentType(ContentType.JSON)
@@ -31,13 +31,18 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .then()
                 .log().ifValidationFails()
                 .assertThat()
-                .statusCode(200)
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
                 .headers(expectedResponseHeaders)
-                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_FETCH_INSTANCE.path))
                 .extract()
                 .response()
-                .jsonPath()
-                .getObject("", ServiceInstance::class.java)
+
+        return if (response.statusCode == 200) {
+            assert(JsonSchemaValidator.matchesJsonSchema(VALID_FETCH_INSTANCE.path).matches(response.jsonPath().prettify()))
+            { "Expected a valid FetchInstance Response, but was ${response.jsonPath().prettify()}" }
+            response.jsonPath().getObject("", ServiceInstance::class.java)
+        } else {
+            null
+        }
     }
 
     fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {

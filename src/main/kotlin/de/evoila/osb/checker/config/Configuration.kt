@@ -27,19 +27,26 @@ class Configuration {
     val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     var services = mutableListOf<CustomService>()
 
+    /*
+     * This Method filters an provided catalog by the service and plan ids set in the application.yml
+     * If no services are set the full catalog gets returned.
+     * Same goes for plans.
+     */
     fun initCustomCatalog(fullCatalog: Catalog): Catalog {
         return if (services.isNotEmpty()) {
             fullCatalog.copy(
                     services = fullCatalog.services.filter { service ->
                         services.firstOrNull { service.id == it.id }?.let { true } ?: false
                     }.map {
-                        it.copy(
-                                plans = it.plans.filter { plan ->
-                                    val customService = services.first { customService -> customService.id == it.id }
-                                    customService.plans.firstOrNull { customPlan -> customPlan.id == plan.id }?.let { true }
-                                            ?: false
-                                }
-                        )
+                        if (it.plans.isNotEmpty()) {
+                            it.copy(
+                                    plans = it.plans.filter { plan ->
+                                        val customService = services.first { customService -> customService.id == it.id }
+                                        customService.plans.firstOrNull { customPlan -> customPlan.id == plan.id }?.let { true }
+                                                ?: false
+                                    }
+                            )
+                        } else it
                     }
             )
         } else fullCatalog

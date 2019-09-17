@@ -67,21 +67,13 @@ class BindingContainers(
             isRetrievable: Boolean,
             plan: Plan
     ): DynamicContainer {
+        val bindingTests = createValidBindingTests(bindingId, binding, instanceId, plan)
 
         return DynamicContainer.dynamicContainer(VALID_BINDING_MESSAGE, if (isRetrievable) {
-            listOf(validRetrievableBindingContainer(instanceId, bindingId, 404)).plus(
-                    createValidBindingTests(
-                            bindingId = bindingId,
-                            binding = binding,
-                            instanceId = instanceId,
-                            plan = plan
-                    ).plus(listOf(validRetrievableBindingContainer(instanceId, bindingId, 200),
-                            validDeleteTest(binding, instanceId, bindingId, plan))
-                    )
-            )
+            bindingTests.plus(listOf(validRetrievableBindingContainer(instanceId, bindingId),
+                    validDeleteTest(binding, instanceId, bindingId, plan)))
         } else {
-            createValidBindingTests(bindingId, binding, instanceId, plan)
-                    .plus(validDeleteTest(binding, instanceId, bindingId, plan))
+            bindingTests.plus(validDeleteTest(binding, instanceId, bindingId, plan))
         })
     }
 
@@ -161,10 +153,10 @@ class BindingContainers(
                 }
             }
 
-    fun validRetrievableBindingContainer(instanceId: String, bindingId: String, expectedStatusCode: Int): DynamicTest {
+    fun validRetrievableBindingContainer(instanceId: String, bindingId: String): DynamicTest {
         return DynamicTest.dynamicTest("Running GET for retrievable service binding" +
-                " and expecting StatusCode: $expectedStatusCode") {
-            bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, expectedStatusCode)
+                " and expecting StatusCode: 200") {
+            bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, 200)
         }
     }
 

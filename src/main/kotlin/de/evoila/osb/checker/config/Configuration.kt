@@ -31,23 +31,30 @@ class Configuration {
     /*
      * This Method filters an provided catalog by the service and plan ids set in the application.yml
      * If no services are set the full catalog gets returned.
-     * Same goes for plans.
+     * If only service id's are defined, all plans in the provided service are returned.
      */
     fun initCustomCatalog(fullCatalog: Catalog): Catalog {
         return if (services.isNotEmpty()) {
             fullCatalog.copy(
+                    /*
+                     * Creates a service list from the catalog only with the services which ids are defined in the
+                     * customServices field from the application.yml.
+                     */
                     services = fullCatalog.services.filter { service ->
                         services.firstOrNull { service.id == it.id }?.let { true } ?: false
-                    }.map {
-                        if (it.plans.isNotEmpty()) {
-                            it.copy(
-                                    plans = it.plans.filter { plan ->
-                                        val customService = services.first { customService -> customService.id == it.id }
+                    }.map { filteredService ->
+                        val customService = services.first { it.id == filteredService.id }
+                        if (customService.plans.isNotEmpty()) {
+                            filteredService.copy(
+                                    /*
+                                     * Filters by same predicate as before just for the plans on the filtered services.
+                                     */
+                                    plans = filteredService.plans.filter { plan ->
                                         customService.plans.firstOrNull { customPlan -> customPlan.id == plan.id }?.let { true }
                                                 ?: false
                                     }
                             )
-                        } else it
+                        } else filteredService
                     }
             )
         } else fullCatalog

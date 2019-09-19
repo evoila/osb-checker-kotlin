@@ -7,6 +7,7 @@ import de.evoila.osb.checker.request.bodies.ProvisionBody.ValidProvisioning
 import de.evoila.osb.checker.response.catalog.MaintenanceInfo
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
@@ -15,12 +16,14 @@ import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
+@DisplayName(value = "Provision test runs")
 class ProvisionJUnit5 : TestBase() {
 
     @Autowired
     lateinit var provisionRequestRunner: ProvisionRequestRunner
 
     @TestFactory
+    @DisplayName(value = "Run fetch, if fetchable, and synchronous operations")
     fun runGetInstanceAndSyncTests(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
 
@@ -32,6 +35,7 @@ class ProvisionJUnit5 : TestBase() {
     }
 
     @TestFactory
+    @DisplayName(value = "Run invalid asynchronous PUT requests")
     fun runInvalidAsyncPutTest(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
 
@@ -43,6 +47,7 @@ class ProvisionJUnit5 : TestBase() {
     }
 
     @TestFactory
+    @DisplayName(value = "Run invalid asynchronous DELETE requests")
     fun runInvalidAsyncDeleteTest(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
 
@@ -146,16 +151,27 @@ class ProvisionJUnit5 : TestBase() {
         return dynamicContainer(createDisplayName(service.name, plan.name, instanceId), if (configuration.apiVersion >= 2.15) {
             ValidProvisioning(service, plan, MaintenanceInfo("Invalid", "Should return 422"))
             dynamicNodes.plus(
-                    dynamicTest("PUT should reject if maintenance_info doesn't match") {
-                        provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
-                                requestBody = ValidProvisioning(service,
-                                        plan,
-                                        MaintenanceInfo("Invalid", "Should return 422")
-                                ),
-                                expectedFinalStatusCodes = *intArrayOf(422),
-                                expectedResponseBodyType = ERR_MAINTENANCE_INFO
-                        )
-                    }
+                    dynamicContainer("Testing Maintenance Info ErrorCode and DELETE for clean up purposes.", listOf(
+                            dynamicTest("PUT should reject if maintenance_info doesn't match") {
+                                provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
+                                        requestBody = ValidProvisioning(
+                                                service = service,
+                                                plan = plan,
+                                                maintenance_info = MaintenanceInfo("Invalid", "Should return 422")
+                                        ),
+                                        expectedFinalStatusCodes = *intArrayOf(422),
+                                        expectedResponseBodyType = ERR_MAINTENANCE_INFO
+                                )
+                            },
+                            dynamicTest("DELETE should return 410 when trying to delete a non existing service instance, as it should not have been created in the previous test.") {
+                                provisionRequestRunner.runDeleteProvisionRequestAsync(
+                                        serviceId = nullIfNotSet(service.id),
+                                        planId = nullIfNotSet(plan.id),
+                                        instanceId = instanceId,
+                                        expectedFinalStatusCodes = intArrayOf(410)
+                                )
+                            }
+                    ))
             )
         } else dynamicNodes
         )
@@ -208,8 +224,7 @@ class ProvisionJUnit5 : TestBase() {
 
         val dynamicNodes = mutableListOf<DynamicNode>()
         service.instancesRetrievable?.let { instancesRetrievable ->
-            if (instancesRetrievable
-            ) {
+            if (configuration.apiVersion >= 2.14 && instancesRetrievable) {
                 dynamicNodes.add(dynamicTest("should return 4XX when trying to retrieve a non existing service instance.") {
                     provisionRequestRunner.getProvision(instanceId, *IntArray(100) { 400 + it })
                 })

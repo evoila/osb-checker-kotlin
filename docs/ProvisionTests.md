@@ -3,22 +3,22 @@
 - [Getting Started](../README.md#getting-started)
     - [Build Application](../README.md#build-application)
     - [Basic Run Configuration](../README.md#basic-run-configuration)
-- [Usage](#usage)
+- [Usage](Usage.md)
     - [Declaring Test Runs](Usage.md#declaring-test-runs)
     - [Configuration](Usage.md#configuration)
     - [Parameters](Usage.md#parameters)
     - [Originating Identity](Usage.md#originating-identity)
     - [Declaring Services](Usage.md#declaring-services)
-- [Test](#test)
-    - [Catalog](#catalog)
-    - [Provision](#provision)
+- Test Classes
+    - [Catalog](Catalog,md)
+       - [Example Output](CatalogTest.md#example-output)
+    - [Provision](#provision-tests)
         - [Test Procedure](#test-procedure)
         - [Version specific Tests](#version-specific-tests)
         - [Example Output](#example-output)
     - [Binding](#binding)
     - [Authentication](#authentication)
     - [Contract](#contract)
-    - [Example output](#example-output)
 
 # Provision Tests
 
@@ -54,7 +54,7 @@ Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spe
 Afterwards a deprovision gets called with the same instanceId, to ensure no instances remain after the test.
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#error-codes) for more information about maintenance_info error code.
 
-### Example Output
+## Example Output
 
 A successful Provision test run of a v2.15 service broker. The tested plan is fetchable and contains a maintenance information.
 

@@ -10,7 +10,7 @@
     - [Parameters](docs/Usage.md#parameters)
     - [Originating Identity](docs/Usage.md#originating-identity)
     - [Declaring Services](docs/Usage.md#declaring-services)
-- [Test Classes]
+- Test Classes
     - [Catalog](docs/CatalogTest.md)
     - [Provision](docs/ProvisionTests.md)
         - [Test Procedure](docs/ProvisionTests.md#test-procedure)

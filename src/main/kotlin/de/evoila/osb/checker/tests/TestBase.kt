@@ -26,5 +26,6 @@ abstract class TestBase {
 data class TestCase<out T : RequestBody>(
         val requestBody: T,
         val message: String,
-        val responseBodyType: ResponseBodyType
+        val responseBodyType: ResponseBodyType,
+        val statusCode : Int
 )

@@ -123,13 +123,15 @@ class BindingJUnit5 : TestBase() {
                                 if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
                                 else BindingBody(null, plan.id),
                                 message = "should reject if missing service_id",
-                                responseBodyType = VALID_BINDING
+                                responseBodyType = VALID_BINDING,
+                                statusCode = 400
                         ),
                         TestCase(
                                 requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
                                 else BindingBody(service.id, null),
                                 message = "should reject if missing plan_id",
-                                responseBodyType = VALID_BINDING
+                                responseBodyType = VALID_BINDING,
+                                statusCode = 400
                         )
                 ).forEach {
                     bindingTests.add(
@@ -138,7 +140,7 @@ class BindingJUnit5 : TestBase() {
                                         requestBody = it.requestBody,
                                         instanceId = instanceId,
                                         bindingId = bindingId,
-                                        expectedStatusCodes = *intArrayOf(400),
+                                        expectedStatusCodes = *intArrayOf(it.statusCode),
                                         expectedResponseBody = ERR
                                 )
                             }

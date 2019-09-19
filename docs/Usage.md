@@ -1,4 +1,4 @@
-## Table of Contents
+# Table of Contents
 - [Description](../README.md#description)
 - [Getting Started](../README.md#getting-started)
     - [Build Application](../README.md#build-application)
@@ -12,16 +12,19 @@
 - [Test](#test)
     - [Catalog](#catalog)
     - [Provision](#provision)
+        - [Test Procedure](ProvisionTests.md#test-procedure)
+        - [Version specific Tests](ProvisionTests.md#version-specific-tests)
+        - [Example Output](ProvisionTests.md#example-output)
     - [Binding](#binding)
     - [Authentication](#authentication)
     - [Contract](#contract)
     - [Example output](#example-output)
 
-## Usage
+# Usage
 
 osb-checker-kotlin provides a number of options to test service brokers with more detail, or shorten the run time, by leaving some tests out.
 
-### Declaring Test Runs
+## Declaring Test Runs
 
 If you want to run all tests just `java -jar osb-checker-kotlin-1.0.jar`
 
@@ -36,7 +39,7 @@ There are five different options to run tests. Possibles commands are:
 In case you want to run all tests call for example `java -jar osb-checker-kotlin-1.0.jar -cat -provision -bind -auth -con`
 or just `java -jar osb-checker-kotlin-1.0.jar`
 
-### Configuration
+## Configuration
 
 To run the application put a file with the name application.yml into the same location as the osb-checker-kotlin-1.0.jar file. For more information on how to configurate a spring boot application see [here](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html). 
  The .yml file needs the following schema.
@@ -101,7 +104,7 @@ If **useRequestIdentity** is set to true, the osb-checker will set 'X-Broker-API
 
 **testDashboard** advises the checker to verify if an provided DashboardURL works after creating a service instance.
 
-### Parameters
+## Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).
 specify the plan id as key for the parameters
@@ -172,7 +175,7 @@ Set the unencoded value content in the value field.
 
 The declared content will be encoded and used in every request by the checker, according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#originating-identity)
 
-### Declaring Services
+## Declaring Services
 
 The checker runs all it's tests on every service and plan defined in the service brokers catalog. If this is not desired, the developer can provide
 a list of service and plan ids to direct the checker to the plans he would like to test. All details about the plans will be fetched from the actual catalog. It is only necessary to provide the ids.

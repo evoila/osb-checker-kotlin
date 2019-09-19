@@ -37,7 +37,7 @@ the catalog is implemented correctly before continuing implementing the other en
 ```
 ╷
 └─ JUnit Jupiter ✔
-   └─ CatalogJUnit5 ✔
-      └─ validateCatalog() ✔
+   └─ Catalog test ✔
+      └─ Verify catalog schema ✔
 
 ```

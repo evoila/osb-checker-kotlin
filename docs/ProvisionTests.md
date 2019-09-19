@@ -54,7 +54,7 @@ Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spe
 Afterwards a deprovision gets called with the same instanceId, to ensure no instances remain after the test.
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#error-codes) for more information about maintenance_info error code.
 
-## Example Output
+# Example Output
 
 A successful Provision test run of a v2.15 service broker. The tested plan is fetchable and contains a maintenance information.
 

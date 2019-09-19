@@ -9,6 +9,7 @@ import de.evoila.osb.checker.response.catalog.Catalog
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
 import de.evoila.osb.checker.tests.containers.BindingContainers
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
+@DisplayName(value = "Binding Tests")
 class BindingJUnit5 : TestBase() {
 
     @Autowired
@@ -24,12 +26,12 @@ class BindingJUnit5 : TestBase() {
     lateinit var bindingContainerFactory: BindingContainers
 
     @TestFactory
+    @DisplayName(value = "Valid Provision and Bindings.")
     fun runValidBindings(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
-        val dynamicNodes = mutableListOf<DynamicNode>()
 
-        catalog.services.forEach { service ->
-            service.plans.forEach { plan ->
+        return findBindableServices(catalog).flatMap { service ->
+            findBindablePlans(service).map { plan ->
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()
                 val needsAppGuid = needAppGUID(plan)
@@ -63,23 +65,23 @@ class BindingJUnit5 : TestBase() {
                                         ?: false),
                                 serviceName = service.name,
                                 planName = plan.name
-                        )
+                        ),
+                        bindingContainerFactory.validBindingContainer(
+                                binding = binding,
+                                instanceId = instanceId,
+                                bindingId = bindingId,
+                                isRetrievable = configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false,
+                                plan = plan
+                        ),
+                        bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan)
                 )
-                testContainers.add(bindingContainerFactory.validBindingContainer(
-                        binding = binding,
-                        instanceId = instanceId,
-                        bindingId = bindingId,
-                        isRetrievable = configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false,
-                        plan = plan))
-                testContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
-                dynamicNodes.add(dynamicContainer(VALID_BINDING_MESSAGE, testContainers))
+                dynamicContainer(VALID_BINDING_MESSAGE, testContainers)
             }
         }
-
-        return dynamicNodes
     }
 
     @TestFactory
+    @DisplayName(value = "Run asynchronous invalid PUT and DELETE binding attempts.")
     fun runSyncAndInvalidBindingAttempts(): List<DynamicNode> {
         val catalog = configuration.initCustomCatalog(catalogRequestRunner.correctRequest())
         val dynamicNodes = mutableListOf<DynamicNode>()
@@ -102,22 +104,27 @@ class BindingJUnit5 : TestBase() {
                                 planName = plan.name
                         )
                 )
-                val bindingTests = mutableListOf<DynamicNode>(
+                val bindingTests = mutableListOf<DynamicNode>()
+
+                service.bindingsRetrievable?.let {
+                    if (configuration.apiVersion >= 2.14 && it) {
                         dynamicTest("should return status code 4XX when tying to fetch a non existing binding") {
                             bindingRequestRunner.runGetBindingRequest(instanceId, bindingId, *IntArray(100) { 400 + it })
-                        },
-                        dynamicContainer("should handle sync requests correctly",
-                                bindingContainerFactory.createSyncBindingTest(
-                                        binding = if (needsAppGuid) BindingBody(
-                                                serviceId = service.id,
-                                                planId = plan.id,
-                                                appGuid = UUID.randomUUID().toString())
-                                        else BindingBody(service.id, plan.id),
-                                        bindingId = bindingId,
-                                        instanceId = instanceId
-                                )
-                        ))
-                listOf(
+                        }
+                    }
+                }
+                bindingTests.add(dynamicContainer("should handle sync requests correctly",
+                        bindingContainerFactory.createSyncBindingTest(
+                                binding = if (needsAppGuid) BindingBody(
+                                        serviceId = service.id,
+                                        planId = plan.id,
+                                        appGuid = UUID.randomUUID().toString())
+                                else BindingBody(service.id, plan.id),
+                                bindingId = bindingId,
+                                instanceId = instanceId
+                        )
+                ))
+                bindingTests.addAll(listOf(
                         TestCase(
                                 requestBody =
                                 if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
@@ -133,21 +140,19 @@ class BindingJUnit5 : TestBase() {
                                 responseBodyType = VALID_BINDING,
                                 statusCode = 400
                         )
-                ).forEach {
-                    bindingTests.add(
-                            dynamicTest("PUT ${it.message}") {
+                ).flatMap { testCase ->
+                    listOf(
+                            dynamicTest("PUT ${testCase.message}") {
                                 bindingRequestRunner.runPutBindingRequestAsync(
-                                        requestBody = it.requestBody,
+                                        requestBody = testCase.requestBody,
                                         instanceId = instanceId,
                                         bindingId = bindingId,
-                                        expectedStatusCodes = *intArrayOf(it.statusCode),
+                                        expectedStatusCodes = *intArrayOf(testCase.statusCode),
                                         expectedResponseBody = ERR
                                 )
-                            }
-                    )
-                    bindingTests.add(
-                            dynamicTest("DELETE ${it.message}") {
-                                val bindingRequestBody = it.requestBody
+                            },
+                            dynamicTest("DELETE ${testCase.message}") {
+                                val bindingRequestBody = testCase.requestBody
                                 bindingRequestRunner.runDeleteBindingRequestAsync(
                                         serviceId = bindingRequestBody.serviceId,
                                         planId = bindingRequestBody.planId,
@@ -157,7 +162,7 @@ class BindingJUnit5 : TestBase() {
                                 )
                             }
                     )
-                }
+                })
                 dynamicNodes.add(dynamicContainer("Run sync and invalid bindings attempts", bindingTests))
                 dynamicNodes.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
             }

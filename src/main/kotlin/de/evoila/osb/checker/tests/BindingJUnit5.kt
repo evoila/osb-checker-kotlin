@@ -60,7 +60,10 @@ class BindingJUnit5 : TestBase() {
                                 plan = plan,
                                 provision = provision,
                                 isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
-                                        ?: false))
+                                        ?: false),
+                                serviceName = service.name,
+                                planName = plan.name
+                        )
                 )
                 testContainers.add(bindingContainerFactory.validBindingContainer(
                         binding = binding,
@@ -94,7 +97,9 @@ class BindingJUnit5 : TestBase() {
                                 plan = plan,
                                 provision = provision,
                                 isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
-                                        ?: false)
+                                        ?: false),
+                                serviceName = service.name,
+                                planName = plan.name
                         )
                 )
                 val bindingTests = mutableListOf<DynamicNode>(

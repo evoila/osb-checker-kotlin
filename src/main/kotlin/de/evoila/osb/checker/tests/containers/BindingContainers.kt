@@ -182,13 +182,15 @@ class BindingContainers(
     private fun createValidProvisionTests(
             instanceId: String,
             provision: ProvisionBody.ValidProvisioning,
-            plan: Plan
+            plan: Plan,
+            serviceName: String,
+            planName: String
     ): List<DynamicTest> {
 
         return listOf(
                 DynamicTest.dynamicTest("Running valid PUT provision with instanceId $instanceId" +
-                        " for service ${provision.service_id}" +
-                        " and plan id: ${provision.plan_id}") {
+                        " for service '$serviceName'" +
+                        " and plan '$planName'") {
                     val response = provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision,
@@ -242,9 +244,11 @@ class BindingContainers(
             instanceId: String,
             plan: Plan,
             provision: ProvisionBody.ValidProvisioning,
-            isRetrievable: Boolean
+            isRetrievable: Boolean,
+            serviceName: String,
+            planName: String
     ): DynamicContainer {
-        val provisionTests = createValidProvisionTests(instanceId, provision, plan)
+        val provisionTests = createValidProvisionTests(instanceId, provision, plan, serviceName, planName)
         var displayName = VALID_PROVISION_DISPLAY_NAME
 
         displayName += if (isRetrievable) {

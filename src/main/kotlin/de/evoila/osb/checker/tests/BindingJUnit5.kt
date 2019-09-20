@@ -82,7 +82,6 @@ class BindingJUnit5 : TestBase() {
                 }
 
                 dynamicContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
-
                 dynamicContainer(if (bindable) {
                     BINDABLE_MESSAGE
                 } else {
@@ -108,17 +107,19 @@ class BindingJUnit5 : TestBase() {
                 })
             }
         }
-        bindingTests.add(dynamicContainer("should handle sync requests correctly",
-                bindingContainerFactory.createSyncBindingTest(
-                        binding = if (needsAppGuid) BindingBody(
-                                serviceId = service.id,
-                                planId = plan.id,
-                                appGuid = UUID.randomUUID().toString())
-                        else BindingBody(service.id, plan.id),
-                        bindingId = bindingId,
-                        instanceId = instanceId
-                )
-        ))
+        if (configuration.apiVersion >= 2.14) {
+            bindingTests.add(dynamicContainer("should handle sync requests correctly",
+                    bindingContainerFactory.createSyncBindingTest(
+                            binding = if (needsAppGuid) BindingBody(
+                                    serviceId = service.id,
+                                    planId = plan.id,
+                                    appGuid = UUID.randomUUID().toString())
+                            else BindingBody(service.id, plan.id),
+                            bindingId = bindingId,
+                            instanceId = instanceId
+                    )
+            ))
+        }
         bindingTests.addAll(listOf(
                 TestCase(
                         requestBody =

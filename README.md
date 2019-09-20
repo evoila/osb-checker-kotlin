@@ -10,9 +10,13 @@
     - [Parameters](docs/Usage.md#parameters)
     - [Originating Identity](docs/Usage.md#originating-identity)
     - [Declaring Services](docs/Usage.md#declaring-services)
-- [Test Classes]
-    - [Catalog Test](docs/CatalogTest.md)
-    - [Contract Test](docs/ContractTest.md)
+- Test Classes
+    - [Catalog](docs/CatalogTest.md)
+    - [Provision](docs/ProvisionTests.md)
+        - [Test Procedure](docs/ProvisionTests.md#test-procedure)
+        - [Version specific Tests](docs/ProvisionTests.md#version-specific-tests)
+        - [Example Output](docs/ProvisionTests.md#example-output)
+    - [Contract](docs/ContractTest.md)
 - [Contribution](docs/Contribution.md)
    
 ## Description

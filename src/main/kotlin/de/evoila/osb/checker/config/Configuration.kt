@@ -22,7 +22,6 @@ class Configuration {
     var useRequestIdentity: Boolean = false
     var skipTLSVerification: Boolean = false
     var testDashboard: Boolean = false
-    //TODO add optional fields for not using appGUID and it should fail
     var usingAppGuid: Boolean = true
     val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()

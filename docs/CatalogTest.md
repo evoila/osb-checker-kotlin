@@ -11,7 +11,6 @@
     - [Declaring Services](Usage.md#declaring-services)
 - Test Classes
     - [Catalog](#catalog)
-        - [Example Output](#example-output)
     - [Provision](#provision)
         - [Test Procedure](ProvisionTests.md#test-procedure)
         - [Version specific Tests](ProvisionTests.md#version-specific-tests)
@@ -19,6 +18,7 @@
     - [Binding](BindingTests.md#binding)
     - [Authentication](AuthenticationTests.md#authentication)
     - [Contract](ContractTest.md#contract)
+- [Contribution](docs/Contribution.md)
 
 # Catalog Test
 

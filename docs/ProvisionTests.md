@@ -16,10 +16,14 @@
         - [Test Procedure](#test-procedure)
         - [Version specific Tests](#version-specific-tests)
         - [Example Output](#example-output)
-    - [Binding](#binding)
-    - [Authentication](#authentication)
-    - [Contract](#contract)
-
+    - [Binding](BindingTests.md#binding)
+        - [Test Procedure](BindingTests.md#test-procedure)
+        - [Version specific Tests](BindingTests.md#version-specific-tests)
+        - [Example Output](BindingTests.md#example-output)
+    - [Authentication](docs/AuthenticationTests.md)
+    - [Contract](docs/ContractTest.md)
+- [Contribution](docs/Contribution.md)
+   
 # Provision Tests
 
 This Test Class checks that the service brokers behaviour when somebody tries to create or delete a service instance

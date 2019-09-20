@@ -20,9 +20,10 @@
         - [Test Procedure](#test-procedure)
         - [Version specific Tests](#version-specific-tests)
         - [Example Output](#example-output)
-    - [Authentication](#authentication)
-    - [Contract](#contract)
-
+    - [Authentication](docs/AuthenticationTests.md)   
+    - [Contract](docs/ContractTest.md)
+- [Contribution](docs/Contribution.md)
+   
 # Binding Tests
 
 This Test Class provisions every plan present in the service broker and if the service instance is bindable, it binds on it.

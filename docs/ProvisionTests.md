@@ -10,7 +10,7 @@
     - [Originating Identity](Usage.md#originating-identity)
     - [Declaring Services](Usage.md#declaring-services)
 - Test Classes
-    - [Catalog](Catalog,md)
+    - [Catalog](CatalogTest.md)
        - [Example Output](CatalogTest.md#example-output)
     - [Provision](#provision-tests)
         - [Test Procedure](#test-procedure)

@@ -50,39 +50,51 @@ A Binding Test output with one deployed service.
 ```
 ╷
 └─ JUnit Jupiter ✔
-   └─ BindingJUnit5 ✔
-      ├─ runInvalidBindingAttempts() ✔
-      │  ├─ Provision and in case of a async service broker polling, for later binding ✔
-      │  │  └─ Running Valid PUT provision with instanceId feaf198a-ec45-4c5b-a35b-77bd4b9c6f95 ✔
-      │  ├─ Running invalid bindings ✔
+   └─ Binding Tests ✔
+      ├─ Run asynchronous invalid PUT and DELETE binding attempts. ✔
+      │  ├─ Creating Service Instance, fetching it. ✔
+      │  │  ├─ Running valid PUT provision with instanceId 6e2f0ded-1d20-4d0e-b16e-548a52440251 for service 'base-sql-service-dev-managed' and plan 's' ✔
+      │  │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
+      │  │  └─ Running valid PUT provision with different attributes again. Expecting Status 409. ✔
+      │  ├─ Run sync and invalid bindings attempts ✔
+      │  │  ├─ should return status code 4XX when tying to fetch a non existing binding ✔
+      │  │  ├─ should handle sync requests correctly ✔
+      │  │  │  ├─ Sync PUT binding request ✔
+      │  │  │  └─ Sync DELETE binding request ✔
       │  │  ├─ PUT should reject if missing service_id ✔
       │  │  ├─ DELETE should reject if missing service_id ✔
       │  │  ├─ PUT should reject if missing plan_id ✔
       │  │  └─ DELETE should reject if missing plan_id ✔
-      │  └─ Deleting Provision ✔
-      │     └─ DELETE provision and if the service broker is async polling afterwards ✔
-      └─ runValidBindings() ✔
-         └─ Running a valid provision if the service is bindable a valid binding. Deleting both afterwards. ✔
-            ├─ Provision and in case of a async service broker polling, for later binding ✔
-            │  └─ Running Valid PUT provision with instanceId b4206514-2915-4fea-b140-63d942aeb25e ✔
-            ├─ Running PUT Binding and DELETE Binding afterwards ✔
-            │  ├─ Running a valid binding with BindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60778 ms ✔
-            │  └─ Deleting binding with bindingId e882b7ba-47c6-40f2-89a0-0e08c6b342c5 60197 ms ✔
-            └─ Deleting Provision ✔
-               └─ DELETE provision and if the service broker is async polling afterwards ✔
+      │  └─ Deleting provision ✔
+      │     ├─ DELETE provision and if the service broker is async polling afterwards ✔
+      │     └─ Running valid DELETE provision with same parameters again. Expecting Status 410. ✔
+      └─ Valid Provision and Bindings. ✔
+         └─ Running a valid provision and if the service is bindable a valid binding. Deleting both afterwards. In case of a async service broker poll afterwards. ✔
+            ├─ Creating Service Instance, fetching it. ✔
+            │  ├─ Running valid PUT provision with instanceId 158bfb75-bba2-4ea9-aeb5-3d7fcc6a8c70 for service 'base-sql-service-dev-managed' and plan 's' ✔
+            │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
+            │  └─ Running valid PUT provision with different attributes again. Expecting Status 409. ✔
+            ├─ Running PUT binding and DELETE binding afterwards ✔
+            │  ├─ Running valid PUT binding with bindingId 73f9151a-00df-474d-b464-31c83e908024 ✔
+            │  ├─ Running PUT binding with same attribute again. Expecting StatusCode 200. ✔
+            │  ├─ Running PUT binding with different attribute again. Expecting StatusCode 409. ✔
+            │  ├─ Running GET for retrievable service binding and expecting StatusCode: 200 ✔
+            │  └─ Deleting binding with bindingId 73f9151a-00df-474d-b464-31c83e908024 ✔
+            └─ Deleting provision ✔
+               ├─ DELETE provision and if the service broker is async polling afterwards ✔
+               └─ Running valid DELETE provision with same parameters again. Expecting Status 410. ✔
 
-Test run finished after 129414 ms
-[        11 containers found      ]
+Test run finished after 8563 ms
+[        12 containers found      ]
 [         0 containers skipped    ]
-[        11 containers started    ]
+[        12 containers started    ]
 [         0 containers aborted    ]
-[        11 containers successful ]
+[        12 containers successful ]
 [         0 containers failed     ]
-[        10 tests found           ]
+[        22 tests found           ]
 [         0 tests skipped         ]
-[        10 tests started         ]
+[        22 tests started         ]
 [         0 tests aborted         ]
-[        10 tests successful      ]
-[         0 tests failed          ]
-
+[        18 tests successful      ]
+[         4 tests failed          ]
 ```

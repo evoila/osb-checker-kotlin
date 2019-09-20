@@ -250,6 +250,9 @@ class BindingContainers(
     ): DynamicContainer {
         val provisionTests = createValidProvisionTests(instanceId, provision, plan, serviceName, planName)
         var displayName = VALID_PROVISION_DISPLAY_NAME
+        if (configuration.testDashboard) {
+            displayName += TEST_DASHBOARD_DISPLAY_NAME
+        }
 
         displayName += if (isRetrievable) {
             provisionTests.plus(validRetrievableInstanceContainer(instanceId, provision, isRetrievable))
@@ -281,11 +284,12 @@ class BindingContainers(
 
     companion object {
         private const val VALID_PROVISION_DISPLAY_NAME = "Creating Service Instance"
+        private const val TEST_DASHBOARD_DISPLAY_NAME = ", test dashboard URL"
         private const val VALID_BINDING_DISPLAY_NAME = "Running valid PUT binding with bindingId "
         private const val VALID_BINDING_MESSAGE = "Running PUT binding and DELETE binding afterwards"
         private const val DELETE_PROVISION_MESSAGE = "DELETE provision and if the service broker is async polling afterwards"
         private const val DELETE_RESULT_MESSAGE = "Delete has to result in 410"
-        private const val VALID_FETCH_PROVISION = ", fetching it"
+        private const val VALID_FETCH_PROVISION = ", and try to fetch it"
         private const val EXPECTED_FINAL_POLLING_STATE = "Expected the final polling state to be \"succeeded\" but was "
     }
 }

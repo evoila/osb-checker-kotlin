@@ -16,10 +16,14 @@
         - [Test Procedure](#test-procedure)
         - [Version specific Tests](#version-specific-tests)
         - [Example Output](#example-output)
-    - [Binding](#binding)
-    - [Authentication](#authentication)
-    - [Contract](#contract)
-
+    - [Binding](BindingTests.md#binding)
+        - [Test Procedure](BindingTests.md#test-procedure)
+        - [Version specific Tests](BindingTests.md#version-specific-tests)
+        - [Example Output](BindingTests.md#example-output)
+    - [Authentication](docs/AuthenticationTests.md)
+    - [Contract](docs/ContractTest.md)
+- [Contribution](docs/Contribution.md)
+   
 # Provision Tests
 
 This Test Class checks that the service brokers behaviour when somebody tries to create or delete a service instance
@@ -47,7 +51,6 @@ Depending on the API version and content of the catalog, additional tests are ad
 **2.14**
 - If the service is declared to be fetchable, this class checks the service broker returns a 4XX error code when the requested service instance does not exist.
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#fetching-a-service-instance) for more information about fetching a service instance.
-
 
 **2.15**
 - If maintenance information is declared for the service plan, the checker verifies the correct error code is returned when a provision request contains a invalid maintenance_info field.

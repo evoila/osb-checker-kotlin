@@ -16,11 +16,15 @@
         - [Test Procedure](docs/ProvisionTests.md#test-procedure)
         - [Version specific Tests](docs/ProvisionTests.md#version-specific-tests)
         - [Example Output](docs/ProvisionTests.md#example-output)
+    - [Binding](docs/BindingTests.md#binding)
+        - [Test Procedure](docs/BindingTests.md#test-procedure)
+        - [Version specific Tests](docs/BindingTests.md#version-specific-tests)
+        - [Example Output](docs/BindingTests.md#example-output)
+    - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
 - [Contribution](docs/Contribution.md)
    
 ## Description
-
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
 behaves as expected to the [service broker API specification](link=https://github.com/openservicebrokerapi/servicebroker)
 Tests are created dynamically based upon the service broker catalog or custom input by the operator.

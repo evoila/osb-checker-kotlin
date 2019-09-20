@@ -34,7 +34,7 @@ class BindingJUnit5 : TestBase() {
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()
                 val needsAppGuid = needAppGUID(plan)
-                val provision = if (configuration.apiVersion == 2.15 && plan.maintenanceInfo != null)
+                val provision = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null)
                     ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
                 else ProvisionBody.ValidProvisioning(service, plan)
 

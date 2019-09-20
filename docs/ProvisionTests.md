@@ -48,7 +48,6 @@ Depending on the API version and content of the catalog, additional tests are ad
 - If the service is declared to be fetchable, this class checks the service broker returns a 4XX error code when the requested service instance does not exist.
 Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#fetching-a-service-instance) for more information about fetching a service instance.
 
-
 **2.15**
 - If maintenance information is declared for the service plan, the checker verifies the correct error code is returned when a provision request contains a invalid maintenance_info field.
 Afterwards a deprovision gets called with the same instanceId, to ensure no instances remain after the test.

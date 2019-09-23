@@ -1,10 +1,16 @@
 package de.evoila.osb.checker.request
 
 import de.evoila.osb.checker.config.Configuration
+import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.RequestBody
-import de.evoila.osb.checker.response.operations.LastOperationResponse
 import de.evoila.osb.checker.response.catalog.ServiceInstance
+import de.evoila.osb.checker.response.operations.LastOperationResponse.State
 import io.restassured.RestAssured
+import io.restassured.builder.RequestSpecBuilder
+import io.restassured.config.RedirectConfig
+import io.restassured.config.RedirectConfig.redirectConfig
+import io.restassured.config.RestAssuredConfig
+import io.restassured.config.RestAssuredConfig.config
 import io.restassured.http.ContentType
 import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator
@@ -12,300 +18,324 @@ import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
 import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
+import java.net.URL
+import java.time.Instant
+import java.util.*
 import kotlin.test.assertTrue
 
 @Service
-class ProvisionRequestRunner(
-    val configuration: Configuration
-) {
+class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandler(configuration) {
 
-  fun getProvision(instanceId: String, retrievable: Boolean): ServiceInstance {
-    return RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/$instanceId")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(200)
-        .and()
-        .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("fetch-instance-response-schema.json"))
-        .extract()
-        .response()
-        .jsonPath()
-        .getObject("", ServiceInstance::class.java)
-  }
+    fun getProvision(instanceId: String, vararg expectedFinalStatusCodes: Int): ServiceInstance? {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-GET-instance-${UUID.randomUUID()}")
+        }
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + instanceId)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .headers(expectedResponseHeaders)
+                .extract()
+                .response()
 
-  fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .body(requestBody)
-        .put("/v2/service_instances/$instanceId")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(listOf(201, 422)))
-        .and()
-        .extract()
-
-    if (response.statusCode() == 201) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
-    }
-  }
-
-  fun runPutProvisionRequestAsync(instanceId: String, requestBody: RequestBody, vararg expectedFinalStatusCodes: Int): ExtractableResponse<Response> {
-    val response = RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .body(requestBody)
-        .put("/v2/service_instances/$instanceId?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
-        .assertThat()
-        .extract()
-
-    if (response.statusCode() in listOf(201, 202, 200)) {
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("provision-response-schema.json").matches(response.body())
+        return if (response.statusCode == 200) {
+            assert(JsonSchemaValidator.matchesJsonSchema(VALID_FETCH_INSTANCE.path).matches(response.jsonPath().prettify()))
+            { "Expected a valid FetchInstance Response, but was ${response.jsonPath().prettify()}" }
+            response.jsonPath().getObject("", ServiceInstance::class.java)
+        } else {
+            null
+        }
     }
 
-    return response
-  }
+    fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+        }
 
-  fun waitForFinish(instanceId: String, expectedFinalStatusCode: Int, operationData: String?): String {
-    val request = RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .put(SERVICE_INSTANCE_PATH + instanceId)
+                .then()
+                .assertThat()
+                .log().ifValidationFails()
+                .statusCode(IsIn(listOf(201, 422)))
+                .extract()
 
-    operationData?.let { request.queryParam("operation", it) }
-
-    val response = request
-        .get("/v2/service_instances/$instanceId/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
-        .extract()
-        .response()
-
-    return if (response.statusCode == 200) {
-
-      val responseBody = response.jsonPath()
-          .getObject("", LastOperationResponse::class.java)
-
-      JsonSchemaValidator.matchesJsonSchemaInClasspath("polling-response-schema.json").matches(responseBody)
-
-      if (responseBody.state == "in progress") {
-        Thread.sleep(10000)
-        return waitForFinish(instanceId, expectedFinalStatusCode, operationData)
-      }
-      assertTrue("Expected response body \"succeeded\" or \"failed\" but was ${responseBody.state}")
-      { responseBody.state in listOf("succeeded", "failed") }
-
-      responseBody.state
-    } else {
-      ""
+        if (response.statusCode() == 201) {
+            val responseBodyString = getGetResponseBodyAsString(response)
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(VALID_PROVISION.path)
+                    .matches(responseBodyString), "\nExpected a valid provision response but was:\n$responseBodyString")
+        } else {
+            val responseBodyString = getGetResponseBodyAsString(response)
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "\nExpected OSB error code \"async required\" but was:\n$responseBodyString")
+        }
     }
-  }
 
-  fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
-    var path = "/v2/service_instances/$instanceId"
-    path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
+    fun runPutProvisionRequestAsync(
+            instanceId: String,
+            requestBody: RequestBody,
+            vararg expectedFinalStatusCodes: Int,
+            expectedResponseBodyType: ResponseBodyType
+    ): ExtractableResponse<Response> {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+        }
 
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .delete(path)
-        .then()
-        .log().ifValidationFails()
-        .statusCode(IsIn(listOf(200, 422)))
-        .extract()
-  }
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .put(SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(expectedResponseBodyType.path))
+                .assertThat()
+                .extract()
+    }
 
-  fun runDeleteProvisionRequestAsync(instanceId: String, serviceId: String?, planId: String?, expectedFinalStatusCodes: IntArray): ExtractableResponse<Response> {
-    var path = "/v2/service_instances/$instanceId?accepts_incomplete=true"
-    path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
-    path = planId?.let { "$path&plan_id=$planId" } ?: path
+    fun polling(
+            instanceId: String,
+            expectedFinalStatusCode: Int,
+            operationData: String?,
+            maxPollingDuration: Int
+    ): State {
+        val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
+        return super.waitForFinish(path = SERVICE_INSTANCE_PATH + instanceId + LAST_OPERATION,
+                expectedFinalStatusCode = expectedFinalStatusCode,
+                operationData = operationData,
+                latestAcceptablePollingInstant = latestAcceptablePollingInstant
+        )
+    }
 
-    return RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .header(Header("Authorization", configuration.correctToken))
-        .contentType(ContentType.JSON)
-        .delete(path)
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(IsIn(expectedFinalStatusCodes.asList()))
-        .extract()
-  }
+    fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
+        var path = SERVICE_INSTANCE_PATH + instanceId
+        path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
+        path = planId?.let { "$path&plan_id=$planId" } ?: path
 
-  fun putWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+        }
 
-  fun deleteWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true&service_id=Invalid&plan_id=Invalid")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+        val response = RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .delete(path)
+                .then()
+                .log().ifValidationFails()
+                .headers(expectedResponseHeaders)
+                .statusCode(IsIn(listOf(200, 422)))
+                .extract()
 
-  fun lastOperationWithoutHeader() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.correctToken))
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(412)
-  }
+        if (response.statusCode() != 200) {
+            val responseBodyString = getGetResponseBodyAsString(response)
+            assertTrue(JsonSchemaValidator.matchesJsonSchemaInClasspath(ERR_ASYNC_REQUIRED.path)
+                    .matches(responseBodyString), "\nExpected OSB error code async required but was:\n$responseBodyString")
+        }
+    }
 
-  fun putNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun runDeleteProvisionRequestAsync(
+            instanceId: String,
+            serviceId: String?,
+            planId: String?,
+            expectedFinalStatusCodes: IntArray
+    ): ExtractableResponse<Response> {
+        var path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
+        path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
+        path = planId?.let { "$path&plan_id=$planId" } ?: path
 
-  fun putWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+        }
 
-  fun putWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .put("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .delete(path)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .headers(expectedResponseHeaders)
+                .statusCode(IsIn(expectedFinalStatusCodes.asList()))
+                .extract()
+    }
 
-  fun deleteNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun putWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
 
-  fun deleteWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun deleteWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .delete("$SERVICE_INSTANCE_PATH${Configuration.notAnId}$ACCEPTS_INCOMPLETE&service_id=Invalid&plan_id=Invalid")
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
 
-  fun deleteWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .delete("/v2/service_instances/${Configuration.notAnId}?accepts_incomplete=true")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    fun lastOperationWithoutHeader() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.correctToken))
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(412)
+    }
+
+    fun putNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun putWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun putWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun deleteNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun deleteWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun deleteWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpNoAuth() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpWrongUser() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun lastOpWrongPassword() {
+        RestAssured.with()
+                .log().ifValidationFails()
+                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
+                .contentType(ContentType.JSON)
+                .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
+                .then()
+                .log().ifValidationFails()
+                .assertThat()
+                .statusCode(401)
+    }
+
+    fun testDashboardURL(dashboardUrl: String) {
+        val statusCode = RestAssured.given()
+                .spec(RequestSpecBuilder()
+                        .setConfig(config().redirect(redirectConfig()
+                                .followRedirects(true)
+                                .allowCircularRedirects(false))).build()
+                )
+                .with()
+                .log().ifValidationFails()
+                .get(URL(dashboardUrl))
+                .then()
+                .extract()
+                .statusCode()
+
+        assertTrue(IntArray(100) { 200 + it }.contains(statusCode),
+                "\nExpected Dashboard URL to be reachable, but got StatusCode: $statusCode")
 
 
-  fun lastOpNoAuth() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
-
-  fun lastOpWrongUser() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongUserToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
-
-  fun lastOpWrongPassword() {
-    RestAssured.with()
-        .log().ifValidationFails()
-        .header(Header("Authorization", configuration.wrongPasswordToken))
-        .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
-        .contentType(ContentType.JSON)
-        .get("/v2/service_instances/${Configuration.notAnId}/last_operation")
-        .then()
-        .log().ifValidationFails()
-        .assertThat()
-        .statusCode(401)
-        .extract()
-  }
+    }
 }

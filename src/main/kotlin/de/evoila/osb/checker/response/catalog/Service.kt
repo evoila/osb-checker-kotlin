@@ -20,6 +20,5 @@ data class Service(
     val instancesRetrievable: Boolean?,
     @JsonProperty("bindings_retrievable")
     val bindingsRetrievable: Boolean?,
-
     val plans: List<Plan>
 )

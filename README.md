@@ -5,6 +5,7 @@
 - [Getting Started](#getting-started)
     - [Build Application](#build-application)
     - [Basic Run Configuration](#basic-run-configuration)
+- [Changes](#changes)
 - [Usage](docs/Usage.md)
     - [Declaring Test Runs](docs/Usage.md##declaring-test-runs)
     - [Parameters](docs/Usage.md#parameters)
@@ -52,3 +53,21 @@ config:
 
 Then call `java -jar osb-checker-kotlin-1.0.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
 in the catalog. See the chapter [Usage](docs/Usage.md) for more details about configuring this test-application.
+
+## Changes
+
+Changes since v1.0:
+- Added 2.15 feature testing:
+    - Using [maintenance_info](docs/ProvisionTests.md#version-specific-tests) if defined in catalog.
+    - Option to set [X-Broker-API-Request-Identity](docs/Usage.md#Configuration) header.
+    - When testing polling maximum polling duration is tested.
+- Added Option to set [X-Broker-API-Originating-Identity](docs/Usage.md#originating-identity).
+- Added checks for osb-error-codes in response bodies.
+- Added tests for fetching non existing bindings / provisions.
+- Tests for what happens, when trying to create already existing provisions / bindings.
+- Various improvements of logging such as using names of services and plans instead of id.
+- setting up a custom catalog requires only the id's of the plan and no more additional information. This is gathered from the catalog now.
+- Add Optional test for Dashboard URLs.
+- Restructuring of binding test:
+ - All plans in the catalog are now tested for invalid binding attempts.
+ - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.

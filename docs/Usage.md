@@ -3,6 +3,7 @@
 - [Getting Started](../README.md#getting-started)
     - [Build Application](../README.md#build-application)
     - [Basic Run Configuration](../README.md#basic-run-configuration)
+- [Changes](../README.md#changes)
 - [Usage](#usage)
     - [Declaring Test Runs](#declaring-test-runs)
     - [Configuration](#configuration)
@@ -100,7 +101,7 @@ When **skipTLSVerification** is set request are 'http' is used instead of 'https
 
 **usingAppGuid** sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
 
-If **useRequestIdentity** is set to true, the osb-checker will set 'X-Broker-API-Request-Identity' Header, for each request and verify if the header is present in the response.
+If **useRequestIdentity** is set to true, the osb-checker will set `X-Broker-API-Request-Identity` Header, for each request and verify if the header is present in the response.
 
 **testDashboard** advises the checker to verify if an provided DashboardURL works after creating a service instance.
 

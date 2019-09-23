@@ -3,6 +3,7 @@
 - [Getting Started](../README.md#getting-started)
     - [Build Application](../README.md#build-application)
     - [Basic Run Configuration](../README.md#basic-run-configuration)
+- [Changes](../README.md#changes)
 - [Usage](Usage.md)
     - [Declaring Test Runs](Usage.md#declaring-test-runs)
     - [Configuration](Usage.md#configuration)

@@ -35,7 +35,7 @@ Tests are created dynamically based upon the service broker catalog or custom in
 ### Build Application
 
 to build the application run `{path}/osb-checker-kotlin/gradlew build` on linux and MacOS or `{path}/osb-checker-kotlin/gradlew.bat build` on windows.
-Afterwards you can find `osb-checker-kotlin-1.0.jar` in `osb-checker-kotlin/build/libs`.
+Afterwards you can find `osb-checker-kotlin-1.1.1.jar` in `osb-checker-kotlin/build/libs`.
 
 ### Basic Run Configuration
 
@@ -71,3 +71,6 @@ Changes since v1.0:
 - Restructuring of binding test:
  - All plans in the catalog are now tested for invalid binding attempts.
  - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
+ 
+ HotFix: 
+    - altering paramters instead of planId when testing service broker behaviour for conflicting binding.

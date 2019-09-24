@@ -2,6 +2,7 @@ package de.evoila.osb.checker
 
 import de.evoila.osb.checker.tests.BindingJUnit5
 import de.evoila.osb.checker.tests.CatalogJUnit5
+import de.evoila.osb.checker.tests.DataConsistencyJUnit5
 import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
@@ -56,6 +57,9 @@ fun main(args: Array<String>) {
                         .desc("Indicate if the Contract Test should run.")
                         .build()
                 )
+                addOption(Option.builder("data").longOpt("data-consistency")
+                        .desc("Indicate if the Data Consistency Test should run.")
+                        .build())
             }
 
     val parser = DefaultParser()
@@ -83,13 +87,19 @@ fun main(args: Array<String>) {
         selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
     }
 
+    if (commandLine.hasOption("data")) {
+        selectors.add(DiscoverySelectors.selectClass(DataConsistencyJUnit5::class.java))
+    }
+
     if (selectors.isEmpty()) {
-        selectors.addAll(
-                listOf(DiscoverySelectors.selectClass(CatalogJUnit5::class.java),
-                        DiscoverySelectors.selectClass(ProvisionJUnit5::class.java),
-                        DiscoverySelectors.selectClass(BindingJUnit5::class.java),
-                        DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java),
-                        DiscoverySelectors.selectClass(ContractJUnit5::class.java)))
+        selectors.addAll(listOf(
+                DiscoverySelectors.selectClass(CatalogJUnit5::class.java),
+                DiscoverySelectors.selectClass(ProvisionJUnit5::class.java),
+                DiscoverySelectors.selectClass(BindingJUnit5::class.java),
+                DiscoverySelectors.selectClass(AuthenticationJUnit5::class.java),
+                DiscoverySelectors.selectClass(ContractJUnit5::class.java),
+                DiscoverySelectors.selectClass(DataConsistencyJUnit5::class.java)
+        ))
     }
 
     val summaryGenerator = SummaryGeneratingListener()

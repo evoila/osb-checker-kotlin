@@ -3,8 +3,6 @@ package de.evoila.osb.checker.tests
 import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.ERR
 import de.evoila.osb.checker.request.ResponseBodyType.VALID_BINDING
-import de.evoila.osb.checker.request.bodies.BindingBody
-import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
 import de.evoila.osb.checker.tests.containers.BindingContainers
@@ -18,12 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 @DisplayName(value = "Binding Tests")
-class BindingJUnit5 : TestBase() {
-
-    @Autowired
-    lateinit var bindingRequestRunner: BindingRequestRunner
-    @Autowired
-    lateinit var bindingContainerFactory: BindingContainers
+class BindingJUnit5 : BindingTestBase() {
 
     @TestFactory
     @DisplayName(value = "Valid Provision and Binding Tests.")
@@ -33,45 +26,13 @@ class BindingJUnit5 : TestBase() {
             service.plans.map { plan ->
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()
-                val needsAppGuid = needAppGUID(plan)
-                val provision = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null)
-                    ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
-                else ProvisionBody.ValidProvisioning(service, plan)
-
-                val binding = if (needsAppGuid) BindingBody(
-                        serviceId = service.id,
-                        planId = plan.id,
-                        appGuid = UUID.randomUUID().toString()
-                )
-                else BindingBody(serviceId = service.id, planId = plan.id)
-
-                configuration.provisionParameters.let {
-                    if (it.containsKey(plan.id)) {
-                        provision.parameters = it[plan.id]
-                    }
-                }
-                configuration.bindingParameters.let {
-                    if (it.containsKey(plan.id)) {
-                        binding.parameters = it[plan.id]
-                    }
-                }
-                val dynamicContainers = mutableListOf(
-                        bindingContainerFactory.validProvisionContainer(
-                                instanceId = instanceId,
-                                plan = plan,
-                                provision = provision,
-                                isRetrievable = configuration.apiVersion > 2.13 && (service.instancesRetrievable
-                                        ?: false),
-                                serviceName = service.name,
-                                planName = plan.name
-                        )
-                )
-
+                val dynamicContainers = setUpValidProvisionRequestTest(service, plan, instanceId)
                 val bindable = planIsBindable(service, plan)
                 if (bindable) {
+                    val binding = setUpValidBindingBody(service, plan)
                     dynamicContainers.add(dynamicContainer("Service ${service.name} Plan ${plan.name} is bindable. Testing binding operation with bindingId $bindingId", mutableListOf(
-                            createSyncAndInvalidBindingTests(service, plan, needsAppGuid, instanceId, bindingId),
-                            bindingContainerFactory.validBindingContainer(
+                            createSyncAndInvalidBindingTests(service, plan, instanceId, bindingId),
+                            bindingContainers.validBindingContainer(
                                     binding = binding,
                                     instanceId = instanceId,
                                     bindingId = bindingId,
@@ -81,7 +42,7 @@ class BindingJUnit5 : TestBase() {
                     ))
                 }
 
-                dynamicContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
+                dynamicContainers.add(bindingContainers.validDeleteProvisionContainer(instanceId, service, plan))
                 dynamicContainer(if (bindable) {
                     BINDABLE_MESSAGE
                 } else {
@@ -94,12 +55,10 @@ class BindingJUnit5 : TestBase() {
     private fun createSyncAndInvalidBindingTests(
             service: Service,
             plan: Plan,
-            needsAppGuid: Boolean,
             instanceId: String,
             bindingId: String
     ): DynamicContainer {
         val bindingTests = mutableListOf<DynamicNode>()
-
         service.bindingsRetrievable?.let { bindingRetrievable ->
             if (configuration.apiVersion >= 2.14 && bindingRetrievable) {
                 bindingTests.add(dynamicTest("should return status code 4XX when tying to fetch a non existing binding") {
@@ -109,29 +68,21 @@ class BindingJUnit5 : TestBase() {
         }
         if (configuration.apiVersion >= 2.14) {
             bindingTests.add(dynamicContainer("should handle sync requests correctly",
-                    bindingContainerFactory.createSyncBindingTest(
-                            binding = if (needsAppGuid) BindingBody(
-                                    serviceId = service.id,
-                                    planId = plan.id,
-                                    appGuid = UUID.randomUUID().toString())
-                            else BindingBody(service.id, plan.id),
+                    bindingContainers.createSyncBindingTest(
+                            binding = setUpValidBindingBody(service, plan),
                             bindingId = bindingId,
-                            instanceId = instanceId
-                    )
+                            instanceId = instanceId)
             ))
         }
         bindingTests.addAll(listOf(
                 TestCase(
-                        requestBody =
-                        if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
-                        else BindingBody(null, plan.id),
+                        requestBody = setUpServiceIdMissingBindingBody(plan),
                         message = "should reject if missing service_id",
                         responseBodyType = VALID_BINDING,
                         statusCode = 400
                 ),
                 TestCase(
-                        requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
-                        else BindingBody(service.id, null),
+                        requestBody = setUpPlanIdMissingBindingBody(service, plan),
                         message = "should reject if missing plan_id",
                         responseBodyType = VALID_BINDING,
                         statusCode = 400
@@ -161,11 +112,6 @@ class BindingJUnit5 : TestBase() {
         })
         return dynamicContainer("Run sync and invalid bindings attempts", bindingTests)
     }
-
-    private fun planIsBindable(service: Service, plan: Plan): Boolean = plan.bindable ?: service.bindable
-
-    fun needAppGUID(plan: Plan): Boolean = plan.metadata?.customParameters?.usesServicesKeys
-            ?: configuration.usingAppGuid
 
     companion object {
         private const val BINDABLE_MESSAGE = "Running a valid provision and run binding tests." +

@@ -121,7 +121,8 @@ class BindingContainers(
                 DynamicTest.dynamicTest("Running PUT binding with different attribute again. Expecting StatusCode 409.") {
                     bindingRequestRunner.runPutBindingRequestAsync(
                             requestBody = binding.copy(
-                                    planId = UUID.randomUUID().toString()
+                                    parameters = binding.parameters?.plus(Pair("key_osb-checker-kotlin", "additional-parameter"))
+                                            ?: mapOf(Pair("key_osb-checker-kotlin", "parameter"))
                             ),
                             instanceId = instanceId,
                             bindingId = bindingId,

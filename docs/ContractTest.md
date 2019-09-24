@@ -22,6 +22,9 @@
         - [Example Output](BindingTests.md#example-output)
     - [Authentication](docs/AuthenticationTests.md)
     - [Contract](#contract)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](docs/Contribution.md)
 
 # Contract

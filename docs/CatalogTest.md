@@ -12,13 +12,16 @@
     - [Declaring Services](Usage.md#declaring-services)
 - Test Classes
     - [Catalog](#catalog)
-    - [Provision](#provision)
+    - [Provision](ProvisionTests.md#provision)
         - [Test Procedure](ProvisionTests.md#test-procedure)
         - [Version specific Tests](ProvisionTests.md#version-specific-tests)
         - [Example Output](ProvisionTests.md#example-output)
     - [Binding](BindingTests.md#binding)
     - [Authentication](AuthenticationTests.md#authentication)
     - [Contract](ContractTest.md#contract)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](docs/Contribution.md)
 
 # Catalog Test

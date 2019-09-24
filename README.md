@@ -21,8 +21,11 @@
         - [Test Procedure](docs/BindingTests.md#test-procedure)
         - [Version specific Tests](docs/BindingTests.md#version-specific-tests)
         - [Example Output](docs/BindingTests.md#example-output)
-    - [Authentication](docs/AuthenticationTests.md)   
+    - [Authentication](docs/AuthenticationTests.md)
     - [Contract](docs/ContractTest.md)
+    - [Data Consistency Check](docs/DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](docs/DataConsistencyCheck.md#test-procedure)
+        - [Example Output](docs/DataConsistencyCheck.md#example-output)    
 - [Contribution](docs/Contribution.md)
    
 ## Description

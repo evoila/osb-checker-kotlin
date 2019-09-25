@@ -2,6 +2,7 @@ package de.evoila.osb.checker.tests.containers
 
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.request.BindingRequestRunner
+import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.BindingBody
@@ -21,6 +22,7 @@ import kotlin.test.assertTrue
 class BindingContainers(
         val provisionRequestRunner: ProvisionRequestRunner,
         val bindingRequestRunner: BindingRequestRunner,
+        val catalogRequestRunner: CatalogRequestRunner,
         val configuration: Configuration
 ) {
 
@@ -118,19 +120,35 @@ class BindingContainers(
                             expectedResponseBody = NO_SCHEMA
                     )
                 },
-                DynamicTest.dynamicTest("Running PUT binding with different attribute again. Expecting StatusCode 409.") {
-                    bindingRequestRunner.runPutBindingRequestAsync(
-                            requestBody = binding.copy(
-                                    parameters = binding.parameters?.plus(Pair("key_osb-checker-kotlin", "additional-parameter"))
-                                            ?: mapOf(Pair("key_osb-checker-kotlin", "parameter"))
-                            ),
-                            instanceId = instanceId,
-                            bindingId = bindingId,
-                            expectedStatusCodes = *intArrayOf(409),
-                            expectedResponseBody = NO_SCHEMA
-                    )
+                if (catalogHasMultiplePlans()) {
+                    DynamicTest.dynamicTest("Running PUT binding with different service or plan id, but same instance and binding id again. Expecting StatusCode 409.") {
+                        bindingRequestRunner.runPutBindingRequestAsync(
+                                requestBody = swapServiceAndPlanId(binding),
+                                instanceId = instanceId,
+                                bindingId = bindingId,
+                                expectedStatusCodes = *intArrayOf(409),
+                                expectedResponseBody = NO_SCHEMA
+                        )
+                    }
+                } else {
+                    DynamicTest.dynamicTest("%SKIPPED%Skipping PUT Binding with different attributes, because catalog does not contain more than one plan.") {}
                 }
         )
+    }
+
+    private fun catalogHasMultiplePlans(): Boolean = catalogRequestRunner.correctRequest().services.flatMap { it.plans }.size > 1
+
+    private fun swapServiceAndPlanId(oldBindingBody: BindingBody): BindingBody {
+        val catalog = catalogRequestRunner.correctRequest()
+        return if (catalog.services.size > 1) {
+            catalog.services.first { service -> service.id != oldBindingBody.serviceId }.let {
+
+                oldBindingBody.copy(serviceId = it.id, planId = it.plans.first().id)
+            }
+        } else {
+
+            oldBindingBody.copy(planId = catalog.services.first().plans.first { oldBindingBody.planId != it.id }.id)
+        }
     }
 
     fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String, plan: Plan): DynamicTest =
@@ -227,7 +245,7 @@ class BindingContainers(
                             expectedResponseBodyType = VALID_PROVISION
                     )
                 },
-                DynamicTest.dynamicTest("Running valid PUT provision with different attributes again. Expecting Status 409.") {
+                DynamicTest.dynamicTest("Running valid PUT provision with different plan_id again. Expecting Status 409.") {
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(

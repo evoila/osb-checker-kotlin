@@ -73,5 +73,5 @@ Changes since v1.0:
  - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
  
  HotFix: 
-    - swap service id and/or plan id, when testing service broker behaviour for conflicting binding. Test wont be executed when, only one plan is listed in the actual catalog.
+    - swap service id and/or plan id, when testing service broker behaviour for conflicting binding. Test wont be executed, if only one plan is listed in the actual catalog.
     (the swap is not influenced by service plans defined in the config)

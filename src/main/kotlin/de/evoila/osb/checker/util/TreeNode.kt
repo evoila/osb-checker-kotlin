@@ -37,9 +37,6 @@ class TreeNode(
     )
 
     fun addChild(node: TreeNode): TreeNode {
-        if (children === Collections.EMPTY_LIST) {
-            children = ArrayList()
-        }
 
         children.add(node)
         return this

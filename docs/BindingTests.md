@@ -90,7 +90,7 @@ A Binding Test output with two services. 'base-sql-service-dev-managed' is binda
          │  │  └─ Running PUT binding and DELETE binding afterwards ✔
          │  │     ├─ Running valid PUT binding with bindingId 27285fe4-c124-4a22-85be-f6db91de8373 ✔
          │  │     ├─ Running PUT binding with same attribute again. Expecting StatusCode 200. ✔
-         │  │     ├─ Running PUT binding with different attribute again. Expecting StatusCode 409. ✔
+         │  │     ├─ Running PUT binding with different service or plan id, but same instance and binding id again. Expecting StatusCode 409. ✔
          │  │     ├─ Running GET for retrievable service binding and expecting StatusCode: 200 ✔
          │  │     └─ Deleting binding with bindingId 27285fe4-c124-4a22-85be-f6db91de8373 ✔
          │  └─ Deleting provision ✔

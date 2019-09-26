@@ -133,6 +133,9 @@
                 "free": {
                   "type": "boolean"
                 },
+                "plan_updateable": {
+                  "type": "boolean"
+                },
                 "bindable": {
                   "type": "boolean"
                 },

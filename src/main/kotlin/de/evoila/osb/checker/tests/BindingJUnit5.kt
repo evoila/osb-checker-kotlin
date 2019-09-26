@@ -79,7 +79,7 @@ class BindingJUnit5 : TestBase() {
                             ))
                     ))
                 } else {
-                    dynamicContainers.add(dynamicTest("%SKIPPED%Service ${service.name} Plan ${plan.name} is not bindable. Skipping binding tests.") {})
+                    dynamicContainers.add(dynamicTest("%SKIPPED%Service '${service.name}' Plan ${plan.name} is not bindable. Skipping binding tests.") {})
                 }
 
                 dynamicContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))

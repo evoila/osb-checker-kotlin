@@ -54,7 +54,7 @@ config:
   password: password
 ```
 
-Then call `java -jar osb-checker-kotlin-1.0.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
+Then call `java -jar osb-checker-kotlin-1.1.1.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
 in the catalog. See the chapter [Usage](docs/Usage.md) for more details about configuring this test-application.
 
 ## Changes
@@ -76,4 +76,5 @@ Changes since v1.0:
  - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
  
  HotFix: 
-    - altering paramters instead of planId when testing service broker behaviour for conflicting binding.
+    - swap service id and/or plan id, when testing service broker behaviour for conflicting binding. Test wont be executed when, only one plan is listed in the actual catalog.
+    (the swap is not influenced by service plans defined in the config)

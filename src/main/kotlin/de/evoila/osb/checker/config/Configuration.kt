@@ -1,5 +1,7 @@
 package de.evoila.osb.checker.config
 
+import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.request.bodies.ProvisionBody.ContextObjectType
 import de.evoila.osb.checker.response.catalog.Catalog
 import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -18,11 +20,13 @@ class Configuration {
     lateinit var correctToken: String
     lateinit var wrongUserToken: String
     lateinit var wrongPasswordToken: String
+    var contextObjectType: ContextObjectType = ContextObjectType.NONE
     var originatingIdentity: OriginatingIdentity? = null
     var useRequestIdentity: Boolean = false
     var skipTLSVerification: Boolean = false
     var testDashboard: Boolean = false
     var usingAppGuid: Boolean = true
+    val context: HashMap<String, Any> = hashMapOf()
     val provisionParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     val bindingParameters: HashMap<String, HashMap<String, Any>> = hashMapOf()
     var services = mutableListOf<CustomService>()

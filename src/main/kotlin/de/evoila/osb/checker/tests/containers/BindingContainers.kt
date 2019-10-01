@@ -99,12 +99,12 @@ class BindingContainers(
                     )
 
                     if (response.statusCode() == 202) {
-                        val provision = response.jsonPath().getObject("", AsyncResponse::class.java)
+                        val bindingResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
                         val state = bindingRequestRunner.polling(
                                 instanceId = instanceId,
                                 bindingId = bindingId,
                                 expectedFinalStatusCode = 200,
-                                operationData = provision.operation,
+                                operationData = bindingResponse.operation,
                                 maxPollingDuration = plan.maximumPollingDuration
                         )
                         assertTrue("Expected the final polling state to be \"succeeded\" but was $state")

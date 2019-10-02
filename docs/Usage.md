@@ -109,6 +109,26 @@ If **useRequestIdentity** is set to true, the osb-checker will set `X-Broker-API
 **contextObjectType** sets the checker to use a ContextObject. Possible object types are kubernetes and cloudfoundry. This option is not set, provision request will be send without 
 a context object.
 
+Cloudfoundry context object: 
+```json
+{
+  "platform" : "cloudfoundry",
+  "organization_guid" : "randomUUID-here",
+  "organization_name" : "osb-api",
+  "space_guid":  "randomUUID-here",
+  "space_name": "osb-checker-kotlin",
+  "instance_name" : "testing instance"
+}
+```
+Kubernetes context object:
+``` json
+{
+  "platform" : "kubernetes",
+  "namespace" : "osb-checker",
+  "clusterid" : "randomUUID-here"
+}
+```
+
 ## Parameters
 
 To set parameters for the provision, define them in parameters (Default is null).

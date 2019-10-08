@@ -1,18 +1,15 @@
 package de.evoila.osb.checker.tests
 
-import de.evoila.osb.checker.request.BindingRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.ERR
 import de.evoila.osb.checker.request.ResponseBodyType.VALID_BINDING
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
-import de.evoila.osb.checker.tests.containers.BindingContainers
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
-import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 @DisplayName(value = "Binding Tests")

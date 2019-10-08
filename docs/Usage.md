@@ -59,6 +59,7 @@ config:
   usingAppGuid: true
   useRequestIdentity: true
   testDashboard: true
+  contextObjectType: kubernetes
   
   originatingIdentity:
       platform: kubernetes
@@ -104,6 +105,29 @@ When **skipTLSVerification** is set request are 'http' is used instead of 'https
 If **useRequestIdentity** is set to true, the osb-checker will set `X-Broker-API-Request-Identity` Header, for each request and verify if the header is present in the response.
 
 **testDashboard** advises the checker to verify if an provided DashboardURL works after creating a service instance.
+
+**contextObjectType** sets the checker to use a ContextObject. Possible object types are kubernetes and cloudfoundry. This option is not set, provision request will be send without 
+a context object.
+
+Cloudfoundry context object: 
+```json
+{
+  "platform" : "cloudfoundry",
+  "organization_guid" : "randomUUID-here",
+  "organization_name" : "osb-api",
+  "space_guid":  "randomUUID-here",
+  "space_name": "osb-checker-kotlin",
+  "instance_name" : "testing instance"
+}
+```
+Kubernetes context object:
+``` json
+{
+  "platform" : "kubernetes",
+  "namespace" : "osb-checker",
+  "clusterid" : "randomUUID-here"
+}
+```
 
 ## Parameters
 

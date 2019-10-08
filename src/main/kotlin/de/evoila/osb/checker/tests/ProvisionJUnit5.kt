@@ -70,7 +70,7 @@ class ProvisionJUnit5 : TestBase() {
                                 } else {
                                     null
                                 }
-                        ),
+                        ).apply { setContextUpdate(configuration.contextObjectType) },
                         message = "should reject if missing service_id",
                         responseBodyType = ERR,
                         statusCode = 400
@@ -84,7 +84,7 @@ class ProvisionJUnit5 : TestBase() {
                                 } else {
                                     null
                                 }
-                        ),
+                        ).apply { setContextUpdate(configuration.contextObjectType) },
                         message = "should reject if missing plan_id",
                         responseBodyType = ERR,
                         statusCode = 400
@@ -120,7 +120,7 @@ class ProvisionJUnit5 : TestBase() {
                                 } else {
                                     null
                                 }
-                        ),
+                        ).apply { setContextUpdate(configuration.contextObjectType) },
                         message = "should reject if missing service_id is Invalid",
                         responseBodyType = ERR,
                         statusCode = 400
@@ -133,7 +133,7 @@ class ProvisionJUnit5 : TestBase() {
                                 } else {
                                     null
                                 }
-                        ),
+                        ).apply { setContextUpdate(configuration.contextObjectType) },
                         message = "should reject if missing plan_id is Invalid",
                         responseBodyType = ERR,
                         statusCode = 400
@@ -158,7 +158,7 @@ class ProvisionJUnit5 : TestBase() {
                                                 service = service,
                                                 plan = plan,
                                                 maintenance_info = MaintenanceInfo("Invalid", "Should return 422")
-                                        ),
+                                        ).apply { setContextUpdate(configuration.contextObjectType) },
                                         expectedFinalStatusCodes = *intArrayOf(422),
                                         expectedResponseBodyType = ERR_MAINTENANCE_INFO
                                 )
@@ -183,19 +183,22 @@ class ProvisionJUnit5 : TestBase() {
         val dynamicNodes = listOf(
                 TestCase(
                         message = "should reject if service_id is missing",
-                        requestBody = ValidProvisioning("", plan.id),
+                        requestBody = ValidProvisioning("", plan.id)
+                                .apply { setContextUpdate(configuration.contextObjectType) },
                         responseBodyType = ERR,
                         statusCode = 400
                 ),
                 TestCase(
                         message = "should reject if plan_id is missing",
-                        requestBody = ValidProvisioning(service.id, ""),
+                        requestBody = ValidProvisioning(service.id, "")
+                                .apply { setContextUpdate(configuration.contextObjectType) },
                         responseBodyType = ERR,
                         statusCode = 400
                 ),
                 TestCase(
                         message = "should return 410 when trying to delete a non existing service instance",
-                        requestBody = ValidProvisioning(service, plan),
+                        requestBody = ValidProvisioning(service, plan)
+                                .apply { setContextUpdate(configuration.contextObjectType) },
                         responseBodyType = NO_SCHEMA,
                         statusCode = 410
                 )
@@ -217,9 +220,9 @@ class ProvisionJUnit5 : TestBase() {
     private fun createSyncAndRetrievableTestForPlan(service: Service, plan: Plan): DynamicContainer {
         val instanceId = UUID.randomUUID().toString()
         val provisionRequestBody = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null) {
-            ValidProvisioning(service, plan, plan.maintenanceInfo)
+            ValidProvisioning(service, plan, plan.maintenanceInfo).apply { setContextUpdate(configuration.contextObjectType) }
         } else {
-            ValidProvisioning(service, plan)
+            ValidProvisioning(service, plan).apply { setContextUpdate(configuration.contextObjectType) }
         }
 
         val dynamicNodes = mutableListOf<DynamicNode>()

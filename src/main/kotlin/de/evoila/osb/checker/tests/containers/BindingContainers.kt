@@ -99,12 +99,12 @@ class BindingContainers(
                     )
 
                     if (response.statusCode() == 202) {
-                        val provision = response.jsonPath().getObject("", AsyncResponse::class.java)
+                        val bindingResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
                         val state = bindingRequestRunner.polling(
                                 instanceId = instanceId,
                                 bindingId = bindingId,
                                 expectedFinalStatusCode = 200,
-                                operationData = provision.operation,
+                                operationData = bindingResponse.operation,
                                 maxPollingDuration = plan.maximumPollingDuration
                         )
                         assertTrue("Expected the final polling state to be \"succeeded\" but was $state")
@@ -245,7 +245,7 @@ class BindingContainers(
                             expectedResponseBodyType = VALID_PROVISION
                     )
                 },
-                DynamicTest.dynamicTest("Running valid PUT provision with different plan_id again. Expecting Status 409.") {
+                DynamicTest.dynamicTest("Running valid PUT provision with different space_guid and organization_guid. Expecting Status 409.") {
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(

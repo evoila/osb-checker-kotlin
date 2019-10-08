@@ -79,7 +79,7 @@ A Binding Test output with two services. 'base-sql-service-dev-managed' is binda
          │  ├─ Creating Service Instance, test dashboard URL, and try to fetch it. ✔
          │  │  ├─ Running valid PUT provision with instanceId 9eeea6a1-478a-4f47-abb4-eebd6d149c4d for service 'base-sql-service-dev-managed' and plan 's' ✔
          │  │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
-         │  │  └─ Running valid PUT provision with different attributes again. Expecting Status 409. ✔
+         │  │  └─ Running valid PUT provision with different space_guid and organization_guid. Expecting Status 409. ✔
          │  ├─ Service base-sql-service-dev-managed Plan s is bindable. Testing binding operation with bindingId 27285fe4-c124-4a22-85be-f6db91de8373 ✔
          │  │  ├─ Run sync and invalid bindings attempts ✔
          │  │  │  ├─ should return status code 4XX when tying to fetch a non existing binding ✔
@@ -103,7 +103,7 @@ A Binding Test output with two services. 'base-sql-service-dev-managed' is binda
             ├─ Creating Service Instance, test dashboard URL. ✔
             │  ├─ Running valid PUT provision with instanceId a408b58d-aa4b-4c53-b851-f3d331cdfe43 for service 'base-sql-service-dev-unmanaged' and plan 's' ✔
             │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
-            │  └─ Running valid PUT provision with different attributes again. Expecting Status 409. ✔
+            │  └─ Running valid PUT provision with different space_guid and organization_guid. Expecting Status 409. ✔
             └─ Deleting provision ✔
                ├─ DELETE provision and if the service broker is async polling afterwards ✔
                └─ Running valid DELETE provision with same parameters again. Expecting Status 410. ✔

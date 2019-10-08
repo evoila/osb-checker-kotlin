@@ -37,8 +37,8 @@ abstract class BindingTestBase : TestBase() {
 
     fun setUpValidProvisionBody(service: Service, plan: Plan): ProvisionBody.ValidProvisioning {
         val provision = if (configuration.apiVersion >= 2.15 && plan.maintenanceInfo != null)
-            ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo)
-        else ProvisionBody.ValidProvisioning(service, plan)
+            ProvisionBody.ValidProvisioning(service, plan, plan.maintenanceInfo).apply { setContextUpdate(configuration.contextObjectType) }
+        else ProvisionBody.ValidProvisioning(service, plan).apply { setContextUpdate(configuration.contextObjectType) }
 
         configuration.provisionParameters.let {
             if (it.containsKey(plan.id)) {

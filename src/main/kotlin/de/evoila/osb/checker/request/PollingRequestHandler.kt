@@ -37,6 +37,7 @@ abstract class PollingRequestHandler(
                 .assertThat()
                 .headers(expectedResponseHeaders)
                 .statusCode(IsIn(listOf(expectedFinalStatusCode, 200)))
+                .log().ifValidationFails()
                 .extract()
                 .response()
 

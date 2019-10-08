@@ -28,6 +28,7 @@ class BindingJUnit5 : BindingTestBase() {
                 val bindingId = UUID.randomUUID().toString()
                 val dynamicContainers = setUpValidProvisionRequestTest(service, plan, instanceId)
                 val bindable = planIsBindable(service, plan)
+
                 if (bindable) {
                     val binding = setUpValidBindingBody(service, plan)
                     dynamicContainers.add(dynamicContainer("Service ${service.name} Plan ${plan.name} is bindable. Testing binding operation with bindingId $bindingId", mutableListOf(

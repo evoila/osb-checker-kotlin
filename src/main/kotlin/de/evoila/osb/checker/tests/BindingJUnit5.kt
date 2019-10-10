@@ -1,8 +1,7 @@
 package de.evoila.osb.checker.tests
 
 import de.evoila.osb.checker.request.BindingRequestRunner
-import de.evoila.osb.checker.request.ResponseBodyType.ERR
-import de.evoila.osb.checker.request.ResponseBodyType.VALID_BINDING
+import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.response.catalog.Plan
@@ -55,7 +54,7 @@ class BindingJUnit5 : TestBase() {
                         binding.parameters = it[plan.id]
                     }
                 }
-                val dynamicContainers = mutableListOf(
+                val dynamicContainers: MutableList<DynamicNode> = mutableListOf(
                         bindingContainerFactory.validProvisionContainer(
                                 instanceId = instanceId,
                                 plan = plan,
@@ -79,6 +78,8 @@ class BindingJUnit5 : TestBase() {
                                     plan = plan
                             ))
                     ))
+                } else {
+                    dynamicContainers.add(dynamicTest("%SKIPPED%Service '${service.name}' Plan ${plan.name} is not bindable. Skipping binding tests.") {})
                 }
 
                 dynamicContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
@@ -161,6 +162,60 @@ class BindingJUnit5 : TestBase() {
         })
         return dynamicContainer("Run sync and invalid bindings attempts", bindingTests)
     }
+
+    @TestFactory
+    @DisplayName("PUT and DELETE and possibly GET bindings requests with non existing service instance Id. Expecting a 4XX Error Code ")
+    fun testBindingOnNonExistingServiceInstance(): List<DynamicNode> {
+        val invalidServiceInstanceId = UUID.randomUUID().toString()
+        val bindingId = UUID.randomUUID().toString()
+
+        return configuration.initCustomCatalog(catalogRequestRunner.correctRequest()).services.flatMap { service ->
+            service.plans.filter { plan -> planIsBindable(service, plan) }.map { bindablePlan ->
+                val binding = if (needAppGUID(bindablePlan)) BindingBody(
+                        serviceId = service.id,
+                        planId = bindablePlan.id,
+                        appGuid = UUID.randomUUID().toString()
+                )
+                else BindingBody(serviceId = service.id, planId = bindablePlan.id)
+
+                configuration.bindingParameters.let {
+                    if (it.containsKey(bindablePlan.id)) {
+                        binding.parameters = it[bindablePlan.id]
+                    }
+                }
+                dynamicContainer("Testing service ${service.id} plan ${bindablePlan.id}", listOf(
+                        dynamicTest("Testing PUT binding") {
+                            bindingRequestRunner.runPutBindingRequestAsync(
+                                    requestBody = binding,
+                                    instanceId = invalidServiceInstanceId,
+                                    bindingId = bindingId,
+                                    expectedStatusCodes = *IntArray(100) { 400 + it },
+                                    expectedResponseBody = NO_SCHEMA
+                            )
+                        },
+                        dynamicTest("Testing DELETE binding") {
+                            bindingRequestRunner.runDeleteBindingRequestAsync(
+                                    serviceId = binding.serviceId,
+                                    planId = binding.planId,
+                                    instanceId = invalidServiceInstanceId,
+                                    bindingId = bindingId,
+                                    expectedStatusCodes = *IntArray(100) { 400 + it }
+                            )
+                        },
+                        if (service.bindingsRetrievable == true) {
+                            dynamicTest("Testing GET binding.") {
+                                bindingRequestRunner.runGetBindingRequest(
+                                        instanceId = invalidServiceInstanceId,
+                                        bindingId = bindingId,
+                                        expectedStatusCodes = *IntArray(100) { 400 + it }
+                                )
+                            }
+                        } else dynamicTest("%SKIPPED%Binding is not retrievable. Skipping GET binding.") {}
+                ))
+            }
+        }
+    }
+
 
     private fun planIsBindable(service: Service, plan: Plan): Boolean = plan.bindable ?: service.bindable
 

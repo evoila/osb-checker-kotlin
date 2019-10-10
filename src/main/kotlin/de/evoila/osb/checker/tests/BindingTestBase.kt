@@ -7,6 +7,7 @@ import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
 import de.evoila.osb.checker.tests.containers.BindingContainers
 import org.junit.jupiter.api.DynamicContainer
+import org.junit.jupiter.api.DynamicNode
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
@@ -21,7 +22,7 @@ abstract class BindingTestBase : TestBase() {
     fun setUpValidProvisionRequestTest(service: Service,
                                        plan: Plan,
                                        instanceId: String
-    ): MutableList<DynamicContainer> {
+    ): MutableList<DynamicNode> {
         return mutableListOf(
                 bindingContainers.validProvisionContainer(
                         instanceId = instanceId,

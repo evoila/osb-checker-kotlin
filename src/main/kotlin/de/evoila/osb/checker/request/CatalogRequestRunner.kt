@@ -7,6 +7,8 @@ import io.restassured.http.Header
 import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath
 import org.springframework.stereotype.Service
 import java.util.*
+import io.restassured.response.ExtractableResponse
+import io.restassured.response.Response
 
 @Service
 class CatalogRequestRunner(
@@ -23,6 +25,19 @@ class CatalogRequestRunner(
                 .assertThat()
                 .statusCode(412)
     }
+
+    fun withSpecificHeaderAndNoAssertion(key: String, value: String): ExtractableResponse<Response> {
+        validRequestHeaders[key] = value
+
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .get("/v2/catalog")
+                .then()
+                .log().ifValidationFails()
+                .extract()
+    }
+
 
     fun correctRequestAndValidateResponse() {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {

@@ -57,6 +57,11 @@ fun main(args: Array<String>) {
                         .desc("Indicate if the Contract Test should run.")
                         .build()
                 )
+                addOption(Option.builder("str")
+                        .longOpt("strange-input")
+                        .desc("Indicate if the Contract Test should run.")
+                        .build()
+                )
             }
 
     val parser = DefaultParser()
@@ -82,6 +87,10 @@ fun main(args: Array<String>) {
 
     if (commandLine.hasOption("contract")) {
         selectors.add(DiscoverySelectors.selectClass(ContractJUnit5::class.java))
+    }
+
+    if (commandLine.hasOption("strange-input")) {
+        selectors.add(DiscoverySelectors.selectClass(MalformedInputTests::class.java))
     }
 
     if (selectors.isEmpty()) {

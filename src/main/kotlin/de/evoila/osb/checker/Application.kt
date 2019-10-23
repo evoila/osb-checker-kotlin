@@ -5,6 +5,7 @@ import de.evoila.osb.checker.tests.CatalogJUnit5
 import de.evoila.osb.checker.tests.ProvisionJUnit5
 import de.evoila.osb.checker.tests.contract.AuthenticationJUnit5
 import de.evoila.osb.checker.tests.contract.ContractJUnit5
+import de.evoila.osb.checker.tests.contract.MalformedInputTests
 import de.evoila.osb.checker.util.TreePrintingListener
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
@@ -15,9 +16,9 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
 import org.junit.platform.launcher.core.LauncherFactory
 import org.junit.platform.launcher.listeners.LoggingListener
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import java.io.PrintWriter
-import java.util.logging.Level
 import kotlin.system.exitProcess
 
 @SpringBootApplication
@@ -96,8 +97,15 @@ fun main(args: Array<String>) {
     val launcher = LauncherFactory.create()
     val treeLogger = TreePrintingListener()
 
+
+    val logger = LoggerFactory.getLogger("Detailed Logger")
+    val loggingListener = LoggingListener.forBiConsumer { t, u ->
+        if (t != null)
+            logger.error(t.message, u)
+    }
+
     launcher.registerTestExecutionListeners(
-            LoggingListener.forJavaUtilLogging(Level.INFO),
+            loggingListener,
             treeLogger,
             summaryGenerator
     )

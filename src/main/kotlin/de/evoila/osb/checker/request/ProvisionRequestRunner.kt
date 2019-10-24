@@ -7,9 +7,7 @@ import de.evoila.osb.checker.response.catalog.ServiceInstance
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
-import io.restassured.config.RedirectConfig
 import io.restassured.config.RedirectConfig.redirectConfig
-import io.restassured.config.RestAssuredConfig
 import io.restassured.config.RestAssuredConfig.config
 import io.restassured.http.ContentType
 import io.restassured.http.Header
@@ -54,7 +52,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
 
     fun runPutProvisionRequestSync(instanceId: String, requestBody: RequestBody) {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
-            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}-sync")
         }
 
         val response = RestAssured.with()
@@ -87,7 +85,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
             expectedResponseBodyType: ResponseBodyType
     ): ExtractableResponse<Response> {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
-            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}")
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}-async")
         }
 
         return RestAssured.with()
@@ -101,6 +99,25 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .statusCode(IsIn(expectedFinalStatusCodes.asList()))
                 .body(JsonSchemaValidator.matchesJsonSchemaInClasspath(expectedResponseBodyType.path))
                 .assertThat()
+                .extract()
+    }
+
+    fun runPutProvisionRequestAsyncWithoutValidation(
+            instanceId: String,
+            requestBody: RequestBody
+    ): ExtractableResponse<Response> {
+        if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
+            useRequestIdentity("OSB-Checker-PUT-instance-${UUID.randomUUID()}-async")
+        }
+
+        return RestAssured.with()
+                .log().ifValidationFails()
+                .headers(validRequestHeaders)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .put(SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE)
+                .then()
+                .log().ifValidationFails()
                 .extract()
     }
 
@@ -119,18 +136,26 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     }
 
     fun runDeleteProvisionRequestSync(instanceId: String, serviceId: String?, planId: String?) {
-        var path = SERVICE_INSTANCE_PATH + instanceId
-        path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
-        path = planId?.let { "$path&plan_id=$planId" } ?: path
+        val path = SERVICE_INSTANCE_PATH + instanceId
 
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
-            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}-sync")
         }
 
-        val response = RestAssured.with()
+        val request = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
                 .contentType(ContentType.JSON)
+
+        if (!serviceId.isNullOrEmpty()) {
+            request.param("service_id", serviceId)
+        }
+        if (!planId.isNullOrEmpty()) {
+            request.param("plan_id", planId)
+        }
+
+
+        val response = request
                 .delete(path)
                 .then()
                 .log().ifValidationFails()
@@ -151,19 +176,25 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
             planId: String?,
             expectedFinalStatusCodes: IntArray
     ): ExtractableResponse<Response> {
-        var path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
-        path = serviceId?.let { "$path&service_id=$serviceId" } ?: path
-        path = planId?.let { "$path&plan_id=$planId" } ?: path
+        val path = SERVICE_INSTANCE_PATH + instanceId + ACCEPTS_INCOMPLETE
 
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
-            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}")
+            useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}-async")
         }
 
-        return RestAssured.with()
+        val request = RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
                 .contentType(ContentType.JSON)
-                .delete(path)
+
+        if (!serviceId.isNullOrEmpty()) {
+            request.param("service_id", serviceId)
+        }
+        if (!planId.isNullOrEmpty()) {
+            request.param("plan_id", planId)
+        }
+
+        return request.delete(path)
                 .then()
                 .log().ifValidationFails()
                 .assertThat()

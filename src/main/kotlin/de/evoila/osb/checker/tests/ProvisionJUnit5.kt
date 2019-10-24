@@ -165,8 +165,8 @@ class ProvisionJUnit5 : TestBase() {
                             },
                             dynamicTest("DELETE should return 410 when trying to delete a non existing service instance, as it should not have been created in the previous test.") {
                                 provisionRequestRunner.runDeleteProvisionRequestAsync(
-                                        serviceId = nullIfNotSet(service.id),
-                                        planId = nullIfNotSet(plan.id),
+                                        serviceId = service.id,
+                                        planId = plan.id,
                                         instanceId = instanceId,
                                         expectedFinalStatusCodes = intArrayOf(410)
                                 )
@@ -206,8 +206,8 @@ class ProvisionJUnit5 : TestBase() {
             dynamicTest("DELETE ${it.message}") {
                 val provisionBody = it.requestBody
                 provisionRequestRunner.runDeleteProvisionRequestAsync(
-                        serviceId = nullIfNotSet(provisionBody.service_id),
-                        planId = nullIfNotSet(provisionBody.plan_id),
+                        serviceId = provisionBody.service_id,
+                        planId = provisionBody.plan_id,
                         instanceId = instanceId,
                         expectedFinalStatusCodes = intArrayOf(it.statusCode)
                 )
@@ -254,12 +254,4 @@ class ProvisionJUnit5 : TestBase() {
     private fun createDisplayName(serviceName: String, planName: String, instanceId: String): String =
             "Testing service '${serviceName}'" +
                     " plan '${planName}'. Using instanceId: $instanceId"
-
-    private fun nullIfNotSet(value: String): String? {
-        return if (value.isNotEmpty()) {
-            value
-        } else {
-            null
-        }
-    }
 }

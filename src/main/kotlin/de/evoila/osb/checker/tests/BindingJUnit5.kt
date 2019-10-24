@@ -6,7 +6,8 @@ import de.evoila.osb.checker.request.bodies.BindingBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
-import de.evoila.osb.checker.tests.containers.BindingContainers
+import de.evoila.osb.checker.tests.containers.BindingContainerService
+import de.evoila.osb.checker.tests.containers.ProvisionContainerService
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
@@ -22,7 +23,9 @@ class BindingJUnit5 : TestBase() {
     @Autowired
     lateinit var bindingRequestRunner: BindingRequestRunner
     @Autowired
-    lateinit var bindingContainerFactory: BindingContainers
+    lateinit var bindingContainerService: BindingContainerService
+    @Autowired
+    lateinit var provisionContainerService: ProvisionContainerService
 
     @TestFactory
     @DisplayName(value = "Valid Provision and Binding Tests.")
@@ -55,7 +58,7 @@ class BindingJUnit5 : TestBase() {
                     }
                 }
                 val dynamicContainers: MutableList<DynamicNode> = mutableListOf(
-                        bindingContainerFactory.validProvisionContainer(
+                        provisionContainerService.validProvisionContainer(
                                 instanceId = instanceId,
                                 plan = plan,
                                 provision = provision,
@@ -70,7 +73,7 @@ class BindingJUnit5 : TestBase() {
                 if (bindable) {
                     dynamicContainers.add(dynamicContainer("Service ${service.name} Plan ${plan.name} is bindable. Testing binding operation with bindingId $bindingId", mutableListOf(
                             createSyncAndInvalidBindingTests(service, plan, needsAppGuid, instanceId, bindingId),
-                            bindingContainerFactory.validBindingContainer(
+                            bindingContainerService.validBindingContainer(
                                     binding = binding,
                                     instanceId = instanceId,
                                     bindingId = bindingId,
@@ -82,7 +85,7 @@ class BindingJUnit5 : TestBase() {
                     dynamicContainers.add(dynamicTest("%SKIPPED%Service '${service.name}' Plan ${plan.name} is not bindable. Skipping binding tests.") {})
                 }
 
-                dynamicContainers.add(bindingContainerFactory.validDeleteProvisionContainer(instanceId, service, plan))
+                dynamicContainers.add(provisionContainerService.validDeleteProvisionContainer(instanceId, service, plan))
                 dynamicContainer(if (bindable) {
                     BINDABLE_MESSAGE
                 } else {
@@ -110,7 +113,7 @@ class BindingJUnit5 : TestBase() {
         }
         if (configuration.apiVersion >= 2.14) {
             bindingTests.add(dynamicContainer("should handle sync requests correctly",
-                    bindingContainerFactory.createSyncBindingTest(
+                    bindingContainerService.createSyncBindingTest(
                             binding = if (needsAppGuid) BindingBody(
                                     serviceId = service.id,
                                     planId = plan.id,

@@ -23,14 +23,8 @@ abstract class PollingRequestHandler(
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-GET-last-operation-${UUID.randomUUID()}")
         }
-
-        val request = RestAssured.with()
-                .log().ifValidationFails()
-                .headers(validRequestHeaders)
-                .contentType(ContentType.JSON)
-
+        val request = requestBase()
         operationData?.let { request.queryParam("operation", it) }
-
         val response = request.get(path)
                 .then()
                 .log().ifValidationFails()

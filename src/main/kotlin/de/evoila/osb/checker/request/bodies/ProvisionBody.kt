@@ -11,17 +11,17 @@ abstract class ProvisionBody : RequestBody {
 
     data class ValidProvisioning(
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var service_id: String,
+            val service_id: String,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var plan_id: String,
+            val plan_id: String,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var organization_guid: String = UUID.randomUUID().toString(),
+            val organization_guid: String = UUID.randomUUID().toString(),
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var space_guid: String = UUID.randomUUID().toString(),
+            val space_guid: String = UUID.randomUUID().toString(),
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            val maintenance_info: MaintenanceInfo? = null,
             @JsonInclude(JsonInclude.Include.NON_NULL)
             var parameters: Map<String, Any>? = null,
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            var maintenance_info: MaintenanceInfo? = null,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             var context: HashMap<String, Any> = hashMapOf()
     ) : ProvisionBody() {
@@ -58,9 +58,9 @@ abstract class ProvisionBody : RequestBody {
     }
 
     data class NoPlanFieldProvisioning(
-            var service_id: String?,
-            var organization_guid: String? = UUID.randomUUID().toString(),
-            var space_guid: String? = UUID.randomUUID().toString()
+            val service_id: String?,
+            val organization_guid: String? = UUID.randomUUID().toString(),
+            val space_guid: String? = UUID.randomUUID().toString()
     ) : ProvisionBody() {
 
         constructor(service: Service) : this(
@@ -69,9 +69,9 @@ abstract class ProvisionBody : RequestBody {
     }
 
     data class NoServiceFieldProvisioning(
-            var plan_id: String?,
-            var organization_guid: String? = UUID.randomUUID().toString(),
-            var space_guid: String? = UUID.randomUUID().toString()
+            val plan_id: String?,
+            val organization_guid: String? = UUID.randomUUID().toString(),
+            val space_guid: String? = UUID.randomUUID().toString()
     ) : ProvisionBody() {
 
         constructor(plan: Plan) : this(
@@ -80,9 +80,9 @@ abstract class ProvisionBody : RequestBody {
     }
 
     data class NoOrgFieldProvisioning(
-            var service_id: String?,
-            var plan_id: String?,
-            var space_guid: String? = UUID.randomUUID().toString()
+            val service_id: String?,
+            val plan_id: String?,
+            val space_guid: String? = UUID.randomUUID().toString()
     ) : ProvisionBody() {
 
         constructor(service: Service, plan: Plan) : this(

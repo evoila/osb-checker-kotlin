@@ -141,11 +141,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}-sync")
         }
-
-        val request = RestAssured.with()
-                .log().ifValidationFails()
-                .headers(validRequestHeaders)
-                .contentType(ContentType.JSON)
+        val request = requestBase()
 
         if (!serviceId.isNullOrEmpty()) {
             request.param("service_id", serviceId)
@@ -153,8 +149,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         if (!planId.isNullOrEmpty()) {
             request.param("plan_id", planId)
         }
-
-
+        
         val response = request
                 .delete(path)
                 .then()
@@ -181,11 +176,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-DELETE-instance-${UUID.randomUUID()}-async")
         }
-
-        val request = RestAssured.with()
-                .log().ifValidationFails()
-                .headers(validRequestHeaders)
-                .contentType(ContentType.JSON)
+        val request = requestBase()
 
         if (!serviceId.isNullOrEmpty()) {
             request.param("service_id", serviceId)

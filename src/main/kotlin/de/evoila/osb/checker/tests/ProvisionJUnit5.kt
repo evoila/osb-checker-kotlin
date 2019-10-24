@@ -60,22 +60,23 @@ class ProvisionJUnit5 : TestBase() {
 
     private fun createInvalidPutTestsForPlan(service: Service, plan: Plan): DynamicContainer {
         val instanceId = UUID.randomUUID().toString()
+        val baseTestCase: TestCase<ProvisionBody> = TestCase(
+                requestBody = ValidProvisioning(
+                        service_id = "",
+                        plan_id = plan.id,
+                        maintenance_info = if (configuration.apiVersion >= 2.15) {
+                            plan.maintenanceInfo
+                        } else {
+                            null
+                        }
+                ).apply { setContextUpdate(configuration.contextObjectType) },
+                message = "should reject if missing service_id",
+                responseBodyType = ERR,
+                statusCode = 400
+        )
         val dynamicNodes = listOf(
-                TestCase(
-                        requestBody = ValidProvisioning(
-                                service_id = "",
-                                plan_id = plan.id,
-                                maintenance_info = if (configuration.apiVersion >= 2.15) {
-                                    plan.maintenanceInfo
-                                } else {
-                                    null
-                                }
-                        ).apply { setContextUpdate(configuration.contextObjectType) },
-                        message = "should reject if missing service_id",
-                        responseBodyType = ERR,
-                        statusCode = 400
-                ),
-                TestCase(
+                baseTestCase,
+                baseTestCase.copy(
                         requestBody = ValidProvisioning(
                                 service_id = service.id,
                                 plan_id = "",
@@ -85,34 +86,24 @@ class ProvisionJUnit5 : TestBase() {
                                     null
                                 }
                         ).apply { setContextUpdate(configuration.contextObjectType) },
-                        message = "should reject if missing plan_id",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing plan_id"
                 ),
-                TestCase(
+                baseTestCase.copy(
                         requestBody = ProvisionBody.NoServiceFieldProvisioning(plan),
-                        message = "should reject if missing service_id field",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing service_id field"
                 ),
-                TestCase(
+                baseTestCase.copy(
                         requestBody = ProvisionBody.NoPlanFieldProvisioning(service),
-                        message = "should reject if missing plan_id field",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing plan_id field"
                 ),
-                TestCase(
+                baseTestCase.copy(
                         requestBody = ProvisionBody.NoSpaceFieldProvisioning(service, plan),
-                        message = "should reject if missing service_id field",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing service_id field"
                 ),
-                TestCase(requestBody = ProvisionBody.NoOrgFieldProvisioning(service, plan),
-                        message = "should reject if missing service_id field",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                baseTestCase.copy(requestBody = ProvisionBody.NoOrgFieldProvisioning(service, plan),
+                        message = "should reject if missing service_id field"
                 ),
-                TestCase(
+                baseTestCase.copy(
                         requestBody = ValidProvisioning(
                                 "Invalid", plan.id,
                                 maintenance_info = if (configuration.apiVersion == 2.15) {
@@ -121,11 +112,9 @@ class ProvisionJUnit5 : TestBase() {
                                     null
                                 }
                         ).apply { setContextUpdate(configuration.contextObjectType) },
-                        message = "should reject if missing service_id is Invalid",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing service_id is Invalid"
                 ),
-                TestCase(
+                baseTestCase.copy(
                         requestBody = ValidProvisioning(
                                 service.id, "Invalid",
                                 maintenance_info = if (configuration.apiVersion >= 2.15) {
@@ -134,16 +123,14 @@ class ProvisionJUnit5 : TestBase() {
                                     null
                                 }
                         ).apply { setContextUpdate(configuration.contextObjectType) },
-                        message = "should reject if missing plan_id is Invalid",
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        message = "should reject if missing plan_id is Invalid"
                 )
-        ).map {
-            dynamicTest("PUT ${it.message}") {
+        ).map { testCase ->
+            dynamicTest("PUT ${testCase.message}") {
                 provisionRequestRunner.runPutProvisionRequestAsync(instanceId,
-                        requestBody = it.requestBody,
-                        expectedFinalStatusCodes = *intArrayOf(it.statusCode),
-                        expectedResponseBodyType = it.responseBodyType
+                        requestBody = testCase.requestBody,
+                        expectedFinalStatusCodes = *intArrayOf(testCase.statusCode),
+                        expectedResponseBodyType = testCase.responseBodyType
                 )
             }
         }
@@ -179,26 +166,23 @@ class ProvisionJUnit5 : TestBase() {
 
     private fun createInvalidAsyncDeleteTestsForPlan(service: Service, plan: Plan): DynamicContainer {
         val instanceId = UUID.randomUUID().toString()
+        val baseTestCase = TestCase(
+                message = "should reject if service_id is missing",
+                requestBody = ValidProvisioning("", plan.id)
+                        .apply { setContextUpdate(configuration.contextObjectType) },
+                responseBodyType = ERR,
+                statusCode = 400
+        )
 
         val dynamicNodes = listOf(
-                TestCase(
-                        message = "should reject if service_id is missing",
-                        requestBody = ValidProvisioning("", plan.id)
-                                .apply { setContextUpdate(configuration.contextObjectType) },
-                        responseBodyType = ERR,
-                        statusCode = 400
-                ),
-                TestCase(
+                baseTestCase,
+                baseTestCase.copy(
                         message = "should reject if plan_id is missing",
-                        requestBody = ValidProvisioning(service.id, "")
-                                .apply { setContextUpdate(configuration.contextObjectType) },
-                        responseBodyType = ERR,
-                        statusCode = 400
+                        requestBody = baseTestCase.requestBody.copy(service_id = service.id, plan_id = "")
                 ),
-                TestCase(
+                baseTestCase.copy(
                         message = "should return 410 when trying to delete a non existing service instance",
-                        requestBody = ValidProvisioning(service, plan)
-                                .apply { setContextUpdate(configuration.contextObjectType) },
+                        requestBody = baseTestCase.requestBody.copy(service_id = service.id, plan_id = plan.id),
                         responseBodyType = NO_SCHEMA,
                         statusCode = 410
                 )

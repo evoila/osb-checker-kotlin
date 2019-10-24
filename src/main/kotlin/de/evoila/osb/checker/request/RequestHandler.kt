@@ -3,8 +3,11 @@ package de.evoila.osb.checker.request
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import de.evoila.osb.checker.config.Configuration
 import de.evoila.osb.checker.config.Configuration.*
+import io.restassured.RestAssured
+import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
 import io.restassured.response.Response
+import io.restassured.specification.RequestSpecification
 import java.util.*
 import kotlin.test.assertTrue
 
@@ -27,6 +30,12 @@ abstract class RequestHandler(val configuration: Configuration) {
         validRequestHeaders[REQUEST_IDENTITY_KEY] = value
         expectedResponseHeaders[REQUEST_IDENTITY_KEY] = value
     }
+
+    fun requestBase(): RequestSpecification =
+            RestAssured.with()
+                    .log().ifValidationFails()
+                    .headers(validRequestHeaders)
+                    .contentType(ContentType.JSON)
 
     fun getGetResponseBodyAsString(response: ExtractableResponse<Response>): String = try {
         response.jsonPath().prettify()

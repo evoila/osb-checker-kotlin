@@ -14,7 +14,7 @@ class MalformedInputTests : TestBase() {
     @Autowired
     lateinit var provisionRequestRunner: ProvisionRequestRunner
     @Autowired
-    lateinit var bindingContaines: BindingContainerService
+    lateinit var bindingContainerService: BindingContainerService
 
 
     @Test

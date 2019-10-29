@@ -52,11 +52,6 @@ class BindingJUnit5 : TestBase() {
                         provision.parameters = it[plan.id]
                     }
                 }
-                configuration.bindingParameters.let {
-                    if (it.containsKey(plan.id)) {
-                        binding.parameters = it[plan.id]
-                    }
-                }
                 val dynamicContainers: MutableList<DynamicNode> = mutableListOf(
                         provisionContainerService.validProvisionContainer(
                                 instanceId = instanceId,
@@ -68,9 +63,14 @@ class BindingJUnit5 : TestBase() {
                                 planName = plan.name
                         )
                 )
-
                 val bindable = planIsBindable(service, plan)
+
                 if (bindable) {
+                    configuration.bindingParameters.let {
+                        if (it.containsKey(plan.id)) {
+                            binding.parameters = it[plan.id]
+                        }
+                    }
                     dynamicContainers.add(dynamicContainer("Service ${service.name} Plan ${plan.name} is bindable. Testing binding operation with bindingId $bindingId", mutableListOf(
                             createSyncAndInvalidBindingTests(service, plan, needsAppGuid, instanceId, bindingId),
                             bindingContainerService.validBindingContainer(
@@ -124,21 +124,19 @@ class BindingJUnit5 : TestBase() {
                     )
             ))
         }
+        val baseTestCase = TestCase(
+                requestBody =
+                if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
+                else BindingBody(null, plan.id),
+                message = "should reject if missing service_id",
+                responseBodyType = NO_SCHEMA,
+                statusCode = 400
+        )
         bindingTests.addAll(listOf(
-                TestCase(
-                        requestBody =
-                        if (needsAppGuid) BindingBody(null, plan.id, UUID.randomUUID().toString())
-                        else BindingBody(null, plan.id),
-                        message = "should reject if missing service_id",
-                        responseBodyType = VALID_BINDING,
-                        statusCode = 400
-                ),
-                TestCase(
-                        requestBody = if (needsAppGuid) BindingBody(service.id, null, UUID.randomUUID().toString())
-                        else BindingBody(service.id, null),
-                        message = "should reject if missing plan_id",
-                        responseBodyType = VALID_BINDING,
-                        statusCode = 400
+                baseTestCase,
+                baseTestCase.copy(
+                        requestBody = baseTestCase.requestBody.copy(serviceId = service.id, planId = null),
+                        message = "should reject if missing plan_id"
                 )
         ).flatMap { testCase ->
             listOf(
@@ -218,7 +216,6 @@ class BindingJUnit5 : TestBase() {
             }
         }
     }
-
 
     private fun planIsBindable(service: Service, plan: Plan): Boolean = plan.bindable ?: service.bindable
 

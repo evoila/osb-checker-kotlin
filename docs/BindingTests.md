@@ -24,6 +24,7 @@
     - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
    
 # Binding Tests
 
@@ -39,6 +40,9 @@ service instances don't work, so it is recommended that the [provision tests](Pr
 
 At the beginning of a test the catalog is fetched. The checker then runs the following tests based upon the provided information:
 
+- Bindings on non existing Service Instances
+    - runs only on bindable services
+        - tests that the service broker returns 4XX when trying to call PUT, DELETE and GET (if fetchable) bindings on non existing service instances.
 - Valid Provision and Bindings
     - Create a valid provision.
         - If the Service broker creates service instances asynchronously, the checker will start polling and and verify the responses.
@@ -71,6 +75,11 @@ A Binding Test output with two services. 'base-sql-service-dev-managed' is binda
 ╷
 └─ JUnit Jupiter ✔
    └─ Binding Tests ✔
+      ├─ PUT and DELETE and possibly GET bindings requests with non existing service instance Id. Expecting a 4XX Error Code ✔
+      │  └─ Testing service b1f8fa45-d58d-40a2-9797-be2da2136a25 plan cad65d27-bfc6-4359-b039-3799c28b082d ✔
+      │     ├─ Testing PUT binding ✔
+      │     ├─ Testing DELETE binding ✔
+      │     └─ Testing GET binding. ✔   
       └─ Valid Provision and Binding Tests. ✔
          ├─ Running a valid provision and run binding tests. Delete both afterwards. In case of a asynchronous service broker polling after each operation. ✔
          │  ├─ Creating Service Instance, test dashboard URL, and try to fetch it. ✔
@@ -101,6 +110,7 @@ A Binding Test output with two services. 'base-sql-service-dev-managed' is binda
             │  ├─ Running valid PUT provision with instanceId a408b58d-aa4b-4c53-b851-f3d331cdfe43 for service 'base-sql-service-dev-unmanaged' and plan 's' ✔
             │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
             │  └─ Running valid PUT provision with different space_guid and organization_guid. Expecting Status 409. ✔
+            ├─ Service 'base-sql-service-dev-unmanaged' Plan s is not bindable. Skipping binding tests. ↷
             └─ Deleting provision ✔
                ├─ DELETE provision and if the service broker is async polling afterwards ✔
                └─ Running valid DELETE provision with same parameters again. Expecting Status 410. ✔

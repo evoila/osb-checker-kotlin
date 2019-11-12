@@ -23,6 +23,7 @@
     - [Authentication](docs/AuthenticationTests.md)
     - [Contract](#contract)
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
 
 # Contract
 

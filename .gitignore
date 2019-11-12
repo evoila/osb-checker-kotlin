@@ -20,3 +20,5 @@ gradle
 src/main/resources/application\.yml
 
 bin/
+
+\.vscode/

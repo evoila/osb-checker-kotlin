@@ -21,8 +21,9 @@
         - [Version specific Tests](BindingTests.md#version-specific-tests)
         - [Example Output](BindingTests.md#example-output)
     - [Authentication](docs/AuthenticationTests.md)
-    - [Contract](docs/ContractTest.md)
-- [Contribution](docs/Contribution.md)
+    - [Contract](ContractTest.md)
+- [Contribution](Contribution.md)
+- [Changes](Changes.md)
    
 # Provision Tests
 

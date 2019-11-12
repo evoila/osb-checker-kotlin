@@ -16,10 +16,12 @@ abstract class RequestHandler(val configuration: Configuration) {
 
     val validRequestHeaders: MutableMap<String, Any> = mutableMapOf()
     val expectedResponseHeaders: MutableMap<String, Any> = mutableMapOf()
+    val wrongUsernameToken = encodePassword(UUID.randomUUID().toString(), configuration.password)
+    val wrongPasswordToken = encodePassword(configuration.user, UUID.randomUUID().toString())
 
     init {
         validRequestHeaders["X-Broker-API-Version"] = configuration.apiVersion
-        validRequestHeaders["Authorization"] = configuration.correctToken
+        validRequestHeaders["Authorization"] = encodePassword(configuration.user, configuration.password)
 
         configuration.originatingIdentity?.let {
             validRequestHeaders[ORIGINATING_IDENTITY_KEY] = encodeOriginatingIdentity(it)
@@ -43,6 +45,10 @@ abstract class RequestHandler(val configuration: Configuration) {
         assertTrue(false, "Expected a response Body, but none was found.")
         ""
     }
+
+    private fun encodePassword(user: String, password: String): String =
+            "Basic ${Base64.getEncoder().encodeToString("$user:$password".toByteArray())}"
+
 
     private fun encodeOriginatingIdentity(originatingIdentity: OriginatingIdentity): String {
         val mapper = jacksonObjectMapper()

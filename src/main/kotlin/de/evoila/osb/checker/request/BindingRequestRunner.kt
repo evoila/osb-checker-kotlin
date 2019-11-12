@@ -187,7 +187,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun putWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.correctToken))
+                .auth().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
                 .log().ifValidationFails()
@@ -198,7 +198,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun deleteWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.correctToken))
+                .auth().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
                 .log().ifValidationFails()
@@ -219,7 +219,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
 
     fun putWrongUser() {
         RestAssured.with()
-                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("Authorization", wrongUsernameToken))
                 .log().ifValidationFails()
                 .header(Header("X-Broker-API-Version", "$configuration.apiVersion"))
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
@@ -232,7 +232,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun putWrongPassword() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("Authorization", wrongPasswordToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
@@ -255,7 +255,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun deleteWrongUser() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("Authorization", wrongUsernameToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
@@ -267,7 +267,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun deleteWrongPassword() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("Authorization", wrongPasswordToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()

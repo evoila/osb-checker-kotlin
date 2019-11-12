@@ -17,9 +17,6 @@ class Configuration {
     var apiVersion: Double = 0.0
     lateinit var user: String
     lateinit var password: String
-    lateinit var correctToken: String
-    lateinit var wrongUserToken: String
-    lateinit var wrongPasswordToken: String
     var contextObjectType: ContextObjectType = ContextObjectType.NONE
     var originatingIdentity: OriginatingIdentity? = null
     var useRequestIdentity: Boolean = false

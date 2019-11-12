@@ -20,6 +20,7 @@
     - [Authentication](AuthenticationTests.md#authentication)
     - [Contract](ContractTest.md#contract)
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
 
 # Catalog Test
 

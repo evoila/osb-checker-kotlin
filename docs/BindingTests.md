@@ -24,6 +24,7 @@
     - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
    
 # Binding Tests
 

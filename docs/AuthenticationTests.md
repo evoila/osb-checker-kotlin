@@ -27,6 +27,7 @@
         - [Test Procedure](DataConsistencyCheck.md#test-procedure)
         - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
    
 # Authentication
 

@@ -25,6 +25,8 @@
         - [Test Procedure](DataConsistencyCheck.md#test-procedure)
         - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](#Contribution)
+- [Changes](/docs/Changes.md)
+
 # Contribution
 
 ## Create an Issue

@@ -27,6 +27,7 @@
         - [Test Procedure](docs/DataConsistencyCheck.md#test-procedure)
         - [Example Output](docs/DataConsistencyCheck.md#example-output)    
 - [Contribution](docs/Contribution.md)
+- [Changes](/docs/Changes.md)
    
 ## Description
 This application is a generalized test program for service brokers. It runs rest calls against the defined service broker and checks if it
@@ -38,7 +39,7 @@ Tests are created dynamically based upon the service broker catalog or custom in
 ### Build Application
 
 to build the application run `{path}/osb-checker-kotlin/gradlew build` on linux and MacOS or `{path}/osb-checker-kotlin/gradlew.bat build` on windows.
-Afterwards you can find `osb-checker-kotlin-1.1.1.jar` in `osb-checker-kotlin/build/libs`.
+Afterwards you can find `osb-checker-kotlin-1.1.2.jar` in `osb-checker-kotlin/build/libs`.
 
 ### Basic Run Configuration
 
@@ -74,7 +75,6 @@ Changes since v1.0:
 - Restructuring of binding test:
  - All plans in the catalog are now tested for invalid binding attempts.
  - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
- 
- HotFix: 
-    - swap service id and/or plan id, when testing service broker behaviour for conflicting binding. Test wont be executed, if only one plan is listed in the actual catalog.
-    (the swap is not influenced by service plans defined in the config)
+
+## HotFix: 
+- Auth token now generated in RequestHandler instead of configuration class, to avoid Application Context failure.

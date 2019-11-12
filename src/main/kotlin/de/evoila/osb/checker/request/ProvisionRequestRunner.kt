@@ -173,7 +173,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun putWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.correctToken))
+                .auth().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
                 .then()
                 .log().ifValidationFails()
@@ -184,7 +184,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun deleteWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.correctToken))
+                .auth().basic(configuration.user, configuration.password)
                 .delete("$SERVICE_INSTANCE_PATH${Configuration.notAnId}$ACCEPTS_INCOMPLETE&service_id=Invalid&plan_id=Invalid")
                 .then()
                 .log().ifValidationFails()
@@ -195,7 +195,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun lastOperationWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.correctToken))
+                .auth().basic(configuration.user, configuration.password)
                 .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
                 .then()
                 .log().ifValidationFails()
@@ -218,7 +218,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun putWrongUser() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("Authorization", wrongUsernameToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
@@ -231,7 +231,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun putWrongPassword() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("Authorization", wrongPasswordToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
@@ -256,7 +256,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun deleteWrongUser() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("Authorization", wrongUsernameToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
@@ -269,7 +269,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun deleteWrongPassword() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("Authorization", wrongPasswordToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .delete(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
@@ -294,7 +294,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun lastOpWrongUser() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongUserToken))
+                .header(Header("Authorization", wrongUsernameToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
@@ -307,7 +307,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun lastOpWrongPassword() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .header(Header("Authorization", configuration.wrongPasswordToken))
+                .header(Header("Authorization", wrongPasswordToken))
                 .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .contentType(ContentType.JSON)
                 .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)

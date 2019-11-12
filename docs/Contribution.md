@@ -22,6 +22,8 @@
     - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
 - [Contribution](#Contribution)
+- [Changes](/docs/Changes.md)
+
 # Contribution
 
 ## Create an Issue

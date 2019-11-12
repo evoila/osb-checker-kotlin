@@ -16,11 +16,14 @@
         - [Test Procedure](ProvisionTests.md#test-procedure)
         - [Version specific Tests](ProvisionTests.md#version-specific-tests)
         - [Example Output](ProvisionTests.md#example-output)
-    - [Binding](#binding)
-    - [Authentication](#authentication)
-    - [Contract](#contract)
-    - [Example output](#example-output)
-
+    - [Binding](BindingTests.md#binding)
+        - [Test Procedure](BindingTests.md#test-procedure)
+        - [Version specific Tests](BindingTests.md#version-specific-tests)
+        - [Example Output](BindingTests.md#example-output)
+    - [Authentication](docs/AuthenticationTests.md)
+    - [Contract](ContractTest.md)
+- [Contribution](Contribution.md)
+- [Changes](Changes.md)
 # Usage
 
 osb-checker-kotlin provides a number of options to test service brokers with more detail, or shorten the run time, by leaving some tests out.

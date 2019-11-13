@@ -14,7 +14,6 @@ import org.hamcrest.collection.IsIn
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
-import javax.swing.plaf.nimbus.State
 import kotlin.test.assertTrue
 
 @Service
@@ -158,7 +157,6 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
             vararg expectedStatusCodes: Int
     ): ExtractableResponse<Response> {
         val path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId
-//        path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
 
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-DELETE-binding-${UUID.randomUUID()}")

@@ -33,6 +33,7 @@ class BindingJUnit5 : BindingTestBase() {
                                     instanceId = instanceId,
                                     bindingId = bindingId,
                                     isRetrievable = configuration.apiVersion > 2.13 && service.bindingsRetrievable ?: false,
+                                    service = service,
                                     plan = plan
                             ))
                     ))

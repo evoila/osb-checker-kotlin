@@ -80,8 +80,8 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
             requestBody: RequestBody,
             instanceId: String,
             bindingId: String,
-            vararg expectedStatusCodes: Int,
-            expectedResponseBody: ResponseBodyType
+            expectedResponseBody: ResponseBodyType,
+            vararg expectedStatusCodes: Int
     ): ExtractableResponse<Response> {
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-PUT-binding-${UUID.randomUUID()}")
@@ -110,12 +110,33 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
         return response
     }
 
-    fun polling(
+    fun putPolling(instanceId: String,
+                   bindingId: String,
+                   operationData: String?,
+                   maxPollingDuration: Int,
+                   requestBody: RequestBody
+    ): LastOperationResponse.State {
+        return polling(instanceId, bindingId, 200, operationData, maxPollingDuration)
+        { runPutBindingRequestAsync(requestBody, instanceId, bindingId, VALID_BINDING, 200, 202) }
+    }
+
+    fun deletePolling(instanceId: String, bindingId: String,
+                      operationData: String?,
+                      maxPollingDuration: Int,
+                      serviceId: String,
+                      planId: String
+    ): LastOperationResponse.State {
+        return polling(instanceId, bindingId, 410, operationData, maxPollingDuration)
+        { runDeleteBindingRequestAsync(serviceId, planId, instanceId, bindingId, 200, 202, 410) }
+    }
+
+    private fun polling(
             instanceId: String,
             bindingId: String,
             expectedFinalStatusCode: Int,
             operationData: String?,
-            maxPollingDuration: Int
+            maxPollingDuration: Int,
+            function: () -> Unit
     ): LastOperationResponse.State {
         val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
 
@@ -123,7 +144,8 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
                 path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId + LAST_OPERATION,
                 expectedFinalStatusCode = expectedFinalStatusCode,
                 operationData = operationData,
-                latestAcceptablePollingInstant = latestAcceptablePollingInstant
+                latestAcceptablePollingInstant = latestAcceptablePollingInstant,
+                function = function
         )
     }
 
@@ -134,8 +156,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
             bindingId: String,
             vararg expectedStatusCodes: Int
     ): ExtractableResponse<Response> {
-        var path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId
-        path = serviceId?.let { "$path?service_id=$serviceId" } ?: path
+        val path = SERVICE_INSTANCE_PATH + instanceId + SERVICE_BINDING_PATH + bindingId
 
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-DELETE-binding-${UUID.randomUUID()}")

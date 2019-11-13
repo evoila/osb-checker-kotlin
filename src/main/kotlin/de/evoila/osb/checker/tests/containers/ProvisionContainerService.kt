@@ -69,11 +69,12 @@ class ProvisionContainerService(
                             if (response.statusCode() == 202) {
                                 val provision = response.jsonPath().getObject("", AsyncResponse::class.java)
                                 assertTrue(DELETE_RESULT_MESSAGE) {
-                                    LastOperationResponse.State.GONE == provisionRequestRunner.polling(
+                                    LastOperationResponse.State.GONE == provisionRequestRunner.deletePolling(
                                             instanceId = instanceId,
-                                            expectedFinalStatusCode = 410,
                                             operationData = provision.operation,
-                                            maxPollingDuration = plan.maximumPollingDuration
+                                            maxPollingDuration = plan.maximumPollingDuration,
+                                            serviceId = service.id,
+                                            planId = plan.id
                                     )
                                 }
                             }
@@ -111,11 +112,11 @@ class ProvisionContainerService(
 
                     if (response.statusCode() == 202) {
                         val asyncResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
-                        val state = provisionRequestRunner.polling(
+                        val state = provisionRequestRunner.putPolling(
                                 instanceId = instanceId,
-                                expectedFinalStatusCode = 200,
                                 operationData = asyncResponse.operation,
-                                maxPollingDuration = plan.maximumPollingDuration
+                                maxPollingDuration = plan.maximumPollingDuration,
+                                requestBody = provision
                         )
                         assertTrue(EXPECTED_FINAL_POLLING_STATE + state)
                         { LastOperationResponse.State.SUCCEEDED == state }

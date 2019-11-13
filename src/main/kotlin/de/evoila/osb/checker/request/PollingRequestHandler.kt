@@ -18,8 +18,11 @@ abstract class PollingRequestHandler(
     fun waitForFinish(path: String,
                       expectedFinalStatusCode: Int,
                       operationData: String?,
-                      latestAcceptablePollingInstant: Instant
+                      latestAcceptablePollingInstant: Instant,
+                      function: () -> Unit
     ): LastOperationResponse.State {
+        function()
+
         if (configuration.apiVersion >= 2.15 && configuration.useRequestIdentity) {
             useRequestIdentity("OSB-Checker-GET-last-operation-${UUID.randomUUID()}")
         }
@@ -54,7 +57,7 @@ abstract class PollingRequestHandler(
 
         return if (responseBody.state == LastOperationResponse.State.IN_PROGRESS) {
             Thread.sleep(10000)
-            waitForFinish(path, expectedFinalStatusCode, operationData, latestAcceptablePollingInstant)
+            waitForFinish(path, expectedFinalStatusCode, operationData, latestAcceptablePollingInstant, function)
         } else {
             responseBody.state
         }

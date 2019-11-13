@@ -32,15 +32,16 @@ class BindingContainerService(
             instanceId: String,
             bindingId: String,
             isRetrievable: Boolean,
+            service: de.evoila.osb.checker.response.catalog.Service,
             plan: Plan
     ): DynamicContainer {
         val bindingTests = createValidBindingTests(bindingId, binding, instanceId, plan)
 
         return DynamicContainer.dynamicContainer(VALID_BINDING_MESSAGE, if (isRetrievable) {
             bindingTests.plus(listOf(validRetrievableBindingContainer(instanceId, bindingId),
-                    validDeleteTest(binding, instanceId, bindingId, plan)))
+                    validDeleteTest(binding, instanceId, bindingId, service, plan)))
         } else {
-            bindingTests.plus(validDeleteTest(binding, instanceId, bindingId, plan))
+            bindingTests.plus(validDeleteTest(binding, instanceId, bindingId, service, plan))
         })
     }
 
@@ -62,12 +63,12 @@ class BindingContainerService(
 
                     if (response.statusCode() == 202) {
                         val bindingResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
-                        val state = bindingRequestRunner.polling(
+                        val state = bindingRequestRunner.putPolling(
                                 instanceId = instanceId,
                                 bindingId = bindingId,
-                                expectedFinalStatusCode = 200,
                                 operationData = bindingResponse.operation,
-                                maxPollingDuration = plan.maximumPollingDuration
+                                maxPollingDuration = plan.maximumPollingDuration,
+                                requestBody = binding
                         )
                         assertTrue("$EXPECTED_FINAL_POLLING_STATE$state")
                         { SUCCEEDED == state }
@@ -111,7 +112,8 @@ class BindingContainerService(
         }
     }
 
-    fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String, plan: Plan): DynamicTest =
+    fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String,
+                        service: de.evoila.osb.checker.response.catalog.Service, plan: Plan): DynamicTest =
             DynamicTest.dynamicTest("Deleting binding with bindingId $bindingId") {
                 val response = bindingRequestRunner.runDeleteBindingRequestAsync(
                         serviceId = binding.serviceId,
@@ -124,12 +126,13 @@ class BindingContainerService(
                 if (response.statusCode() == 202) {
                     val asyncResponse = response.jsonPath().getObject("", AsyncResponse::class.java)
                     assertTrue(DELETE_RESULT_MESSAGE) {
-                        GONE == bindingRequestRunner.polling(
+                        GONE == bindingRequestRunner.deletePolling(
                                 instanceId = instanceId,
                                 bindingId = bindingId,
-                                expectedFinalStatusCode = 410,
                                 operationData = asyncResponse.operation,
-                                maxPollingDuration = plan.maximumPollingDuration
+                                maxPollingDuration = plan.maximumPollingDuration,
+                                serviceId = service.id,
+                                planId = plan.id
                         )
                     }
                 }

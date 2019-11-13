@@ -121,17 +121,56 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
                 .extract()
     }
 
-    fun polling(
+    fun putPolling(instanceId: String,
+                   operationData: String?,
+                   maxPollingDuration: Int,
+                   requestBody: RequestBody
+    ): State {
+        return polling(
+                instanceId = instanceId,
+                expectedFinalStatusCode = 200,
+                operationData = operationData,
+                maxPollingDuration = maxPollingDuration
+        ) {
+            runPutProvisionRequestAsync(
+                    instanceId = instanceId,
+                    requestBody = requestBody,
+                    expectedFinalStatusCodes = *intArrayOf(202, 200),
+                    expectedResponseBodyType = VALID_PROVISION)
+        }
+    }
+
+    fun deletePolling(instanceId: String,
+                      operationData: String?,
+                      maxPollingDuration: Int,
+                      serviceId: String,
+                      planId: String
+    ): State {
+        return polling(instanceId = instanceId,
+                operationData = operationData,
+                maxPollingDuration = maxPollingDuration,
+                expectedFinalStatusCode = 410
+        ) {
+            runDeleteProvisionRequestAsync(
+                    instanceId = instanceId,
+                    serviceId = serviceId, planId = planId,
+                    expectedFinalStatusCodes = intArrayOf(202, 200, 410))
+        }
+    }
+
+    private fun polling(
             instanceId: String,
             expectedFinalStatusCode: Int,
             operationData: String?,
-            maxPollingDuration: Int
+            maxPollingDuration: Int,
+            function: () -> Unit
     ): State {
         val latestAcceptablePollingInstant = Instant.now().plusSeconds(maxPollingDuration.toLong())
         return super.waitForFinish(path = SERVICE_INSTANCE_PATH + instanceId + LAST_OPERATION,
                 expectedFinalStatusCode = expectedFinalStatusCode,
                 operationData = operationData,
-                latestAcceptablePollingInstant = latestAcceptablePollingInstant
+                latestAcceptablePollingInstant = latestAcceptablePollingInstant,
+                function = function
         )
     }
 
@@ -149,7 +188,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
         if (!planId.isNullOrEmpty()) {
             request.param("plan_id", planId)
         }
-        
+
         val response = request
                 .delete(path)
                 .then()

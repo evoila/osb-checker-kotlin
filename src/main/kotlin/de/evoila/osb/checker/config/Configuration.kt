@@ -1,12 +1,10 @@
 package de.evoila.osb.checker.config
 
-import de.evoila.osb.checker.request.bodies.ProvisionBody
 import de.evoila.osb.checker.request.bodies.ProvisionBody.ContextObjectType
 import de.evoila.osb.checker.response.catalog.Catalog
-import java.util.*
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
-import kotlin.collections.HashMap
+import java.util.*
 
 @Component
 @ConfigurationProperties(prefix = "config")

@@ -175,7 +175,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun putWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + ACCEPTS_INCOMPLETE)
                 .then()
                 .log().ifValidationFails()
@@ -186,7 +186,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun deleteWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .delete("$SERVICE_INSTANCE_PATH${Configuration.notAnId}$ACCEPTS_INCOMPLETE&service_id=Invalid&plan_id=Invalid")
                 .then()
                 .log().ifValidationFails()
@@ -197,7 +197,7 @@ class ProvisionRequestRunner(configuration: Configuration) : PollingRequestHandl
     fun lastOperationWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .get(SERVICE_INSTANCE_PATH + Configuration.notAnId + LAST_OPERATION)
                 .then()
                 .log().ifValidationFails()

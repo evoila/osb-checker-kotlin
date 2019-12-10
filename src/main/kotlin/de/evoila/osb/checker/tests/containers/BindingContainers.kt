@@ -245,7 +245,7 @@ class BindingContainers(
                             expectedResponseBodyType = VALID_PROVISION
                     )
                 },
-                DynamicTest.dynamicTest("Running valid PUT provision with different plan_id again. Expecting Status 409.") {
+                DynamicTest.dynamicTest("Running valid PUT provision with different space_guid and organization_guid again. Expecting Status 409.") {
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(

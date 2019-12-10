@@ -21,8 +21,11 @@
         - [Test Procedure](docs/BindingTests.md#test-procedure)
         - [Version specific Tests](docs/BindingTests.md#version-specific-tests)
         - [Example Output](docs/BindingTests.md#example-output)
-    - [Authentication](docs/AuthenticationTests.md)   
+    - [Authentication](docs/AuthenticationTests.md)
     - [Contract](docs/ContractTest.md)
+    - [Data Consistency Check](docs/DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](docs/DataConsistencyCheck.md#test-procedure)
+        - [Example Output](docs/DataConsistencyCheck.md#example-output)    
 - [Contribution](docs/Contribution.md)
 - [Changes](/docs/Changes.md)
    
@@ -52,8 +55,7 @@ config:
   password: password
 ```
 
-Then call `java -jar osb-checker-kotlin-1.1.1.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
-in the catalog. See the chapter [Usage](docs/Usage.md) for more details about configuring this test-application.
+Then call `java -jar osb-checker-kotlin-1.1.1.jar` on the command line to start checker. In this configuration, the checker will run all tests for every service-plan listed in the catalog. See the chapter [Usage](docs/Usage.md) for more details about configuring this test-application.
 
 ## Changes
 
@@ -64,14 +66,14 @@ Changes since v1.0:
     - When testing polling maximum polling duration is tested.
 - Added Option to set [X-Broker-API-Originating-Identity](docs/Usage.md#originating-identity).
 - Added checks for osb-error-codes in response bodies.
-- Added tests for fetching non existing bindings / provisions.
-- Tests for what happens, when trying to create already existing provisions / bindings.
+- Added tests for fetching non existing bindings/provisions.
+- Tests for what happens, when trying to create already existing provisions/bindings.
 - Various improvements of logging such as using names of services and plans instead of id.
 - setting up a custom catalog requires only the id's of the plan and no more additional information. This is gathered from the catalog now.
 - Add Optional test for Dashboard URLs.
 - Restructuring of binding test:
  - All plans in the catalog are now tested for invalid binding attempts.
- - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
+ - To reduce runtime invalid and valid binding tests use the same provision for testing instead.
 
 ## HotFix: 
 - Auth token now generated in RequestHandler instead of configuration class, to avoid Application Context failure.

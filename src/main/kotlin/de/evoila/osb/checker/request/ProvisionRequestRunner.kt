@@ -7,9 +7,7 @@ import de.evoila.osb.checker.response.catalog.ServiceInstance
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
-import io.restassured.config.RedirectConfig
 import io.restassured.config.RedirectConfig.redirectConfig
-import io.restassured.config.RestAssuredConfig
 import io.restassured.config.RestAssuredConfig.config
 import io.restassured.http.ContentType
 import io.restassured.http.Header

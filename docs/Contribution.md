@@ -21,6 +21,9 @@
         - [Example Output](docs/BindingTests.md#example-output)
     - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](#Contribution)
 - [Changes](/docs/Changes.md)
 
@@ -34,12 +37,12 @@ When creating an issue you should follow these tips:
 
 - Check if a similar issue *already exists*.
 - Describe your problem *as clear as possible*. What was your expected outcome and what happened instead?
-- Name your *system details*, for example what operation system or library you are using.
+- Name your *system details*, for example, what operating system or library you are using.
 - Paste your *error or logs* in the issue. Make sure to wrap it in three backticks to render it automatically.
 
 ## Pull Request
 
-If you are able to patch a bug or add a feature, you can create a pull request with the code to contribute. But first of make sure you understand the license. Once you created the pull request, the maintainer(s) can check out your code and decide whether or not to pull in your changes.
+If you can patch a bug or add a feature, you can create a pull request with the code to contribute. But first of make sure you understand the license. Once you created the pull request, the maintainer(s) can check out your code and decide whether or not to pull in your changes.
 
 When creating a pull request you should follow these tips:
 

@@ -22,12 +22,15 @@
         - [Example Output](BindingTests.md#example-output)
     - [Authentication](docs/AuthenticationTests.md)
     - [Contract](#contract)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](docs/Contribution.md)
 - [Changes](/docs/Changes.md)
 
 # Contract
 
-Tuns all standard requests and checks if they fail with 412 Precondition Failed, if the X-Broker-API-Version header is missing or does not match the given one.
+Tuns all standard requests and checks, if they fail with 412 'Precondition failed' when the X-Broker-API-Version header is missing or does not match the given one.
 
 ## Example Output
 

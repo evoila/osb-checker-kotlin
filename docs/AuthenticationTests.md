@@ -23,12 +23,15 @@
         - [Example Output](BindingTests.md#example-output)
     - [Authentication](#authentication)
     - [Contract](docs/ContractTest.md)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)
 - [Contribution](docs/Contribution.md)
 - [Changes](/docs/Changes.md)
    
 # Authentication
 
-Runs a all requests without a user and password, a wrong username and a wrong password. It checks if service broker replies with HttpStatus 401 unauthorized.
+Runs all requests without a user and password, a wrong username and a wrong password. It checks if the service broker replies with HttpStatus 401 unauthorized.
 
 ## Example Output
 

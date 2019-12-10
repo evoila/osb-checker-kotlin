@@ -23,6 +23,9 @@
         - [Example Output](#example-output)
     - [Authentication](docs/AuthenticationTests.md)   
     - [Contract](docs/ContractTest.md)
+    - [Data Consistency Check](DataConsistencyCheck.md#data-consistency-check)
+        - [Test Procedure](DataConsistencyCheck.md#test-procedure)
+        - [Example Output](DataConsistencyCheck.md#example-output)    
 - [Contribution](docs/Contribution.md)
 - [Changes](/docs/Changes.md)
    
@@ -35,7 +38,7 @@ The checker also validates the behaviour of the service broker, when invalid bin
 ## Test Procedure
 
 The tests created in this class depends upon the catalog. This means that a valid catalog is required for this test to generate useful debugging information. 
-It is highly recommended to ensure the Catalog Test Class runs successfully, before using this test class. Naturally all binding tests will fail, if the underlying
+It is highly recommended to ensure the Catalog Test Class runs successfully, before using this test class. Naturally, all binding tests will fail, if the underlying
 service instances don't work, so it is recommended that the [provision tests](ProvisionTests.md#provision-tests) are succeeding too. 
 
 At the beginning of a test the catalog is fetched. The checker then runs the following tests based upon the provided information:
@@ -45,24 +48,23 @@ At the beginning of a test the catalog is fetched. The checker then runs the fol
         - tests that the service broker returns 4XX when trying to call PUT, DELETE and GET (if fetchable) bindings on non existing service instances.
 - Valid Provision and Bindings
     - Create a valid provision.
-        - If the Service broker creates service instances asynchronously, the checker will start polling and and verify the responses.
+        - If the Service broker creates service instances asynchronously, the checker will start polling and verify the responses are according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) and finish successfully.
         - When configured to do so, the checker verifies if the dashboard URL works.
-        are according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) and finish successfully.
         - Test what happens when attempting to create a service instances with the same instance id and same parameters and with different parameters.
      Read [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) about the expected behaviour.
     - If the Service is bindable. Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#binding) on how it should behave.
         - Binding Attempts with missing mandatory or malformed data.
         - Valid Bindings und un bindings.
     - Delete the provision
-     
+       
 ## Version specific Tests
 **2.14**
 - If the [instances](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#fetching-a-service-instance)
- and [binding](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#fetching-a-service-instance) are the checker tests they perform correctly.
+ and [binding](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#fetching-a-service-instance) is the checker tests they perform correctly.
 - Tests how the broker reacts with synchronous and asynchronous binding attempts. More information [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#fetching-a-service-instance)
 
 **2.15**
-- If the catalog contains [maintenance information](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#maintenance-info-object) the checker will uses it when requesting a provision.
+- If the catalog contains [maintenance information](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#maintenance-info-object) the checker will use it when requesting a provision.
 - If the catalog contains a [maximum polling duration](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#polling-interval-and-duration)
  the checker will verify that the service broker acts accordingly.
 

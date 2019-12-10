@@ -31,18 +31,19 @@
 # Data Consistency Check
 
 The Data Consistency Check tests if creating instances and bindings with the same instanceId or bindingId,
-works, if the service instance got deleted. The goal is to ensure that all binding on a service don't remain 
-in the database of the service broker. This is done for all plans in the catalog. bindings and provisions are created based upon the 
+works if the service instance got deleted. The goal is to ensure that all binding on service doesn't remain in the database of the service broker.
+This is done for all plans in the catalog. bindings and provisions are created based upon the
 api-version and configuration like in [Binding Tests](BindingTests.md).
+
 
 ## Test Procedure
 
-- Valid Provision and Bindings
-    - Create a valid provision.
-        - If the Service broker creates service instances asynchronously, the checker will start polling and and verify the responses.
+- Valid Provisioning and Bindings
+    - Create valid provisioning.
+        - If the Service broker creates service instances asynchronously, the checker will start polling and verify the responses are according
+         to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) and finish successfully.
         - When configured to do so, the checker verifies if the dashboard URL works.
-        are according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) and finish successfully.
-        - Test what happens when attempting to create a service instances with the same instance id and same parameters and with different parameters.
+        - Test what happens when attempting to create a service instance with the same instance id and same parameters and with different parameters.
      Read [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#polling-last-operation-for-service-instances) about the expected behaviour.
     - If the Service is bindable. Look [here](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#binding) on how it should behave.
         - Runs a valid binding on the service.

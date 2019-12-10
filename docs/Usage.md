@@ -30,7 +30,7 @@
 
 # Usage
 
-osb-checker-kotlin provides a number of options to test service brokers with more detail, or shorten the run time, by leaving some tests out.
+osb-checker-kotlin provides a number of options to test service brokers with more detail or shorten the run time, by leaving some tests out.
 
 ## Declaring Test Runs
 
@@ -49,7 +49,7 @@ or just `java -jar osb-checker-kotlin-1.0.jar`
 
 ## Configuration
 
-To run the application put a file with the name application.yml into the same location as the osb-checker-kotlin-1.0.jar file. For more information on how to configurate a spring boot application see [here](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html). 
+To run the application put a file with the name application.yml into the same location as the osb-checker-kotlin-1.0.jar file. For more information on how to configure a spring boot application see [here](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html). 
  The .yml file needs the following schema.
 
 ```yaml
@@ -102,18 +102,18 @@ config:
 Currently the application can test 2.13, 2.14 or 2.15 Service Brokers. Therefor **apiVersion** MUST be set to 2.13, 2.14 or 2.15.
 **usingAppGuid**, **skipTLSVerification**, **useRequestIdentity**, **originatingIdentity**, **parameters**, **testDashboard** and **services** are optional.
 
-Tests are created based upon the provided **apiVersion**. So the checker will not tests 2.15 functionality when this field is set to 2.13 or 2.14. More on version specific
+Tests are created based upon the provided **apiVersion**. So the checker will not test 2.15 functionality when this field is set to 2.13 or 2.14. More on version-specific
 testing here.
 
 When **skipTLSVerification** is set request are 'http' is used instead of 'https' for every request. 
 
-**usingAppGuid** sets the osb-checker to set a appGuid during provisioning. If no value it set it falls back to default true.
+**usingAppGuid** sets the osb-checker to set an appGuid during provisioning. If no value it set it falls back to default true.
 
 If **useRequestIdentity** is set to true, the osb-checker will set `X-Broker-API-Request-Identity` Header, for each request and verify if the header is present in the response.
 
-**testDashboard** advises the checker to verify if an provided DashboardURL works after creating a service instance.
+**testDashboard** advises the checker to verify if a provided DashboardURL works after creating a service instance.
 
-**contextObjectType** sets the checker to use a ContextObject. Possible object types are kubernetes and cloudfoundry. This option is not set, provision request will be send without 
+**contextObjectType** sets the checker to use a ContextObject. Possible object types are kubernetes and cloudfoundry. This option is not set, provision request will be sent without 
 a context object.
 
 Cloudfoundry context object: 
@@ -152,7 +152,7 @@ provisionParameters:
       schemaName: a_name
 ```
 
-would run a provisions with the following request body.
+would run a provision with the following request body.
 ```json
 {
   "service_id": "service-id-here",
@@ -181,7 +181,7 @@ bindingParameters:
 
 ### Originating Identity
 
-If you wish to check the brokers behaviour with the header **X-Broker-API-Request-Identity** you define the value like in the following examples.
+If you wish to check the broker's behaviour with the header **X-Broker-API-Request-Identity** you define the value like in the following examples.
 Set the unencoded value content in the value field.
 
 ```yaml
@@ -209,7 +209,7 @@ The declared content will be encoded and used in every request by the checker, a
 
 ## Declaring Services
 
-The checker runs all it's tests on every service and plan defined in the service brokers catalog. If this is not desired, the developer can provide
+The checker runs all its tests on every service and plan defined in the service brokers catalog. If this is not desired, the developer can provide
 a list of service and plan ids to direct the checker to the plans he would like to test. All details about the plans will be fetched from the actual catalog. It is only necessary to provide the ids.
 
 ```yaml

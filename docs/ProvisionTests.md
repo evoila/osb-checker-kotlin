@@ -31,7 +31,7 @@
 # Provision Tests
 
 This Test Class checks that the service brokers behaviour when somebody tries to create or delete a service instance
-with malformed request bodies, is spec compliant. Additionally it verifies that the service broker reacts correctly to synchronous
+with malformed request bodies is spec-compliant. Additionally, it verifies that the service broker reacts correctly to synchronous
 provision and deprovision attempts. 
 
 ## Test Procedure
@@ -39,7 +39,7 @@ provision and deprovision attempts.
 The tests created in this class depends upon the catalog. This means that a valid catalog is required for this test to generate useful debugging information. 
 It is highly recommended to ensure the Catalog Test Class runs successfully, before using this test class.
 
-At the beginning of a test the catalog is fetched. The checker then runs the following tests based upon the provided information:
+At the beginning of a test, the catalog is fetched. The checker then runs the following tests based upon the provided information:
 
 - Synchronous Test run
     - Runs a valid provision without query parameter `accepts_incomplete=true` and verifies if the response is correct according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#synchronous-and-asynchronous-operations)
@@ -47,7 +47,7 @@ At the beginning of a test the catalog is fetched. The checker then runs the fol
 - Runs invalid provisions where either the service_id or plan_id is empty, missing or not defined in the catalog and verifies if the response is correct according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#provisioning)
 - Runs invalid de provisions where either the service_id or plan_id is empty, missing or not defined in the catalog and verifies if the response is correct according to [spec](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#provisioning)
  
-If you wish to avoid testing a entire catalog every time see [here](Usage.md#declaring-services) on how to cherry pick plans.
+If you wish to avoid testing an entire catalog every time see [here](Usage.md#declaring-services) on how to cherry-pick plans.
 Depending on the API version and content of the catalog, additional tests are added.
 
 ## Version specific Tests

@@ -36,7 +36,7 @@ Tests are created dynamically based upon the service broker catalog or custom in
 ### Build Application
 
 to build the application run `{path}/osb-checker-kotlin/gradlew build` on linux and MacOS or `{path}/osb-checker-kotlin/gradlew.bat build` on windows.
-Afterwards you can find `osb-checker-kotlin-1.1.2.jar` in `osb-checker-kotlin/build/libs`.
+Afterwards you can find `osb-checker-kotlin-1.1.3.jar` in `osb-checker-kotlin/build/libs`.
 
 ### Basic Run Configuration
 
@@ -52,7 +52,7 @@ config:
   password: password
 ```
 
-Then call `java -jar osb-checker-kotlin-1.1.1.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
+Then call `java -jar osb-checker-kotlin-1.1.3.jar` on the commandline to start checker. In this configuration the checker will run all tests for every service-plan listed 
 in the catalog. See the chapter [Usage](docs/Usage.md) for more details about configuring this test-application.
 
 ## Changes

@@ -16,7 +16,7 @@ class CatalogRequestRunner(
     fun withoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .get("/v2/catalog")
                 .then()
                 .log().ifValidationFails()
@@ -32,7 +32,7 @@ class CatalogRequestRunner(
         RestAssured.with()
                 .log().ifValidationFails()
                 .headers(validRequestHeaders)
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .get("/v2/catalog")
                 .then()
                 .log().ifValidationFails()

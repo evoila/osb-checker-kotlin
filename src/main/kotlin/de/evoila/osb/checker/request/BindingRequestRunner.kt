@@ -187,7 +187,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun putWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
                 .log().ifValidationFails()
@@ -198,7 +198,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
     fun deleteWithoutHeader() {
         RestAssured.with()
                 .log().ifValidationFails()
-                .auth().basic(configuration.user, configuration.password)
+                .auth().preemptive().basic(configuration.user, configuration.password)
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
                 .log().ifValidationFails()

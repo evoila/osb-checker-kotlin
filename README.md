@@ -74,4 +74,4 @@ Changes since v1.0:
  - Too reduce runtime invalid and valid binding tests use the same provision for testing instead.
  
 ## HotFix: 
-- Auth token now generated in RequestHandler instead of configuration class, to avoid Application Context failure.
+- Contract test uses preemptive authentication to avoid unintentional 401 status codes. Read [here](https://github.com/rest-assured/rest-assured/wiki/Usage#preemptive-basic-authentication) for more information.

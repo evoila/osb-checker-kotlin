@@ -19,6 +19,9 @@
  
 ## Hotfix:
 
+### v1.1.3:
+- Contract test uses preemptive authentication to avoid unintentional 401 status codes. Read [here](https://github.com/rest-assured/rest-assured/wiki/Usage#preemptive-basic-authentication) for more information.
+
 #### v1.1.2:
 - Auth token now generated in RequestHandler instead of configuration class, to avoid Application Context failure.
 

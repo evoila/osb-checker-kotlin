@@ -32,7 +32,7 @@ data class BindingBody(
             ),
             context = null
     )
-
+    
     constructor(serviceId: String?, planId: String?) : this(
             serviceId = serviceId,
             planId = planId,

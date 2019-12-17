@@ -6,7 +6,8 @@ import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.BindingBody
-import de.evoila.osb.checker.request.bodies.ProvisionBody
+import de.evoila.osb.checker.request.bodies.ProvisionBody.ValidProvisioning
+import de.evoila.osb.checker.response.catalog.Catalog
 import de.evoila.osb.checker.response.operations.LastOperationResponse.State.*
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.operations.AsyncResponse
@@ -20,11 +21,13 @@ import kotlin.test.assertTrue
 
 @Service
 class BindingContainers(
-        val provisionRequestRunner: ProvisionRequestRunner,
-        val bindingRequestRunner: BindingRequestRunner,
-        val catalogRequestRunner: CatalogRequestRunner,
-        val configuration: Configuration
+        private val provisionRequestRunner: ProvisionRequestRunner,
+        private val bindingRequestRunner: BindingRequestRunner,
+        private val catalogRequestRunner: CatalogRequestRunner,
+        private val configuration: Configuration
 ) {
+
+    val catalog: Catalog = catalogRequestRunner.correctRequest()
 
     fun validDeleteProvisionContainer(
             instanceId: String,
@@ -140,8 +143,19 @@ class BindingContainers(
 
     private fun catalogHasMultiplePlans(): Boolean = catalogRequestRunner.correctRequest().services.flatMap { it.plans }.size > 1
 
+    private fun swapServiceAndPlanId(oldProvisionBody: ValidProvisioning): ValidProvisioning {
+        return if (catalog.services.size > 1) {
+            catalog.services.first { service -> service.id != oldProvisionBody.serviceId }.let {
+
+                oldProvisionBody.copy(serviceId = it.id, planId = it.plans.first().id)
+            }
+        } else {
+
+            oldProvisionBody.copy(planId = catalog.services.first().plans.first { oldProvisionBody.planId != it.id }.id)
+        }
+    }
+
     private fun swapServiceAndPlanId(oldBindingBody: BindingBody): BindingBody {
-        val catalog = catalogRequestRunner.correctRequest()
         return if (catalog.services.size > 1) {
             catalog.services.first { service -> service.id != oldBindingBody.serviceId }.let {
 
@@ -188,7 +202,7 @@ class BindingContainers(
 
     fun validRetrievableInstanceContainer(
             instanceId: String,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             isRetrievable: Boolean
     ): DynamicTest {
 
@@ -196,15 +210,15 @@ class BindingContainers(
             val serviceInstance = provisionRequestRunner.getProvision(instanceId, 200)
             assertNotNull(serviceInstance, "Expected a valid service Instance Object.")
             assertTrue("When retrieving the instance the response did not match the expected value. \n" +
-                    "service_id: expected ${provision.service_id} actual ${serviceInstance.serviceId} \n" +
-                    "plan_id: expected ${provision.plan_id} actual ${serviceInstance.planId}")
-            { serviceInstance.serviceId == provision.service_id && serviceInstance.planId == provision.plan_id }
+                    "service_id: expected ${provision.serviceId} actual ${serviceInstance.serviceId} \n" +
+                    "plan_id: expected ${provision.planId} actual ${serviceInstance.planId}")
+            { serviceInstance.serviceId == provision.serviceId && serviceInstance.planId == provision.planId }
         }
     }
 
     private fun createValidProvisionTests(
             instanceId: String,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             plan: Plan,
             serviceName: String,
             planName: String
@@ -253,7 +267,7 @@ class BindingContainers(
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(
-                                    space_guid = UUID.randomUUID().toString()
+                                    spaceGuid = UUID.randomUUID().toString()
                             ),
                             expectedFinalStatusCodes = *intArrayOf(409),
                             expectedResponseBodyType = NO_SCHEMA
@@ -263,7 +277,7 @@ class BindingContainers(
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(
-                                    organization_guid = UUID.randomUUID().toString()
+                                    organizationGuid = UUID.randomUUID().toString()
                             ),
                             expectedFinalStatusCodes = *intArrayOf(409),
                             expectedResponseBodyType = NO_SCHEMA
@@ -275,7 +289,7 @@ class BindingContainers(
     fun validProvisionContainer(
             instanceId: String,
             plan: Plan,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             isRetrievable: Boolean,
             serviceName: String,
             planName: String

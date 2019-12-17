@@ -1,6 +1,7 @@
 package de.evoila.osb.checker.request.bodies
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import de.evoila.osb.checker.response.catalog.MaintenanceInfo
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.catalog.Service
@@ -11,39 +12,44 @@ abstract class ProvisionBody : RequestBody {
 
     data class ValidProvisioning(
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var service_id: String,
+            @JsonProperty(value = "service_id")
+            var serviceId: String,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var plan_id: String,
+            @JsonProperty(value = "plan_id")
+            var planId: String,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var organization_guid: String = UUID.randomUUID().toString(),
+            @JsonProperty(value = "organization_guid")
+            var organizationGuid: String = UUID.randomUUID().toString(),
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
-            var space_guid: String = UUID.randomUUID().toString(),
+            @JsonProperty(value = "space_guid")
+            var spaceGuid: String = UUID.randomUUID().toString(),
             @JsonInclude(JsonInclude.Include.NON_NULL)
             var parameters: Map<String, Any>? = null,
             @JsonInclude(JsonInclude.Include.NON_NULL)
-            var maintenance_info: MaintenanceInfo? = null,
+            @JsonProperty(value = "maintenance_info")
+            var maintenanceInfo: MaintenanceInfo? = null,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             var context: HashMap<String, Any> = hashMapOf()
     ) : ProvisionBody() {
 
         constructor(service: Service, plan: Plan) : this(
-                service_id = service.id,
-                plan_id = plan.id
+                serviceId = service.id,
+                planId = plan.id
         )
 
         constructor(service: Service, plan: Plan, maintenance_info: MaintenanceInfo) : this(
-                service_id = service.id,
-                plan_id = plan.id,
-                maintenance_info = maintenance_info
+                serviceId = service.id,
+                planId = plan.id,
+                maintenanceInfo = maintenance_info
         )
 
         fun setContextUpdate(type: ContextObjectType) {
             return when (type) {
                 ContextObjectType.CLOUDFOUNDRY -> {
                     this.context["platform"] = "cloudfoundry"
-                    this.context["organization_guid"] = this.organization_guid
+                    this.context["organization_guid"] = this.organizationGuid
                     this.context["organization_name"] = "osb-api"
-                    this.context["space_guid"] = this.space_guid
+                    this.context["space_guid"] = this.spaceGuid
                     this.context["space_name"] = "osb-checker-kotlin"
                     this.context["instance_name"] = "testing instance"
                 }

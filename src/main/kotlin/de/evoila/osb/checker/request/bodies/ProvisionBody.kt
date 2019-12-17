@@ -30,7 +30,7 @@ abstract class ProvisionBody : RequestBody {
             var maintenanceInfo: MaintenanceInfo? = null,
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             var context: HashMap<String, Any> = hashMapOf()
-    ) : ProvisionBody() {
+    ) : ProvisionBody(), SwappableServiceAndPlan<ValidProvisioning> {
 
         constructor(service: Service, plan: Plan) : this(
                 serviceId = service.id,
@@ -61,6 +61,18 @@ abstract class ProvisionBody : RequestBody {
                 ContextObjectType.NONE -> return
             }
         }
+
+        override fun sameServiceId(otherServiceId: String): Boolean = this.serviceId == otherServiceId
+
+        override fun swapServiceIdAndPlanId(service: Service): ValidProvisioning {
+            return this.copy(serviceId = service.id, planId = service.plans.first().id)
+        }
+
+        override fun swapPlanId(plan: Plan): ValidProvisioning {
+            return this.copy(planId = plan.id)
+        }
+
+        override fun extractPlanId(): String? = this.planId
     }
 
     data class NoPlanFieldProvisioning(
@@ -69,9 +81,11 @@ abstract class ProvisionBody : RequestBody {
             var space_guid: String? = UUID.randomUUID().toString()
     ) : ProvisionBody() {
 
+
         constructor(service: Service) : this(
                 service_id = service.id
         )
+
     }
 
     data class NoServiceFieldProvisioning(
@@ -83,6 +97,7 @@ abstract class ProvisionBody : RequestBody {
         constructor(plan: Plan) : this(
                 plan_id = plan.id
         )
+
     }
 
     data class NoOrgFieldProvisioning(
@@ -95,6 +110,7 @@ abstract class ProvisionBody : RequestBody {
                 service_id = service.id,
                 plan_id = plan.id
         )
+
     }
 
     data class NoSpaceFieldProvisioning(
@@ -107,6 +123,7 @@ abstract class ProvisionBody : RequestBody {
                 service_id = service.id,
                 plan_id = plan.id
         )
+
     }
 
     enum class ContextObjectType {

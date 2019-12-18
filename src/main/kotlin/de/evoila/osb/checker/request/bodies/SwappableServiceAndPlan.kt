@@ -6,7 +6,7 @@ import de.evoila.osb.checker.response.catalog.Service
 
 interface SwappableServiceAndPlan<T> where T : RequestBody {
 
-    fun sameServiceId(otherServiceId: String): Boolean
+    fun serviceIdEquals(otherServiceId: String): Boolean
 
     fun swapServiceIdAndPlanId(service: Service): T
 
@@ -19,7 +19,7 @@ interface SwappableServiceAndPlan<T> where T : RequestBody {
 
     fun swap(catalog: Catalog): T {
         return if (catalog.services.size > 1) {
-            catalog.services.first { service -> !this.sameServiceId(service.id) }.let {
+            catalog.services.first { service -> !this.serviceIdEquals(service.id) }.let {
                 this.swapServiceIdAndPlanId(it)
             }
         } else {

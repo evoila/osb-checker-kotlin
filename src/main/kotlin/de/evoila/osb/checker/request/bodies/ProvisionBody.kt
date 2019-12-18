@@ -62,7 +62,7 @@ abstract class ProvisionBody : RequestBody {
             }
         }
 
-        override fun sameServiceId(otherServiceId: String): Boolean = this.serviceId == otherServiceId
+        override fun serviceIdEquals(otherServiceId: String): Boolean = this.serviceId == otherServiceId
 
         override fun swapServiceIdAndPlanId(service: Service): ValidProvisioning {
             return this.copy(serviceId = service.id, planId = service.plans.first().id)

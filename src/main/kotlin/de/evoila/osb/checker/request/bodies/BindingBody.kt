@@ -57,7 +57,7 @@ data class BindingBody(
         )
     }
 
-    override fun sameServiceId(otherServiceId: String): Boolean = serviceId == otherServiceId
+    override fun serviceIdEquals(otherServiceId: String): Boolean = serviceId == otherServiceId
 
     override fun swapServiceIdAndPlanId(service: Service): BindingBody {
         return this.copy(serviceId = service.id, planId = service.plans.first().id)

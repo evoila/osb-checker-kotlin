@@ -6,10 +6,12 @@ import de.evoila.osb.checker.request.CatalogRequestRunner
 import de.evoila.osb.checker.request.ProvisionRequestRunner
 import de.evoila.osb.checker.request.ResponseBodyType.*
 import de.evoila.osb.checker.request.bodies.BindingBody
-import de.evoila.osb.checker.request.bodies.ProvisionBody
-import de.evoila.osb.checker.response.operations.LastOperationResponse.State.*
+import de.evoila.osb.checker.request.bodies.ProvisionBody.ValidProvisioning
+import de.evoila.osb.checker.response.catalog.Catalog
 import de.evoila.osb.checker.response.catalog.Plan
 import de.evoila.osb.checker.response.operations.AsyncResponse
+import de.evoila.osb.checker.response.operations.LastOperationResponse.State.GONE
+import de.evoila.osb.checker.response.operations.LastOperationResponse.State.SUCCEEDED
 import de.evoila.osb.checker.response.operations.ProvisionResponse
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
@@ -20,11 +22,13 @@ import kotlin.test.assertTrue
 
 @Service
 class BindingContainers(
-        val provisionRequestRunner: ProvisionRequestRunner,
-        val bindingRequestRunner: BindingRequestRunner,
-        val catalogRequestRunner: CatalogRequestRunner,
-        val configuration: Configuration
+        private val provisionRequestRunner: ProvisionRequestRunner,
+        private val bindingRequestRunner: BindingRequestRunner,
+        private val configuration: Configuration,
+        catalogRequestRunner: CatalogRequestRunner
 ) {
+
+    val catalog: Catalog = catalogRequestRunner.correctRequest()
 
     fun validDeleteProvisionContainer(
             instanceId: String,
@@ -125,7 +129,7 @@ class BindingContainers(
                 if (catalogHasMultiplePlans()) {
                     DynamicTest.dynamicTest("Running PUT binding with different service or plan id, but same instance and binding id again. Expecting StatusCode 409.") {
                         bindingRequestRunner.runPutBindingRequestAsync(
-                                requestBody = swapServiceAndPlanId(binding),
+                                requestBody = binding.swap(catalog),
                                 instanceId = instanceId,
                                 bindingId = bindingId,
                                 expectedStatusCodes = *intArrayOf(409),
@@ -133,24 +137,9 @@ class BindingContainers(
                         )
                     }
                 } else {
-                    DynamicTest.dynamicTest("%SKIPPED%Skipping PUT Binding with different attributes, because catalog does not contain more than one plan.") {}
+                    DynamicTest.dynamicTest("%SKIPPED%Skipping PUT Binding with different plan or service Id, because catalog does not contain more than one plan.") {}
                 }
         )
-    }
-
-    private fun catalogHasMultiplePlans(): Boolean = catalogRequestRunner.correctRequest().services.flatMap { it.plans }.size > 1
-
-    private fun swapServiceAndPlanId(oldBindingBody: BindingBody): BindingBody {
-        val catalog = catalogRequestRunner.correctRequest()
-        return if (catalog.services.size > 1) {
-            catalog.services.first { service -> service.id != oldBindingBody.serviceId }.let {
-
-                oldBindingBody.copy(serviceId = it.id, planId = it.plans.first().id)
-            }
-        } else {
-
-            oldBindingBody.copy(planId = catalog.services.first().plans.first { oldBindingBody.planId != it.id }.id)
-        }
     }
 
     fun validDeleteTest(binding: BindingBody, instanceId: String, bindingId: String,
@@ -188,7 +177,7 @@ class BindingContainers(
 
     fun validRetrievableInstanceContainer(
             instanceId: String,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             isRetrievable: Boolean
     ): DynamicTest {
 
@@ -196,15 +185,15 @@ class BindingContainers(
             val serviceInstance = provisionRequestRunner.getProvision(instanceId, 200)
             assertNotNull(serviceInstance, "Expected a valid service Instance Object.")
             assertTrue("When retrieving the instance the response did not match the expected value. \n" +
-                    "service_id: expected ${provision.service_id} actual ${serviceInstance.serviceId} \n" +
-                    "plan_id: expected ${provision.plan_id} actual ${serviceInstance.planId}")
-            { serviceInstance.serviceId == provision.service_id && serviceInstance.planId == provision.plan_id }
+                    "service_id: expected ${provision.serviceId} actual ${serviceInstance.serviceId} \n" +
+                    "plan_id: expected ${provision.planId} actual ${serviceInstance.planId}")
+            { serviceInstance.serviceId == provision.serviceId && serviceInstance.planId == provision.planId }
         }
     }
 
     private fun createValidProvisionTests(
             instanceId: String,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             plan: Plan,
             serviceName: String,
             planName: String
@@ -249,16 +238,37 @@ class BindingContainers(
                             expectedResponseBodyType = VALID_PROVISION
                     )
                 },
-                DynamicTest.dynamicTest("Running valid PUT provision with different space_guid and organization_guid. Expecting Status 409.") {
+                DynamicTest.dynamicTest("Running valid PUT provision with different space_guid. Expecting Status 409.") {
                     provisionRequestRunner.runPutProvisionRequestAsync(
                             instanceId = instanceId,
                             requestBody = provision.copy(
-                                    space_guid = UUID.randomUUID().toString(),
-                                    organization_guid = UUID.randomUUID().toString()
+                                    spaceGuid = UUID.randomUUID().toString()
                             ),
                             expectedFinalStatusCodes = *intArrayOf(409),
                             expectedResponseBodyType = NO_SCHEMA
                     )
+                },
+                DynamicTest.dynamicTest("Running valid PUT provision with different organization_guid. Expecting Status 409.") {
+                    provisionRequestRunner.runPutProvisionRequestAsync(
+                            instanceId = instanceId,
+                            requestBody = provision.copy(
+                                    organizationGuid = UUID.randomUUID().toString()
+                            ),
+                            expectedFinalStatusCodes = *intArrayOf(409),
+                            expectedResponseBodyType = NO_SCHEMA
+                    )
+                },
+                if (catalogHasMultiplePlans()) {
+                    DynamicTest.dynamicTest("Running valid PUT provision with different plan and service Id. Expecting Status 409.") {
+                        provisionRequestRunner.runPutProvisionRequestAsync(
+                                instanceId = instanceId,
+                                requestBody = provision.swap(catalog),
+                                expectedFinalStatusCodes = *intArrayOf(409),
+                                expectedResponseBodyType = NO_SCHEMA
+                        )
+                    }
+                } else {
+                    DynamicTest.dynamicTest("%SKIPPED%Skipping PUT provision with different plan or service Id, because catalog does not contain more than one plan.") {}
                 }
         )
     }
@@ -266,7 +276,7 @@ class BindingContainers(
     fun validProvisionContainer(
             instanceId: String,
             plan: Plan,
-            provision: ProvisionBody.ValidProvisioning,
+            provision: ValidProvisioning,
             isRetrievable: Boolean,
             serviceName: String,
             planName: String
@@ -304,6 +314,8 @@ class BindingContainers(
                 )
             }
     )
+
+    private fun catalogHasMultiplePlans(): Boolean = catalog.services.flatMap { it.plans }.size > 1
 
     companion object {
         private const val VALID_PROVISION_DISPLAY_NAME = "Creating Service Instance"

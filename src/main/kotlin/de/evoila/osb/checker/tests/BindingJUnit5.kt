@@ -17,7 +17,7 @@ class BindingJUnit5 : BindingTestBase() {
     @TestFactory
     @DisplayName(value = "Valid Provision and Binding Tests.")
     fun validProvisionAndBindingTestRuns(): List<DynamicNode> {
-        return configuration.initCustomCatalog(catalogRequestRunner.correctRequest()).services.flatMap { service ->
+        return configuration.initCustomCatalog(bindingContainers.catalog).services.flatMap { service ->
             service.plans.map { plan ->
                 val instanceId = UUID.randomUUID().toString()
                 val bindingId = UUID.randomUUID().toString()

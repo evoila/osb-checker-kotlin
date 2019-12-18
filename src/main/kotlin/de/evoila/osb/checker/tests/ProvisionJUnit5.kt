@@ -63,9 +63,9 @@ class ProvisionJUnit5 : TestBase() {
         val dynamicNodes = listOf(
                 TestCase(
                         requestBody = ValidProvisioning(
-                                service_id = "",
-                                plan_id = plan.id,
-                                maintenance_info = if (configuration.apiVersion >= 2.15) {
+                                serviceId = "",
+                                planId = plan.id,
+                                maintenanceInfo = if (configuration.apiVersion >= 2.15) {
                                     plan.maintenanceInfo
                                 } else {
                                     null
@@ -77,9 +77,9 @@ class ProvisionJUnit5 : TestBase() {
                 ),
                 TestCase(
                         requestBody = ValidProvisioning(
-                                service_id = service.id,
-                                plan_id = "",
-                                maintenance_info = if (configuration.apiVersion >= 2.15) {
+                                serviceId = service.id,
+                                planId = "",
+                                maintenanceInfo = if (configuration.apiVersion >= 2.15) {
                                     plan.maintenanceInfo
                                 } else {
                                     null
@@ -115,7 +115,7 @@ class ProvisionJUnit5 : TestBase() {
                 TestCase(
                         requestBody = ValidProvisioning(
                                 "Invalid", plan.id,
-                                maintenance_info = if (configuration.apiVersion == 2.15) {
+                                maintenanceInfo = if (configuration.apiVersion == 2.15) {
                                     plan.maintenanceInfo
                                 } else {
                                     null
@@ -128,7 +128,7 @@ class ProvisionJUnit5 : TestBase() {
                 TestCase(
                         requestBody = ValidProvisioning(
                                 service.id, "Invalid",
-                                maintenance_info = if (configuration.apiVersion >= 2.15) {
+                                maintenanceInfo = if (configuration.apiVersion >= 2.15) {
                                     plan.maintenanceInfo
                                 } else {
                                     null
@@ -206,8 +206,8 @@ class ProvisionJUnit5 : TestBase() {
             dynamicTest("DELETE ${it.message}") {
                 val provisionBody = it.requestBody
                 provisionRequestRunner.runDeleteProvisionRequestAsync(
-                        serviceId = nullIfNotSet(provisionBody.service_id),
-                        planId = nullIfNotSet(provisionBody.plan_id),
+                        serviceId = nullIfNotSet(provisionBody.serviceId),
+                        planId = nullIfNotSet(provisionBody.planId),
                         instanceId = instanceId,
                         expectedFinalStatusCodes = intArrayOf(it.statusCode)
                 )
@@ -242,8 +242,8 @@ class ProvisionJUnit5 : TestBase() {
                         dynamicTest("Sync DELETE provision request") {
                             provisionRequestRunner.runDeleteProvisionRequestSync(
                                     instanceId = instanceId,
-                                    serviceId = provisionRequestBody.service_id,
-                                    planId = provisionRequestBody.plan_id)
+                                    serviceId = provisionRequestBody.serviceId,
+                                    planId = provisionRequestBody.planId)
                         }
                 ))
         )

@@ -27,5 +27,5 @@ data class TestCase<out T : RequestBody>(
         val requestBody: T,
         val message: String,
         val responseBodyType: ResponseBodyType,
-        val statusCode : Int
+        val statusCode: Int
 )

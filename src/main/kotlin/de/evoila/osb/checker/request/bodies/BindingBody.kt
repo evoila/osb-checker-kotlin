@@ -3,6 +3,8 @@ package de.evoila.osb.checker.request.bodies
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.annotation.JsonProperty
+import de.evoila.osb.checker.response.catalog.Plan
+import de.evoila.osb.checker.response.catalog.Service
 
 data class BindingBody(
         @JsonProperty(value = "service_id")
@@ -20,7 +22,7 @@ data class BindingBody(
         var bindResource: BindResource?,
         @JsonInclude(NON_EMPTY)
         var context: Map<String, Any>?
-) : RequestBody {
+) : RequestBody, SwappableServiceAndPlan<BindingBody> {
 
     constructor(serviceId: String?, planId: String?, appGuid: String?) : this(
             serviceId = serviceId,
@@ -54,4 +56,16 @@ data class BindingBody(
                 route = null
         )
     }
+
+    override fun serviceIdEquals(otherServiceId: String): Boolean = serviceId == otherServiceId
+
+    override fun swapServiceIdAndPlanId(service: Service): BindingBody {
+        return this.copy(serviceId = service.id, planId = service.plans.first().id)
+    }
+
+    override fun swapPlanId(plan: Plan): BindingBody {
+        return this.copy(planId = plan.id)
+    }
+
+    override fun extractPlanId(): String? = this.planId
 }

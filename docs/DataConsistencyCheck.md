@@ -62,7 +62,9 @@ api-version and configuration like in [Binding Tests](BindingTests.md).
             │  ├─ Creating Service Instance. ✔
             │  │  ├─ Running valid PUT provision with instanceId 36374785-a9a9-4e47-a9c6-36d5679eee3f for service 'base-sql-service-dev-managed' and plan 's' ✔
             │  │  ├─ Running valid PUT provision with same attributes again. Expecting Status 200. ✔
-            │  │  └─ Running valid PUT provision with different attributes again. Expecting Status 409. ✔
+            │  │  ├─ Running valid PUT provision with different space_guid. Expecting Status 409. ✔
+            │  │  ├─ Running valid PUT provision with different organization_guid. Expecting Status 409. ✔
+            │  │  └─ Running valid PUT provision with different plan and service Id. Expecting Status 409. ✔
             │  ├─ Binding on bindable service instance. ✔
             │  │  ├─ Running valid PUT binding with bindingId 3d5dd356-78d8-4a9c-abd8-344acb0b9f90 ✔
             │  │  ├─ Running PUT binding with same attribute again. Expecting StatusCode 200. ✔

@@ -62,7 +62,32 @@
         },
         "additionalProperties": false
       }
+    },
+    "endpoints": {
+      "type": "array",
+      "items": [{
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "protocol": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "ports"
+        ]
+      }]
     }
   },
   "additionalProperties": false
 }
+

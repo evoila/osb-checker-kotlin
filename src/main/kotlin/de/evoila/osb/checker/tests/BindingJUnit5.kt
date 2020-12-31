@@ -108,13 +108,19 @@ class BindingJUnit5 : TestBase() {
             }
         }
         if (configuration.apiVersion >= 2.14) {
+            val binding = if (needsAppGuid) BindingBody(
+                    serviceId = service.id,
+                    planId = plan.id,
+                    appGuid = UUID.randomUUID().toString())
+            else BindingBody(service.id, plan.id)
+            configuration.bindingParameters.let {
+                if (it.containsKey(plan.id)) {
+                    binding.parameters = it[plan.id]
+                }
+            }
             bindingTests.add(dynamicContainer("should handle sync requests correctly",
                     bindingContainerFactory.createSyncBindingTest(
-                            binding = if (needsAppGuid) BindingBody(
-                                    serviceId = service.id,
-                                    planId = plan.id,
-                                    appGuid = UUID.randomUUID().toString())
-                            else BindingBody(service.id, plan.id),
+                            binding = binding,
                             bindingId = bindingId,
                             instanceId = instanceId
                     )

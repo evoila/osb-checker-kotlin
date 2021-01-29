@@ -221,7 +221,7 @@ class BindingRequestRunner(configuration: Configuration) : PollingRequestHandler
         RestAssured.with()
                 .header(Header("Authorization", wrongUsernameToken))
                 .log().ifValidationFails()
-                .header(Header("X-Broker-API-Version", "$configuration.apiVersion"))
+                .header(Header("X-Broker-API-Version", "${configuration.apiVersion}"))
                 .put(SERVICE_INSTANCE_PATH + Configuration.notAnId + SERVICE_BINDING_PATH + Configuration.notAnId)
                 .then()
                 .log().ifValidationFails()
